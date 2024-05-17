@@ -7,8 +7,6 @@ target/
 # Admin/src/main/resources/application-dev.yml & User/src/main/resources/application-dev.yml
 application-dev.yml
 
-# README
-README.md
 
 ### STS ###
 .apt_generated
