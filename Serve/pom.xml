@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>Serve</artifactId>
+    <name>Serve</name>
+    <description>Serve处理模块</description>
+
+    <parent>
+        <groupId>com.shop</groupId>
+        <artifactId>EduExch</artifactId>
+        <version>1.0.0-RELEASE</version>
+    </parent>
+
+
+    <dependencies>
+        <!--        others-->
+        <dependency>
+            <groupId>com.shop</groupId>
+            <artifactId>Pojo</artifactId>
+            <version>1.0.0-RELEASE</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>lettuce-core</artifactId>
+                    <groupId>io.lettuce</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.shop</groupId>
+            <artifactId>Common</artifactId>
+            <version>1.0.0-RELEASE</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>lettuce-core</artifactId>
+                    <groupId>io.lettuce</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    </dependencies>
+
+
+</project>
