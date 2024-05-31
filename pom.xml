@@ -23,7 +23,7 @@
 
     <modules>
         <module>Admin</module>
-        <module>User</module>
+        <module>Guest</module>
         <module>Pojo</module>
         <module>Common</module>
         <module>Serve</module>

@@ -115,4 +115,4 @@ management:
 springdoc:
   # swagger
   swagger-ui:
-    path: api.html # http://localhost:8085/api.html
+    path: admin.html # http://localhost:8085/admin.html

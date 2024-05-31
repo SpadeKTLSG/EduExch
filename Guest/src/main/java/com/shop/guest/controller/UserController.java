@@ -1,4 +1,4 @@
-package com.shop.admin.controller;
+package com.shop.guest.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -9,16 +9,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 /**
- * 管理员员工
+ * 用户
  *
  * @author SK
  * @date 2024/05/31
  */
 @Slf4j
-@Tag(name = "Employee", description = "员工")
-@RequestMapping("/admin/employee")
+@Tag(name = "User", description = "用户")
+@RequestMapping("/guest/user")
 @RestController
-public class EmployeeController {
+public class UserController {
 
 
     @Operation(summary = "test")   //test swagger
