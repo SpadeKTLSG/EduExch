@@ -1,19 +1,20 @@
 package com.shop.common.interceptor;
 
-import com.sky.constant.JwtClaimsConstant;
-import com.sky.context.BaseContext;
-import com.sky.properties.JwtProperties;
-import com.sky.utils.JwtUtil;
+
+import com.shop.common.constant.JwtClaimsConstant;
+import com.shop.common.context.BaseContext;
+import com.shop.common.properties.JwtProperties;
+import com.shop.common.utils.JwtUtil;
 import io.jsonwebtoken.Claims;
+import jakarta.annotation.Nonnull;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import javax.annotation.Nonnull;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * jwt令牌校验的拦截器

@@ -1,6 +1,6 @@
 # 这个是User主配置文件, application-dev是生产配置文件(需要手动修改提供的application-dev.bk)
 server:
-  port: 8085 # 服务端口
+  port: 8086 # 服务端口
 
 
 spring:
@@ -11,6 +11,7 @@ spring:
   main:
 
     allow-circular-references: true # 允许循环引用
+    lazy-initialization: true # 开启懒加载
 
   # MySQL
   datasource:
@@ -109,3 +110,9 @@ management:
   health:
     redis:
       enabled: false
+
+# springdoc
+springdoc:
+  # swagger
+  swagger-ui:
+    path: api.html # http://localhost:8086/api.html

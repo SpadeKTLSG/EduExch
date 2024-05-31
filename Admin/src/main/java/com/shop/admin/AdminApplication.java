@@ -10,7 +10,7 @@ import org.springframework.context.annotation.ComponentScan;
 @Slf4j
 @SpringBootApplication
 @ComponentScan("com.shop")
-@MapperScan(basePackages = {"com.shop.serve.dao"})
+@MapperScan(basePackages = {"com.shop.serve.mapper"})
 public class AdminApplication {
 
     public static void main(String[] args) {

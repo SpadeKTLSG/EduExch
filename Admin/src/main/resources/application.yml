@@ -11,6 +11,7 @@ spring:
   main:
 
     allow-circular-references: true # 允许循环引用
+    lazy-initialization: true # 开启懒加载
 
   # MySQL
   datasource:
@@ -109,3 +110,9 @@ management:
   health:
     redis:
       enabled: false
+
+# springdoc
+springdoc:
+  # swagger
+  swagger-ui:
+    path: api.html # http://localhost:8085/api.html
