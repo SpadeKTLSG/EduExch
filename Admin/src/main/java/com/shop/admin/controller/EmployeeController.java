@@ -1,5 +1,6 @@
 package com.shop.admin.controller;
 
+import com.shop.pojo.entity.Employee;
 import com.shop.pojo.result.Result;
 import com.shop.pojo.vo.EmployeeVO;
 import com.shop.serve.service.EmployeeService;
@@ -8,10 +9,7 @@ import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 /**
@@ -38,9 +36,6 @@ public class EmployeeController {
 
     /**
      * 新增员工
-     *
-     * @param employeeDTO 员工DTO
-     * @return Result
      */
     @PostMapping
     @Operation(summary = "新增员工")
@@ -48,5 +43,25 @@ public class EmployeeController {
         log.info("新增员工：{}", employeeVO);
         employeeService.save(employeeVO);//该方法后续步骤会定义
         return Result.success();
+    }
+
+    /**
+     * 退出
+     */
+    @PostMapping("/logout")
+    @Operation(summary = "退出")
+    public Result<String> logout() {
+        //TODO 实现退出功能
+        return Result.success();
+    }
+
+    /**
+     * id查员工
+     */
+    @GetMapping("/{id}")
+    @Operation(summary = "id查员工")
+    public Result<Employee> getById(@PathVariable Long id) {
+        Employee employee = employeeService.getById(id);
+        return Result.success(employee);
     }
 }

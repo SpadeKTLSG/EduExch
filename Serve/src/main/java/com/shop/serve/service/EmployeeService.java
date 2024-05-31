@@ -28,12 +28,6 @@ public interface EmployeeService extends IService<Employee> {
 
 
     /**
-     * 根据id查询员工
-     */
-    Employee getById(Long id);
-
-
-    /**
      * 编辑员工信息
      */
     void update(EmployeeDTO employeeDTO);

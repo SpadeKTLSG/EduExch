@@ -2,6 +2,7 @@ package com.shop.serve.service.impl;
 
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.shop.common.constant.PasswordConstant;
 import com.shop.pojo.dto.EmployeeDTO;
 import com.shop.pojo.dto.EmployeeLoginDTO;
 import com.shop.pojo.dto.EmployeePageQueryDTO;
@@ -10,8 +11,10 @@ import com.shop.pojo.result.PageResult;
 import com.shop.pojo.vo.EmployeeVO;
 import com.shop.serve.mapper.EmployeeMapper;
 import com.shop.serve.service.EmployeeService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.DigestUtils;
 
 @Service
 public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> implements EmployeeService {
@@ -26,6 +29,11 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
      * @return 员工实体对象
      */
     public Employee login(EmployeeLoginDTO employeeLoginDTO) {
+        //采用基础实现
+//        String username = employeeLoginDTO.();
+//        String password = employeeLoginDTO.getPassword();
+
+
         return null;
     }
 
@@ -36,12 +44,9 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
     @Override
     public void save(EmployeeVO employeeVO) {
         Employee employee = new Employee();
-        employee.builder()
-                .username(employeeVO.getUsername())
-                .password(employeeVO.getPassword())
-                .name(employeeVO.getName())
-                .build();
-        employeeMapper.insert();
+        BeanUtils.copyProperties(employeeVO, employee);
+        employee.setPassword(DigestUtils.md5DigestAsHex(PasswordConstant.DEFAULT_PASSWORD.getBytes()));
+        employeeMapper.insert(employee);
     }
 
     /**
@@ -51,13 +56,6 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
         return null;
     }
 
-
-    /**
-     * 根据id查询员工
-     */
-    public Employee getById(Long id) {
-        return null;
-    }
 
     /**
      * 编辑员工信息
