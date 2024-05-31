@@ -5,7 +5,7 @@
 
     <artifactId>Admin</artifactId>
     <name>Admin</name>
-    <description>EduExch管理员(对应网页前端)模块</description>
+    <description>EduExch员工(对应网页前端)模块</description>
 
     <parent>
         <groupId>com.shop</groupId>

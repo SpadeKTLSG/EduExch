@@ -24,7 +24,7 @@ public class SwaggerConfig {
                 .openapi("3.0.0")
                 .info(new Info().title("Admin API文档")
                         .contact(new Contact())
-                        .description("管理员端API文档")
+                        .description("员工端API文档")
                         .version("1.0.0"));
 
     }
