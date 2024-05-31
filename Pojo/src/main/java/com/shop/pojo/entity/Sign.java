@@ -7,10 +7,18 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
+import java.sql.Date;
+
+/**
+ * 签到
+ *
+ * @author SK
+ * @date 2024/05/31
+ */
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("hotsearch")
+@TableName("sign")
 public class Sign {
 
     /**
@@ -18,5 +26,26 @@ public class Sign {
      */
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
+
+    /**
+     * 用户ID
+     */
+    private Long userId;
+
+    /**
+     * 年
+     */
+    private Integer year;
+
+    /**
+     * 月
+     */
+    private Integer month;
+
+    /**
+     * 日期
+     */
+    private Date date;
+
 
 }

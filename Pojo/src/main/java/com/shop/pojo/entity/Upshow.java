@@ -7,10 +7,16 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
+/**
+ * 提升
+ *
+ * @author SK
+ * @date 2024/05/31
+ */
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("hotsearch")
+@TableName("upshow")
 public class Upshow {
 
     /**
@@ -18,5 +24,15 @@ public class Upshow {
      */
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
+
+    /**
+     * 对应商品ID
+     */
+    private Long prodId;
+
+    /**
+     * 对应商品名
+     */
+    private String name;
 
 }

@@ -10,7 +10,7 @@ import lombok.experimental.Accessors;
 import java.time.LocalDateTime;
 
 /**
- * 用户详情
+ * 券核心
  *
  * @author SK
  * @date 2024/05/31
@@ -18,8 +18,8 @@ import java.time.LocalDateTime;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("user_detail")
-public class UserDetail {
+@TableName("voucher")
+public class Voucher {
 
     /**
      * 主键
@@ -29,63 +29,58 @@ public class UserDetail {
 
 
     /**
-     * 性别 (男1 女0)
+     * 名称
      */
-    private Integer gender;
+    private String name;
 
     /**
-     * 邮箱
+     * 副名称
      */
-    private String email;
+    private String subname;
 
     /**
-     * QQ号
+     * 数量
      */
-    private String qq;
+    private Integer stock;
 
     /**
-     * 微信号
+     * 状态(0 未使用, 1 已使用, 2 已过期)
      */
-    private String wechat;
+    private Integer status;
 
     /**
-     * 头像
+     * 类型(一般 0 / 秒杀 1)
      */
-    private String avatar;
+    private Integer type;
 
     /**
-     * 详细地址
+     * 可使用对象(卖方 0 / 买方 1)
      */
-    private String address;
+    private Integer user;
 
     /**
-     * 地区
+     * 功能字段(基础 0 / 高级 1 / 超级 2)
      */
-    private String area;
+    private Integer func;
 
     /**
-     * 学校
+     * 积分价值
      */
-    private String school;
+    private Integer value;
 
     /**
-     * 学院
+     * 生效时间
      */
-    private String institution;
+    private LocalDateTime beginTime;
 
     /**
-     * 年级
+     * 失效时间
      */
-    private String grade;
+    private LocalDateTime endTime;
 
     /**
-     * 注册时间
+     * 描述
      */
-    private LocalDateTime createTime;
-
-    /**
-     * 个人介绍
-     */
-    private String introduce;
+    private String description;
 
 }

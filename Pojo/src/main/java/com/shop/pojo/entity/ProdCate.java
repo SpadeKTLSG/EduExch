@@ -7,10 +7,16 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
+/**
+ * 商品分类
+ *
+ * @author SK
+ * @date 2024/05/31
+ */
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("hotsearch")
+@TableName("prod_cate")
 public class ProdCate {
 
     /**
@@ -18,5 +24,15 @@ public class ProdCate {
      */
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
+
+    /**
+     * 分类名
+     */
+    private String name;
+
+    /**
+     * 描述
+     */
+    private String description;
 
 }
