@@ -16,7 +16,17 @@
 
     <dependencies>
         <!--        others-->
-
+        <dependency>
+            <groupId>com.shop</groupId>
+            <artifactId>Pojo</artifactId>
+            <version>1.0.0-RELEASE</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>lettuce-core</artifactId>
+                    <groupId>io.lettuce</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
     </dependencies>
 
 

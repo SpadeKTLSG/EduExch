@@ -1,4 +1,4 @@
-package com.shop.admin.config;
+package com.shop.common.config;
 
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;

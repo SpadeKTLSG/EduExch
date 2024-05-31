@@ -1,4 +1,4 @@
-package com.shop.common.result;
+package com.shop.pojo.result;
 
 import lombok.Data;
 

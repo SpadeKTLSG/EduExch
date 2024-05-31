@@ -49,6 +49,7 @@ spring:
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
+    default-property-inclusion: non_null # JSON处理时忽略非空字段
 
 
 
@@ -77,6 +78,8 @@ logging:
         mapper: debug #mybatis日志
         service: info   #service日志
         controller: info  #controller日志
+  pattern:
+    dateformat: mm:ss.SSS
 
 # 自定义
 eduexch:
