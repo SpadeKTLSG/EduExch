@@ -102,8 +102,8 @@ public class EmployeeController {
     @Operation(summary = "新增员工")
     @Parameters(@Parameter(name = "employeeDTO", description = "员工DTO", required = true))
     public Result save(@RequestBody EmployeeDTO employeeDTO) {
-
-        if (employeeService.query().eq("account", employeeDTO.getAccount()).count() > 0) {//判断这个account是否存在
+        //判断这个account是否存在
+        if (employeeService.query().eq("account", employeeDTO.getAccount()).count() > 0) {
             return Result.success("账号已存在");
         }
 
@@ -138,10 +138,10 @@ public class EmployeeController {
     //! UPDATE
 
     /**
-     * 选择性修改员工信息
+     * 选择性更新员工信息
      */
     @PutMapping("/update")
-    @Operation(summary = "选择性修改员工信息")
+    @Operation(summary = "选择性更新员工信息")
     @Parameters(@Parameter(name = "employee", description = "员工", required = true))
     public Result update(@RequestBody Employee employee) {
         //? 选择性更新字段示例

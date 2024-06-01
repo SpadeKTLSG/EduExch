@@ -1,6 +1,9 @@
 package com.shop.pojo.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
@@ -11,6 +14,9 @@ import java.time.LocalDateTime;
  * @date 2024/06/01
  */
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserGreatDTO {
 
     /**

@@ -1,6 +1,9 @@
 package com.shop.pojo.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 用户登录
@@ -9,6 +12,9 @@ import lombok.Data;
  * @date 2024/06/01
  */
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserLoginDTO {
 
 

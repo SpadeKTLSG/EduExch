@@ -11,15 +11,21 @@ import com.shop.pojo.Result;
 import com.shop.pojo.dto.UserLocalDTO;
 import com.shop.pojo.dto.UserLoginDTO;
 import com.shop.pojo.entity.User;
+import com.shop.pojo.entity.UserDetail;
+import com.shop.pojo.entity.UserFunc;
 import com.shop.serve.mapper.UserMapper;
+import com.shop.serve.service.UserDetailService;
+import com.shop.serve.service.UserFuncService;
 import com.shop.serve.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.DigestUtils;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -32,8 +38,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
+    @Autowired
+    private UserFuncService userFuncService;
+    @Autowired
+    private UserDetailService userDetailService;
 
 
+    @Transactional
     @Override
     public Result register(UserLoginDTO userLoginDTO, HttpSession session) {
         String phone = userLoginDTO.getPhone();
@@ -48,12 +59,33 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             return Result.error("验证码错误!");
         }
 
+        //校验账户是否已存在
+        User userExist = query().eq("account", userLoginDTO.getAccount()).one();
+        if (userExist != null) {
+            return Result.error("账户已存在！");
+        }
+
+        //创建账户 + 账户具体信息 + 账户功能信息, 填充必须字段
         User user = User.builder()
                 .account(userLoginDTO.getAccount())
                 .password(DigestUtils.md5DigestAsHex(PasswordConstant.DEFAULT_PASSWORD.getBytes())) //默认密码
                 .phone(phone)
                 .build();
         save(user);
+
+        UserDetail userDetail = UserDetail.builder()
+                .school("维也纳艺术学院")
+                .createTime(LocalDateTime.now())
+                .introduce("这个人很懒，什么都没留下")
+                .build();
+        userDetailService.save(userDetail);
+
+        UserFunc userFunc = UserFunc.builder()
+                .credit(114L)
+                .build();
+        userFuncService.save(userFunc);
+
+
         return Result.success();
     }
 

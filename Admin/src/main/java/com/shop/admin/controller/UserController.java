@@ -18,6 +18,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 import static com.shop.common.utils.SystemConstants.MAX_PAGE_SIZE;
 
 /**
@@ -52,24 +54,20 @@ public class UserController {
     //! UPDATE
 
     /**
-     * 更新用户信息
+     * 选择性更新用户信息
      */
     @PutMapping("/update")
     public Result update(@RequestBody UserGreatDTO userGreatDTO) {
 
-        User u2 = userService.getOne(Wrappers.<User>lambdaQuery().eq(User::getAccount, userGreatDTO.getAccount()));
+        Optional<User> optionalUser = Optional.ofNullable(userService.getOne(Wrappers.<User>lambdaQuery().eq(User::getAccount, userGreatDTO.getAccount())));
 
-        if (u2 == null) {
+        if (optionalUser.isEmpty()) {
             return Result.error("用户不存在");
         }
 
-        //更新三张表
-    /*    User user = new User();
-        BeanUtils.copyProperties(userGreatDTO, user);
-        user.setId(u2.getId());
+        //选择性更新三张表 userService, userFuncService, userDetailService
 
 
-        userService.updateById(user);*/
         return Result.success();
     }
 
