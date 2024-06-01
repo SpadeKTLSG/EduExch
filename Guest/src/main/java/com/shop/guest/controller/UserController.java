@@ -45,6 +45,7 @@ public class UserController {
     public Result login(@RequestBody UserLoginDTO userLoginDTO, HttpSession session) {
         return userService.login(userLoginDTO, session);
     }
+    //http://localhost:8086/guest/user/login
 
 
     /**
@@ -70,6 +71,7 @@ public class UserController {
     public Result logout() {
         return Result.success();
     }
+    //http://localhost:8086/guest/user/logout
 
 
     //! ADD
@@ -93,8 +95,8 @@ public class UserController {
     @GetMapping("/me")
     @Operation(summary = "获取当前用户")
     public Result me() {
-        // 获取当前登录的用户并返回
         UserDTO user = UserHolder.getUser();
         return Result.success(user);
     }
+    //http://localhost:8086/guest/user/me
 }
