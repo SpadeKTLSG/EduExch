@@ -1,14 +1,17 @@
 package com.shop.pojo.vo;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 /**
  * 员工登录VO
+ * 传递员工信息, 不包含密码
  *
  * @author SK
  * @date 2024/06/01
  */
 @Data
+@Schema(description = "员工登录VO")
 public class EmployeeLoginVO {
 
     /**
@@ -27,6 +30,7 @@ public class EmployeeLoginVO {
      * 姓名
      */
     private String name;
+
 
     /**
      * jwt令牌

@@ -4,16 +4,12 @@ package com.shop.serve.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.shop.common.constant.MessageConstant;
-import com.shop.common.constant.PasswordConstant;
 import com.shop.common.exception.AccountNotFoundException;
 import com.shop.common.exception.PasswordErrorException;
-import com.shop.pojo.dto.EmployeeDTO;
 import com.shop.pojo.dto.EmployeeLoginDTO;
 import com.shop.pojo.entity.Employee;
-import com.shop.pojo.vo.EmployeeVO;
 import com.shop.serve.mapper.EmployeeMapper;
 import com.shop.serve.service.EmployeeService;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
@@ -46,26 +42,5 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
         return employee;
     }
 
-
-    /**
-     * 新增员工
-     */
-    @Override
-    public void save(EmployeeVO employeeVO) {
-        Employee employee = new Employee();
-        BeanUtils.copyProperties(employeeVO, employee);
-        employee.setPassword(DigestUtils.md5DigestAsHex(PasswordConstant.DEFAULT_PASSWORD.getBytes()));
-        employeeMapper.insert(employee);
-    }
-
-
-    /**
-     * 编辑员工信息
-     */
-    public void update(EmployeeDTO employeeDTO) {
-
-    }
-
-    //修改员工密码
 
 }
