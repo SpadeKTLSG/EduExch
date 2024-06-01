@@ -51,8 +51,6 @@ public class EmployeeController {
 
     /**
      * 登录
-     *
-     * @param employeeLoginDTO 员工登录DTO
      */
     @PostMapping("/login")
     @Operation(summary = "登录")
@@ -177,6 +175,8 @@ public class EmployeeController {
         BeanUtils.copyProperties(employee, employeeVO);
         return Result.success(employeeVO);
     }
+    //http://localhost:8085/admin/employee/Account查员工
+
 
     /**
      * 分页查全部员工
@@ -194,4 +194,5 @@ public class EmployeeController {
 
         return Result.success(employeeVOPage);
     }
+    //http://localhost:8085/admin/employee/page
 }
