@@ -24,7 +24,7 @@ public class GlobalExceptionHandler {
      * @return 统一响应结果
      */
     @ExceptionHandler
-    public Result<Object> exceptionHandler(BaseException ex) {
+    public Result exceptionHandler(BaseException ex) {
         log.error("异常信息：{}", ex.getMessage());
         return Result.error(ex.getMessage());
     }
@@ -37,7 +37,7 @@ public class GlobalExceptionHandler {
      * @return 错误信息
      */
     @ExceptionHandler
-    public Result<Object> exceptionHandler(SQLIntegrityConstraintViolationException ex) {
+    public Result exceptionHandler(SQLIntegrityConstraintViolationException ex) {
         //Duplicate entry 'zhangsan' for key 'employee.idx_username'
         String message = ex.getMessage();
         if (message.contains("Duplicate entry")) { //判断是否是重复插入数据

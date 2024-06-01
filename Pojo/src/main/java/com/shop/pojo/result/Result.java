@@ -1,39 +1,63 @@
 package com.shop.pojo.result;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
+import java.util.List;
 
 /**
- * 后端统一返回结果
+ * 返回结果
  *
- * @param <T>
+ * @author SK
+ * @date 2024/06/01
  */
 @Data
-public class Result<T> implements Serializable {
+@NoArgsConstructor
+@AllArgsConstructor
+public class Result {
+    private Boolean success;
+    private String errorMsg;
+    private Object data;
+    private Long total;
 
-    private Integer code; //编码：1成功，0和其它数字为失败
-    private String msg; //错误信息
-    private T data; //数据
-
-    public static <T> Result<T> success() {
-        Result<T> result = new Result<>();
-        result.code = 1;
-        return result;
+    /**
+     * 返回成功结果
+     *
+     * @return {@link Result }
+     */
+    public static Result success() {
+        return new Result(true, null, null, null);
     }
 
-    public static <T> Result<T> success(T object) {
-        Result<T> result = new Result<>();
-        result.data = object;
-        result.code = 1;
-        return result;
+    /**
+     * 返回成功结果
+     *
+     * @param data 数据
+     * @return {@link Result }
+     */
+    public static Result success(Object data) {
+        return new Result(true, null, data, null);
     }
 
-    public static <T> Result<T> error(String msg) {
-        Result<T> result = new Result<>();
-        result.msg = msg;
-        result.code = 0;
-        return result;
+    /**
+     * 返回成功结果
+     *
+     * @param data  数据
+     * @param total 总数
+     * @return {@link Result }
+     */
+    public static Result success(List<?> data, Long total) {
+        return new Result(true, null, data, total);
     }
 
+    /**
+     * 返回失败结果
+     *
+     * @param errorMsg 错误信息
+     * @return {@link Result }
+     */
+    public static Result error(String errorMsg) {
+        return new Result(false, errorMsg, null, null);
+    }
 }

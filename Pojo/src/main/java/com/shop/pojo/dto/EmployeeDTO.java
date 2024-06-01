@@ -1,23 +1,16 @@
 package com.shop.pojo.dto;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
+
 /**
- * 用户
+ * 员工DTO
  *
  * @author SK
- * @date 2024/05/31
+ * @date 2024/06/01
  */
 @Data
 public class EmployeeDTO {
-
-    /**
-     * 主键 Employee唯一
-     */
-    @TableId(value = "id", type = IdType.AUTO)
-    private Long id;
 
     /**
      * 账号

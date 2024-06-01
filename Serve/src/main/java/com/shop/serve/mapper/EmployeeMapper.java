@@ -6,4 +6,5 @@ import com.shop.pojo.entity.Employee;
 
 public interface EmployeeMapper extends BaseMapper<Employee> {
 
+
 }

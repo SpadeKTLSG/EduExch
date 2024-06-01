@@ -1,11 +1,9 @@
 package com.shop.pojo.vo;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
 /**
- * 用户
+ * 员工VO
  *
  * @author SK
  * @date 2024/05/31
@@ -13,11 +11,6 @@ import lombok.Data;
 @Data
 public class EmployeeVO {
 
-    /**
-     * 主键 Employee唯一
-     */
-    @TableId(value = "id", type = IdType.AUTO)
-    private Long id;
 
     /**
      * 账号

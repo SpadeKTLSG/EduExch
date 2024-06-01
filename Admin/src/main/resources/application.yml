@@ -89,12 +89,12 @@ eduexch:
   jwt:
     # Admin
     admin-secret-key: nothing    # 设置jwt签名加密时使用的秘钥
-    admin-ttl: 7200000 # 设置jwt过期时间
+    admin-ttl: 86400000 # 设置jwt过期时间: 一天 : 86400000
     admin-token-name: token    # 设置前端传递过来的令牌名称
 
     # User
     user-secret-key: anything
-    user-ttl: 7200000
+    user-ttl: 86400000 # 设置jwt过期时间: 一天 : 86400000
     user-token-name: auth
 
   # AliOSS

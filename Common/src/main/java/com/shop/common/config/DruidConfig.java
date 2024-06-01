@@ -11,5 +11,6 @@ public class DruidConfig {
     @PostConstruct
     public void setProperties() {
         System.setProperty("druid.mysql.usePingMethod", "false");
+        System.out.println("解决druid报错");
     }
 }
