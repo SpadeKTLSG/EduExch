@@ -37,6 +37,7 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
 
         if (employee == null) {//账号不存在
             throw new AccountNotFoundException(MessageConstant.ACCOUNT_NOT_FOUND);
+
         }
         if (!DigestUtils.md5DigestAsHex(employeeLoginDTO.getPassword().getBytes()).equals(employee.getPassword())) {//密码错误
             throw new PasswordErrorException(MessageConstant.PASSWORD_ERROR);
