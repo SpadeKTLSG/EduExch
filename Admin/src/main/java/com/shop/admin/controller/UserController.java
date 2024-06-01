@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.shop.pojo.Result;
 import com.shop.pojo.dto.UserGreatDTO;
 import com.shop.pojo.entity.User;
+import com.shop.pojo.entity.UserDetail;
+import com.shop.pojo.entity.UserFunc;
 import com.shop.pojo.vo.UserVO;
 import com.shop.serve.service.UserDetailService;
 import com.shop.serve.service.UserFuncService;
@@ -16,10 +18,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.Optional;
 
+import static com.shop.common.utils.NewBeanUtils.getNullPropertyNamesPlus;
 import static com.shop.common.utils.SystemConstants.MAX_PAGE_SIZE;
 
 /**
@@ -56,20 +61,40 @@ public class UserController {
     /**
      * 选择性更新用户信息
      */
+    @Transactional
     @PutMapping("/update")
+    @Operation(summary = "选择性更新用户信息")
+    @Parameters(@Parameter(name = "userGreatDTO", description = "用户更新DTO", required = true))
     public Result update(@RequestBody UserGreatDTO userGreatDTO) {
 
         Optional<User> optionalUser = Optional.ofNullable(userService.getOne(Wrappers.<User>lambdaQuery().eq(User::getAccount, userGreatDTO.getAccount())));
-
         if (optionalUser.isEmpty()) {
             return Result.error("用户不存在");
         }
 
         //选择性更新三张表 userService, userFuncService, userDetailService
+        User u2 = optionalUser.get();
+        String[] nullPropertyNames = getNullPropertyNamesPlus(userGreatDTO, User.class, UserFunc.class, UserDetail.class);
 
+        BeanUtils.copyProperties(userGreatDTO, u2, nullPropertyNames);
+        userService.updateById(u2);
+
+        UserFunc uf2 = userFuncService.getOne(Wrappers.<UserFunc>lambdaQuery().eq(UserFunc::getId, u2.getId()));
+        BeanUtils.copyProperties(userGreatDTO, uf2, nullPropertyNames);
+        uf2.setId(u2.getId());
+        if (!Arrays.equals(nullPropertyNames, getNullPropertyNamesPlus(uf2, UserFunc.class))) {
+            userFuncService.updateById(uf2);
+        }
+        UserDetail ud2 = userDetailService.getOne(Wrappers.<UserDetail>lambdaQuery().eq(UserDetail::getId, u2.getId()));
+        BeanUtils.copyProperties(userGreatDTO, ud2, nullPropertyNames);
+        ud2.setId(u2.getId());
+        if (!Arrays.equals(nullPropertyNames, getNullPropertyNamesPlus(ud2, UserDetail.class))) {
+            userDetailService.updateById(ud2); //bug here : if nothing changed, it will still update then fail
+        }
 
         return Result.success();
     }
+    //http://localhost:8085/admin/user/update
 
     //! QUERY
 

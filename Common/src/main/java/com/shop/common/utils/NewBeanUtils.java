@@ -3,6 +3,11 @@ package com.shop.common.utils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -30,5 +35,27 @@ public class NewBeanUtils {
                 })
                 .filter(name -> !name.isEmpty())
                 .toArray(String[]::new);
+    }
+
+    /**
+     * 获取所有的属性值为空属性名数组Plus, 用于多个目标类
+     */
+    public static String[] getNullPropertyNamesPlus(Object source, Class<?>... targetClasses) {
+        final List<String> sourceFields = Arrays.stream(source.getClass().getDeclaredFields())
+                .map(Field::getName)
+                .collect(Collectors.toList());
+
+        final List<String> targetFields = Arrays.stream(targetClasses)
+                .flatMap(c -> Arrays.stream(c.getDeclaredFields()))
+                .map(Field::getName)
+                .collect(Collectors.toList());
+
+        // Create a new list that is a copy of sourceFields
+        List<String> sourceFieldsCopy = new ArrayList<>(sourceFields);
+
+        // Remove all elements from sourceFieldsCopy that are also present in targetFields
+        sourceFieldsCopy.removeAll(targetFields);
+
+        return sourceFields.toArray(new String[0]);
     }
 }
