@@ -8,7 +8,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.shop.common.constant.PasswordConstant;
 import com.shop.common.utils.RegexUtils;
 import com.shop.pojo.Result;
-import com.shop.pojo.dto.UserDTO;
+import com.shop.pojo.dto.UserLocalDTO;
 import com.shop.pojo.dto.UserLoginDTO;
 import com.shop.pojo.entity.User;
 import com.shop.serve.mapper.UserMapper;
@@ -82,7 +82,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         // 随机生成token，作为登录令牌
         String token = UUID.randomUUID().toString(true);
-        UserDTO userDTO = BeanUtil.copyProperties(user, UserDTO.class); //将User对象转为HashMap存储
+        UserLocalDTO userDTO = BeanUtil.copyProperties(user, UserLocalDTO.class); //将User对象转为HashMap存储
         Map<String, Object> userMap = BeanUtil.beanToMap(userDTO, new HashMap<>(),
                 CopyOptions.create()
                         .setIgnoreNullValue(true)

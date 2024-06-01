@@ -10,10 +10,12 @@ import com.shop.pojo.dto.EmployeeLoginDTO;
 import com.shop.pojo.entity.Employee;
 import com.shop.serve.mapper.EmployeeMapper;
 import com.shop.serve.service.EmployeeService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
+@Slf4j
 @Service
 public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> implements EmployeeService {
 

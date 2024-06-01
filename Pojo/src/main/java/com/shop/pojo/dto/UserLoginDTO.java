@@ -2,6 +2,12 @@ package com.shop.pojo.dto;
 
 import lombok.Data;
 
+/**
+ * 用户登录
+ *
+ * @author SK
+ * @date 2024/06/01
+ */
 @Data
 public class UserLoginDTO {
 

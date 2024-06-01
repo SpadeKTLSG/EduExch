@@ -25,7 +25,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
+import static com.shop.common.utils.NewBeanUtils.getNullPropertyNames;
 import static com.shop.common.utils.SystemConstants.MAX_PAGE_SIZE;
 
 
@@ -136,23 +138,27 @@ public class EmployeeController {
     //! UPDATE
 
     /**
-     * 编辑员工信息(修改密码)
+     * 选择性修改员工信息
      */
     @PutMapping("/update")
-    @Operation(summary = "编辑员工信息(修改密码)")
+    @Operation(summary = "选择性修改员工信息")
     @Parameters(@Parameter(name = "employee", description = "员工", required = true))
     public Result update(@RequestBody Employee employee) {
+        //? 选择性更新字段示例
 
-        Employee e2 = employeeService.getOne(Wrappers.<Employee>lambdaQuery().eq(Employee::getAccount, employee.getAccount()));
-
-        if (e2 == null) {
+        Optional<Employee> optionalEmployee = Optional.ofNullable(employeeService.getOne(Wrappers.<Employee>lambdaQuery().eq(Employee::getAccount, employee.getAccount())));
+        if (optionalEmployee.isEmpty()) {
             return Result.error("员工不存在");
         }
 
-        e2.setName(employee.getName());
-        e2.setPassword(DigestUtils.md5DigestAsHex(employee.getPassword().getBytes()));
-        employeeService.updateById(e2);
+        Employee e2 = optionalEmployee.get();
+        String[] nullPropertyNames = getNullPropertyNames(employee);
+        BeanUtils.copyProperties(employee, e2, nullPropertyNames);
 
+        Optional.ofNullable(employee.getPassword()) //手动调整密码生成
+                .ifPresent(password -> e2.setPassword(DigestUtils.md5DigestAsHex(password.getBytes())));
+
+        employeeService.updateById(e2);
         return Result.success();
     }
     //http://localhost:8085/admin/employee/update

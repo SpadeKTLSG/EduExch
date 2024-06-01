@@ -2,7 +2,7 @@ package com.shop.guest.controller;
 
 import com.shop.common.utils.UserHolder;
 import com.shop.pojo.Result;
-import com.shop.pojo.dto.UserDTO;
+import com.shop.pojo.dto.UserLocalDTO;
 import com.shop.pojo.dto.UserLoginDTO;
 import com.shop.serve.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -78,7 +78,7 @@ public class UserController {
 
 
     /**
-     * 注册功能
+     * 注册功能 需要注册三张表
      */
     @PostMapping("/register")
     @Operation(summary = "注册")
@@ -90,13 +90,33 @@ public class UserController {
 
 
     /**
-     * 获取当前用户
+     * 获取当前用户LocalDTO
      */
     @GetMapping("/me")
     @Operation(summary = "获取当前用户")
     public Result me() {
-        UserDTO user = UserHolder.getUser();
-        return Result.success(user);
+        UserLocalDTO userLocalDTO = UserHolder.getUser();
+        return Result.success(userLocalDTO);
     }
     //http://localhost:8086/guest/user/me
+
+
+    //! DELETE
+
+    /**
+     * 注销自己
+     */
+    @DeleteMapping("/delete")
+    @Operation(summary = "销号")
+    public Result delete() {
+        UserLocalDTO userLocalDTO = UserHolder.getUser();
+        userService.removeById(userLocalDTO.getId());
+        return Result.success();
+    }
+
+
+    //! UPDATE
+
+
+    //! QUERY
 }

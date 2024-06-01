@@ -1,15 +1,15 @@
 package com.shop.common.utils;
 
-import com.shop.pojo.dto.UserDTO;
+import com.shop.pojo.dto.UserLocalDTO;
 
 public class UserHolder {
-    private static final ThreadLocal<UserDTO> tl = new ThreadLocal<>();
+    private static final ThreadLocal<UserLocalDTO> tl = new ThreadLocal<>();
 
-    public static void saveUser(UserDTO user) {
+    public static void saveUser(UserLocalDTO user) {
         tl.set(user);
     }
 
-    public static UserDTO getUser() {
+    public static UserLocalDTO getUser() {
         return tl.get();
     }
 
