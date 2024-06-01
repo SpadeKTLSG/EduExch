@@ -7,6 +7,7 @@ import com.shop.pojo.entity.Employee;
 
 
 public interface EmployeeService extends IService<Employee> {
+
     /**
      * 员工登录
      */

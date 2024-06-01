@@ -1,12 +1,18 @@
 package com.shop.guest.controller;
 
+import com.shop.common.utils.UserHolder;
+import com.shop.pojo.Result;
+import com.shop.pojo.dto.UserDTO;
+import com.shop.pojo.dto.UserLoginDTO;
+import com.shop.serve.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
 
 /**
@@ -21,11 +27,74 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class UserController {
 
+    @Autowired
+    private UserService userService;
 
-    @Operation(summary = "test")   //test swagger
-    @Parameters()
-    @PostMapping("/test")
-    public void test() {
-        log.info("test");
+
+    //! Func
+
+
+    /**
+     * 登录功能
+     *
+     * @return Token
+     */
+    @PostMapping("/login")
+    @Operation(summary = "登录")
+    @Parameters(@Parameter(name = "userLoginDTO", description = "用户登录DTO", required = true))
+    public Result login(@RequestBody UserLoginDTO userLoginDTO, HttpSession session) {
+        return userService.login(userLoginDTO, session);
+    }
+
+
+    /**
+     * 发送手机验证码 并保存到redis
+     */
+    @PostMapping("code")
+    @Operation(summary = "发送手机验证码")
+    @Parameters(@Parameter(name = "phone", description = "手机号", required = true))
+    public Result sendCode(@RequestParam("phone") String phone, HttpSession session) {
+        return userService.sendCode(phone, session);
+    }
+    //http://localhost:8086/guest/user/code?phone=15985785169
+
+
+    /**
+     * 登出功能
+     *
+     * @return 无
+     */
+    @PostMapping("/logout")
+    @Operation(summary = "退出")
+    @Parameters(@Parameter(name = "无", description = "无", required = true))
+    public Result logout() {
+        return Result.success();
+    }
+
+
+    //! ADD
+
+
+    /**
+     * 注册功能
+     */
+    @PostMapping("/register")
+    @Operation(summary = "注册")
+    @Parameters(@Parameter(name = "userLoginDTO", description = "用户登录DTO", required = true))
+    public Result register(@RequestBody UserLoginDTO userLoginDTO, HttpSession session) {
+        return userService.register(userLoginDTO, session);
+    }
+    //http://localhost:8086/guest/user/register
+
+
+    /**
+     * 获取当前用户
+     */
+    @GetMapping("/me")
+    @Operation(summary = "获取当前用户")
+    public Result me() {
+        // 获取当前登录的用户并返回
+        UserDTO user = UserHolder.getUser();
+        return Result.success(user);
     }
 }
