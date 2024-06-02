@@ -3,6 +3,9 @@ package com.shop.admin.controller;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.shop.pojo.Result;
+import com.shop.pojo.dto.UserDTO;
+import com.shop.pojo.dto.UserDetailDTO;
+import com.shop.pojo.dto.UserFuncDTO;
 import com.shop.pojo.dto.UserGreatDTO;
 import com.shop.pojo.entity.User;
 import com.shop.pojo.entity.UserDetail;
@@ -21,10 +24,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
 import java.util.Optional;
 
-import static com.shop.common.utils.NewBeanUtils.getNullPropertyNamesPlus;
+import static com.shop.common.utils.NewBeanUtils.getNullPropertyNames;
 import static com.shop.common.utils.SystemConstants.MAX_PAGE_SIZE;
 
 /**
@@ -72,25 +74,35 @@ public class UserController {
             return Result.error("用户不存在");
         }
 
-        //选择性更新三张表 userService, userFuncService, userDetailService
-        User u2 = optionalUser.get();
-        String[] nullPropertyNames = getNullPropertyNamesPlus(userGreatDTO, User.class, UserFunc.class, UserDetail.class);
+        //在这里将userGreatDTO切为三个对象来使用BeanUtils.copyProperties
+        // 1找到目标对象
+        User u_target = optionalUser.get();
+        UserFunc uf_target = userFuncService.getOne(Wrappers.<UserFunc>lambdaQuery().eq(UserFunc::getId, u_target.getId()));
+        UserDetail ud_target = userDetailService.getOne(Wrappers.<UserDetail>lambdaQuery().eq(UserDetail::getId, u_target.getId()));
 
-        BeanUtils.copyProperties(userGreatDTO, u2, nullPropertyNames);
-        userService.updateById(u2);
+        // 2修改传递DTO
+        UserDTO userDTO = new UserDTO();
+        UserFuncDTO userFuncDTO = new UserFuncDTO();
+        UserDetailDTO userDetailDTO = new UserDetailDTO();
+        BeanUtils.copyProperties(userGreatDTO, userDTO);
+        BeanUtils.copyProperties(userGreatDTO, userFuncDTO);
+        BeanUtils.copyProperties(userGreatDTO, userDetailDTO);
 
-        UserFunc uf2 = userFuncService.getOne(Wrappers.<UserFunc>lambdaQuery().eq(UserFunc::getId, u2.getId()));
-        BeanUtils.copyProperties(userGreatDTO, uf2, nullPropertyNames);
-        uf2.setId(u2.getId());
-        if (!Arrays.equals(nullPropertyNames, getNullPropertyNamesPlus(uf2, UserFunc.class))) {
-            userFuncService.updateById(uf2);
-        }
-        UserDetail ud2 = userDetailService.getOne(Wrappers.<UserDetail>lambdaQuery().eq(UserDetail::getId, u2.getId()));
-        BeanUtils.copyProperties(userGreatDTO, ud2, nullPropertyNames);
-        ud2.setId(u2.getId());
-        if (!Arrays.equals(nullPropertyNames, getNullPropertyNamesPlus(ud2, UserDetail.class))) {
-            userDetailService.updateById(ud2); //bug here : if nothing changed, it will still update then fail
-        }
+        //3分别判断每个对象的nullPN
+        String[] nullPN4User = getNullPropertyNames(userDTO);
+        String[] nullPN4UserFunc = getNullPropertyNames(userFuncDTO);
+        String[] nullPN4UserDetail = getNullPropertyNames(userDetailDTO);
+
+
+        //4分别更新目标对象
+        BeanUtils.copyProperties(userDTO, u_target, nullPN4User);
+        BeanUtils.copyProperties(userFuncDTO, uf_target, nullPN4UserFunc);
+        BeanUtils.copyProperties(userDetailDTO, ud_target, nullPN4UserDetail);
+
+        //5update
+        userService.updateById(u_target);
+        userFuncService.updateById(uf_target);
+        userDetailService.updateById(ud_target);
 
         return Result.success();
     }

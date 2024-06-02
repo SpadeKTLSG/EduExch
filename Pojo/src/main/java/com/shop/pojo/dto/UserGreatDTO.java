@@ -19,11 +19,17 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class UserGreatDTO {
 
+    // 以下为用户核心信息
+
     /**
      * 账号
      */
     private String account;
 
+    /**
+     * 密码
+     */
+    private String password;
 
     /**
      * 真实姓名
@@ -40,6 +46,7 @@ public class UserGreatDTO {
      */
     private String phone;
 
+    // 以下为用户详细信息
 
     /**
      * 性别 (男1 女0)
@@ -101,6 +108,7 @@ public class UserGreatDTO {
      */
     private String introduce;
 
+    // 以下为用户功能信息
 
     /**
      * 状态 (0正常, 1封禁)
