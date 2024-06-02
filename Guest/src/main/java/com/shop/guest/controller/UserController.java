@@ -4,6 +4,7 @@ import com.shop.common.utils.UserHolder;
 import com.shop.pojo.Result;
 import com.shop.pojo.dto.*;
 import com.shop.serve.service.UserDetailService;
+import com.shop.serve.service.UserFollowService;
 import com.shop.serve.service.UserFuncService;
 import com.shop.serve.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,6 +36,9 @@ public class UserController {
     private UserFuncService userFuncService;
     @Autowired
     private UserDetailService userDetailService;
+    @Autowired
+    private UserFollowService userFollowService;
+
 
     //! Func
 
@@ -77,6 +81,67 @@ public class UserController {
         return Result.success();
     }
     //http://localhost:8086/guest/user/logout
+
+
+    /**
+     * 关注功能
+     */
+    @PutMapping("follow/{id}/{isFollow}")
+    @Operation(summary = " 用户关注")
+    @Parameters({
+            @Parameter(name = "id", description = "被关注用户id", required = true),
+            @Parameter(name = "isFollow", description = "是否关注", required = true)
+    })
+    public Result follow(@PathVariable("id") Long followUserId, @PathVariable("isFollow") Boolean isFollow) {
+        return userFollowService.follow(followUserId, isFollow);
+    }
+    //http://localhost:8086/guest/user/follow/2/true
+
+
+    /**
+     * 是否关注
+     */
+    @GetMapping("follow/ornot/{id}")
+    @Operation(summary = "是否关注")
+    @Parameters(@Parameter(name = "id", description = "被关注用户id", required = true))
+    public Result isFollow(@PathVariable("id") Long followUserId) {
+        return userFollowService.isFollow(followUserId);
+    }
+    //http://localhost:8086/guest/user/follow/ornot/2
+
+
+    /**
+     * 查询共同关注
+     */
+    @GetMapping("follow/share/{id}")
+    @Operation(summary = "关注的人")
+    @Parameters(@Parameter(name = "id", description = "用户id", required = true))
+    public Result shareFollow(@PathVariable("id") Long id) {
+        return userFollowService.shareFollow(id);
+    }
+    //http://localhost:8086/guest/user/follow/share/2
+
+
+    /**
+     * 签到
+     */
+    @PostMapping("/sign/add")
+    @Operation(summary = "签到")
+    public Result sign() {
+        return userService.sign();
+    }
+    //http://localhost:8086/guest/user/sign/add
+
+
+    /**
+     * 签到次数
+     */
+    @GetMapping("/sign/count")
+    @Operation(summary = "签到次数")
+    public Result signCount() {
+        return userService.signCount();
+    }
+    //http://localhost:8086/guest/user/sign/count
 
 
     //! ADD

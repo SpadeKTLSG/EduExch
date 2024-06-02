@@ -22,13 +22,16 @@ import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.connection.BitFieldSubCommands;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.DigestUtils;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -123,6 +126,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
     }
 
+
     /**
      * 从UserGreatDTO创建DTO
      */
@@ -188,6 +192,63 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         log.info("模拟发送短信验证码成功，验证码：{}", code);
 
         return Result.success();
+    }
+
+
+    @Override
+    public Result sign() {
+
+//        Long userId = UserHolder.getUser().getId();
+        //调试选项:
+        Long userId = 1L;
+
+        LocalDateTime now = LocalDateTime.now();
+        String keySuffix = now.format(DateTimeFormatter.ofPattern(":yyyyMM"));  // 拼接key
+        String key = USER_SIGN_KEY + userId + keySuffix;
+        int dayOfMonth = now.getDayOfMonth();
+        stringRedisTemplate.opsForValue().setBit(key, dayOfMonth - 1, true);
+        return Result.success();
+    }
+
+
+    @Override
+    public Result signCount() {
+
+//        Long userId = UserHolder.getUser().getId();
+        //调试选项:
+        Long userId = 1L;
+
+
+        LocalDateTime now = LocalDateTime.now();
+        String keySuffix = now.format(DateTimeFormatter.ofPattern(":yyyyMM"));  // 拼接key
+        String key = USER_SIGN_KEY + userId + keySuffix;
+        int dayOfMonth = now.getDayOfMonth();
+
+        // 获取本月截止今天为止的所有的签到记录，返回的是一个十进制的数字 BITFIELD sign:5:202203 GET u14 0
+        List<Long> result = stringRedisTemplate.opsForValue().bitField(
+                key,
+                BitFieldSubCommands.create()
+                        .get(BitFieldSubCommands.BitFieldType.unsigned(dayOfMonth)).valueAt(0)
+        );
+
+        if (result == null || result.isEmpty()) { // 没有任何签到结果
+            return Result.success(0);
+        }
+
+        Long num = result.get(0); // 获取签到结果
+
+        if (num == null || num == 0) {
+            return Result.success(0);
+        }
+
+        int count = 0;
+
+        while ((num & 1) != 0) {
+            // 让这个数字与1做与运算，得到数字的最后一个bit位  // 判断这个bit位是否为0
+            count++;
+            num >>>= 1;// 把数字右移一位，抛弃最后一个bit位，继续下一个bit位
+        }
+        return Result.success(count);
     }
 
 

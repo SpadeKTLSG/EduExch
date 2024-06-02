@@ -18,4 +18,8 @@ public interface UserService extends IService<User> {
     Result register(UserLoginDTO userLoginDTO, HttpSession session);
 
     void updateUserGreatDTO(UserGreatDTO userGreatDTO) throws InstantiationException, IllegalAccessException;
+
+    Result sign();
+
+    Result signCount();
 }
