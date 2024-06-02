@@ -10,4 +10,24 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/admin/prod")
 @RestController
 public class ProdController {
+
+    //! Func
+
+
+    //! ADD
+
+    /**
+     * 添加商品分类
+     */
+
+
+    //! DELETE
+
+
+    //! UPDATE
+
+
+    //! QUERY
+
+
 }
