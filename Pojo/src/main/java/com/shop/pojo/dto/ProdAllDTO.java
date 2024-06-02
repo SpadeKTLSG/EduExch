@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 用户完全DTO
+ * 商品完全DTO
  *
  * @author SK
  * @date 2024/06/02
@@ -15,30 +15,36 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserDTO {
+public class ProdAllDTO {
 
     /**
-     * 账号
-     */
-    private String account;
-
-    /**
-     * 密码
-     */
-    private String password;
-
-    /**
-     * 真实姓名
+     * 名称
      */
     private String name;
 
     /**
-     * 昵称
+     * 分类ID
      */
-    private String nickname;
+    private Long categoryId;
 
     /**
-     * 手机
+     * 价格
      */
-    private String phone;
+    private Long price;
+
+    /**
+     * 图片 集合
+     */
+    private String images;
+
+    /**
+     * 库存
+     */
+    private Long stock;
+
+    /**
+     * 描述
+     */
+    private String description;
+
 }

@@ -36,7 +36,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import static com.shop.common.utils.NewBeanUtils.getNullPropertyNames;
+import static com.shop.common.utils.NewBeanUtils.dtoMapService;
 import static com.shop.common.utils.RedisConstants.*;
 
 @Slf4j
@@ -100,6 +100,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Transactional
     @SuppressWarnings("unchecked")
     public void updateUserGreatDTO(UserGreatDTO userGreatDTO) throws InstantiationException, IllegalAccessException {
+        //? 联表选择性更新字段示例
+
         Optional<User> optionalUser = Optional.ofNullable(this.getOne(Wrappers.<User>lambdaQuery().eq(User::getAccount, userGreatDTO.getAccount())));
         if (optionalUser.isEmpty()) {
             throw new RuntimeException("用户不存在");
@@ -108,22 +110,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 用Map存储DTO和Service
         @SuppressWarnings("rawtypes")
         Map<Object, IService> dtoServiceMap = new HashMap<>();
-        dtoServiceMap.put(createDTOFromUserGreatDTO(userGreatDTO, UserDTO.class), this);
-        dtoServiceMap.put(createDTOFromUserGreatDTO(userGreatDTO, UserFuncDTO.class), userFuncService);
-        dtoServiceMap.put(createDTOFromUserGreatDTO(userGreatDTO, UserDetailDTO.class), userDetailService);
+        dtoServiceMap.put(createDTOFromUserGreatDTO(userGreatDTO, UserAllDTO.class), this);
+        dtoServiceMap.put(createDTOFromUserGreatDTO(userGreatDTO, UserFuncAllDTO.class), userFuncService);
+        dtoServiceMap.put(createDTOFromUserGreatDTO(userGreatDTO, UserDetailAllDTO.class), userDetailService);
 
-        for (@SuppressWarnings("rawtypes") Map.Entry<Object, IService> entry : dtoServiceMap.entrySet()) {
-            //找到输入的DTO和对应的Service
-            Object dto = entry.getKey();
-            @SuppressWarnings("rawtypes")
-            IService service = entry.getValue();
-            String[] nullPN = getNullPropertyNames(dto);// 判断nullPN
-
-            // 获取目标对象
-            Object target = service.getOne(Wrappers.<User>lambdaQuery().eq(User::getId, optionalUser.get().getId()));
-            BeanUtils.copyProperties(dto, target, nullPN);// 利用nullPN和输入DTO更新目标对象
-            service.updateById(target); // 存储回对应位置
-        }
+        dtoMapService(dtoServiceMap, optionalUser.get().getId(), optionalUser);
     }
 
 

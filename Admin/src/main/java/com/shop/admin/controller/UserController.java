@@ -79,9 +79,9 @@ public class UserController {
         UserDetail ud_target = userDetailService.getOne(Wrappers.<UserDetail>lambdaQuery().eq(UserDetail::getId, u_target.getId()));
 
         // 2修改传递DTO
-        UserDTO userDTO = new UserDTO();
-        UserFuncDTO userFuncDTO = new UserFuncDTO();
-        UserDetailDTO userDetailDTO = new UserDetailDTO();
+        UserAllDTO userDTO = new UserAllDTO();
+        UserFuncAllDTO userFuncDTO = new UserFuncAllDTO();
+        UserDetailAllDTO userDetailDTO = new UserDetailAllDTO();
         BeanUtils.copyProperties(userGreatDTO, userDTO);
         BeanUtils.copyProperties(userGreatDTO, userFuncDTO);
         BeanUtils.copyProperties(userGreatDTO, userDetailDTO);

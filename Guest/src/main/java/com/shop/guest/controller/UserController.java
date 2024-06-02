@@ -194,7 +194,7 @@ public class UserController {
      * 选择性更新用户信息 包治百病!
      */
     @PutMapping("/update")
-    @Operation(summary = "Update user information selectively")
+    @Operation(summary = "选择性更新用户信息")
     @Parameters(@Parameter(name = "userGreatDTO", description = "User update DTO", required = true))
     public Result update(@RequestBody UserGreatDTO userGreatDTO) {
         try {
@@ -228,16 +228,16 @@ public class UserController {
             return Result.error("用户不存在");
         }
 
-        UserDTO userDTO = new UserDTO();
-        UserDetailDTO userDetailDTO = new UserDetailDTO();
-        UserFuncDTO userFuncDTO = new UserFuncDTO();
+        UserAllDTO userAllDTO = new UserAllDTO();
+        UserDetailAllDTO userDetailDTO = new UserDetailAllDTO();
+        UserFuncAllDTO userFuncDTO = new UserFuncAllDTO();
         UserGreatDTO userGreatDTO = new UserGreatDTO();
         //查三张表
-        BeanUtils.copyProperties(userService.getById(userLocalDTO.getId()), userDTO);
+        BeanUtils.copyProperties(userService.getById(userLocalDTO.getId()), userAllDTO);
         BeanUtils.copyProperties(userDetailService.getById(userLocalDTO.getId()), userDetailDTO);
         BeanUtils.copyProperties(userFuncService.getById(userLocalDTO.getId()), userFuncDTO);
         //整合到GreatDTO
-        BeanUtils.copyProperties(userDTO, userGreatDTO);
+        BeanUtils.copyProperties(userAllDTO, userGreatDTO);
         BeanUtils.copyProperties(userDetailDTO, userGreatDTO);
         BeanUtils.copyProperties(userFuncDTO, userGreatDTO);
 

@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserFuncDTO {
+public class UserFuncAllDTO {
     /**
      * 状态 (0正常, 1封禁)
      */

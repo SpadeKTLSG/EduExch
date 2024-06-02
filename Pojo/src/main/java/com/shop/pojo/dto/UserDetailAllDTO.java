@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserDetailDTO {
+public class UserDetailAllDTO {
 
     /**
      * 性别 (男1 女0)
