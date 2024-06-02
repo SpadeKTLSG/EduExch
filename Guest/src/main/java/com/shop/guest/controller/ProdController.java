@@ -8,6 +8,7 @@ import com.shop.pojo.dto.ProdAllDTO;
 import com.shop.pojo.dto.ProdFuncAllDTO;
 import com.shop.pojo.dto.ProdGreatDTO;
 import com.shop.pojo.entity.Prod;
+import com.shop.pojo.entity.ProdCate;
 import com.shop.pojo.entity.ProdFunc;
 import com.shop.pojo.vo.ProdGreatVO;
 import com.shop.serve.service.ProdCateService;
@@ -172,11 +173,33 @@ public class ProdController {
 
 
     /**
-     * 根据分类查自己的商品列表
+     * 根据分类查自己的商品列表分页(联表)
      */
+    @GetMapping("/category/prod/{cate}")
+    @Operation(summary = "根据分类获得自己的对应商品列表")
+    @Parameters(@Parameter(name = "cate", description = "分类名", required = true))
+    public Result getPageByCate(@PathVariable("cate") String cate, @RequestParam(value = "current", defaultValue = "1") Integer current) {
+
+        ProdCate prodCate = prodCateService.getOne(Wrappers.<ProdCate>lambdaQuery()
+                .eq(ProdCate::getName, cate));
+
+        if (prodCate == null) {
+            return Result.error("该分类不存在");
+        }
+
+        Long id = prodCate.getId();
+
+        return Result.success(prodService.page(
+                new Page<>(current, SystemConstants.MAX_PAGE_SIZE),
+                Wrappers.<Prod>lambdaQuery().eq(Prod::getCategoryId, id)));
+
+    }
+    //http://localhost:8086/guest/prod/category/prod/0
+
 
     /**
      * 商品冻结/恢复
      */
+
 
 }
