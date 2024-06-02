@@ -6,8 +6,6 @@ import com.shop.pojo.Result;
 import com.shop.pojo.dto.UserGreatDTO;
 import com.shop.pojo.entity.User;
 import com.shop.pojo.vo.UserVO;
-import com.shop.serve.service.UserDetailService;
-import com.shop.serve.service.UserFuncService;
 import com.shop.serve.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -34,25 +32,21 @@ public class UserController {
 
     @Autowired
     private UserService userService;
-    @Autowired
-    private UserFuncService userFuncService;
-    @Autowired
-    private UserDetailService userDetailService;
 
 
     //! Func
 
 
     //! ADD
-    //管理员手动添加用户: 未实现
+    //管理员手动添加用户: 禁止
 
     //! DELETE
-    //管理员手动删除用户: 未实现
+    //管理员手动删除用户: 禁止
 
     //! UPDATE
 
     /**
-     * 选择性更新用户信息
+     * 选择性更新用户信息 包治百病!
      */
     @PutMapping("/update")
     @Operation(summary = "Update user information selectively")
@@ -148,6 +142,7 @@ public class UserController {
         return Result.success(userVO);
     }
     //http://localhost:8085/admin/user/specify/1
+
 
     /**
      * 分页查全部用户

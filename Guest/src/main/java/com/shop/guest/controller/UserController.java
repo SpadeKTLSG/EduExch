@@ -2,8 +2,9 @@ package com.shop.guest.controller;
 
 import com.shop.common.utils.UserHolder;
 import com.shop.pojo.Result;
-import com.shop.pojo.dto.UserLocalDTO;
-import com.shop.pojo.dto.UserLoginDTO;
+import com.shop.pojo.dto.*;
+import com.shop.serve.service.UserDetailService;
+import com.shop.serve.service.UserFuncService;
 import com.shop.serve.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -11,6 +12,7 @@ import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,7 +31,10 @@ public class UserController {
 
     @Autowired
     private UserService userService;
-
+    @Autowired
+    private UserFuncService userFuncService;
+    @Autowired
+    private UserDetailService userDetailService;
 
     //! Func
 
@@ -111,13 +116,68 @@ public class UserController {
     public Result delete() {
         UserLocalDTO userLocalDTO = UserHolder.getUser();
         userService.removeById(userLocalDTO.getId());
+        userDetailService.removeById(userLocalDTO.getId());
+        userFuncService.removeById(userLocalDTO.getId());
         return Result.success();
     }
+    //http://localhost:8086/guest/user/delete
 
 
     //! UPDATE
 
-    //改自己
+    /**
+     * 选择性更新用户信息 包治百病!
+     */
+    @PutMapping("/update")
+    @Operation(summary = "Update user information selectively")
+    @Parameters(@Parameter(name = "userGreatDTO", description = "User update DTO", required = true))
+    public Result update(@RequestBody UserGreatDTO userGreatDTO) {
+        try {
+            userService.updateUserGreatDTO(userGreatDTO);
+            return Result.success();
+        } catch (RuntimeException | InstantiationException | IllegalAccessException e) {
+            return Result.error(e.getMessage());
+        }
+    }
+    //http://localhost:8086/guest/user/update
+
 
     //! QUERY
+
+    /**
+     * 查自己全部信息
+     */
+    @GetMapping("/info")
+    @Operation(summary = "查用户自己全部信息")
+    public Result info() {
+//        UserLocalDTO userLocalDTO = UserHolder.getUser(); //从ThreadLocal中获取用户信息id
+        //测试时使用id = 1测试账号
+        UserLocalDTO userLocalDTO = new UserLocalDTO();
+        BeanUtils.copyProperties(userService.getById(1L), userLocalDTO);
+
+        if (userLocalDTO == null) {
+            return Result.error("用户未登录");
+        }
+
+        if (userService.getById(userLocalDTO.getId()) == null) {
+            return Result.error("用户不存在");
+        }
+
+        UserDTO userDTO = new UserDTO();
+        UserDetailDTO userDetailDTO = new UserDetailDTO();
+        UserFuncDTO userFuncDTO = new UserFuncDTO();
+        UserGreatDTO userGreatDTO = new UserGreatDTO();
+        //查三张表
+        BeanUtils.copyProperties(userService.getById(userLocalDTO.getId()), userDTO);
+        BeanUtils.copyProperties(userDetailService.getById(userLocalDTO.getId()), userDetailDTO);
+        BeanUtils.copyProperties(userFuncService.getById(userLocalDTO.getId()), userFuncDTO);
+        //整合到GreatDTO
+        BeanUtils.copyProperties(userDTO, userGreatDTO);
+        BeanUtils.copyProperties(userDetailDTO, userGreatDTO);
+        BeanUtils.copyProperties(userFuncDTO, userGreatDTO);
+
+        return Result.success(userGreatDTO);
+    }
+    //http://localhost:8086/guest/user/info
+
 }
