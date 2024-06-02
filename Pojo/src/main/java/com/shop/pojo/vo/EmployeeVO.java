@@ -1,7 +1,10 @@
 package com.shop.pojo.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 员工VO
@@ -11,6 +14,9 @@ import lombok.Data;
  * @date 2024/05/31
  */
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Schema(description = "员工VO")
 public class EmployeeVO {
 

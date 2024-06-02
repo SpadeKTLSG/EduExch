@@ -4,12 +4,16 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.shop.common.utils.SystemConstants;
 import com.shop.pojo.Result;
+import com.shop.pojo.dto.ProdAllDTO;
+import com.shop.pojo.dto.ProdFuncAllDTO;
 import com.shop.pojo.dto.ProdGreatDTO;
 import com.shop.pojo.entity.Prod;
 import com.shop.pojo.entity.ProdFunc;
+import com.shop.pojo.vo.ProdGreatVO;
 import com.shop.serve.service.ProdCateService;
 import com.shop.serve.service.ProdFuncService;
 import com.shop.serve.service.ProdService;
+import com.shop.serve.tool.NewDTOUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -31,6 +35,10 @@ public class ProdController {
     private ProdFuncService prodFuncService;
     @Autowired
     private ProdCateService prodCateService;
+
+    @Autowired
+    private NewDTOUtils dtoUtils;
+
 
     //! Func
 
@@ -127,12 +135,41 @@ public class ProdController {
      * 分页查询自己的商品列表
      * <p>简单展示VO</p>
      */
+    @GetMapping("/page")
+    @Operation(summary = "分页查询自己的商品列表")
+    @Parameters(@Parameter(name = "current", description = "当前页", required = true))
+    public Result pageProdQuery(@RequestParam(value = "current", defaultValue = "1") Integer current) {
+        return Result.success(prodService.page(new Page<>(current, SystemConstants.MAX_PAGE_SIZE)));
+    }
+    //http://localhost:8086/guest/prod/page
 
 
     /**
-     * 查询单个商品详细信息
+     * name查询单个商品详细信息
      * <p>联表查询VO</p>
      */
+    @GetMapping("/{name}")
+    @Operation(summary = "查询单个商品详细信息")
+    @Parameters(@Parameter(name = "name", description = "商品名", required = true))
+    public Result getByName(@PathVariable("name") String name) {
+
+        Prod prod = prodService.getOne(Wrappers.<Prod>lambdaQuery().eq(Prod::getName, name));
+        if (prod == null) {
+            return Result.error("商品不存在");
+        }
+
+
+        ProdGreatVO prodGreatVO;
+        try {
+            prodGreatVO = dtoUtils.createAndCombineDTOs(ProdGreatVO.class, prod.getId(), ProdAllDTO.class, ProdFuncAllDTO.class);
+        } catch (Exception e) {
+            return Result.error(e.getMessage());
+        }
+
+        return Result.success(prodGreatVO);
+    }
+    //http://localhost:8086/guest/prod/
+
 
     /**
      * 根据分类查自己的商品列表

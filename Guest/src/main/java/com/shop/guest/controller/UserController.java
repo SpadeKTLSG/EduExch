@@ -3,10 +3,12 @@ package com.shop.guest.controller;
 import com.shop.common.utils.UserHolder;
 import com.shop.pojo.Result;
 import com.shop.pojo.dto.*;
+import com.shop.pojo.vo.UserGreatVO;
 import com.shop.serve.service.UserDetailService;
 import com.shop.serve.service.UserFollowService;
 import com.shop.serve.service.UserFuncService;
 import com.shop.serve.service.UserService;
+import com.shop.serve.tool.NewDTOUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -39,6 +41,8 @@ public class UserController {
     @Autowired
     private UserFollowService userFollowService;
 
+    @Autowired
+    private NewDTOUtils dtoUtils;
 
     //! Func
 
@@ -88,10 +92,7 @@ public class UserController {
      */
     @PutMapping("follow/{id}/{isFollow}")
     @Operation(summary = " 用户关注")
-    @Parameters({
-            @Parameter(name = "id", description = "被关注用户id", required = true),
-            @Parameter(name = "isFollow", description = "是否关注", required = true)
-    })
+    @Parameters({@Parameter(name = "id", description = "被关注用户id", required = true), @Parameter(name = "isFollow", description = "是否关注", required = true)})
     public Result follow(@PathVariable("id") Long followUserId, @PathVariable("isFollow") Boolean isFollow) {
         return userFollowService.follow(followUserId, isFollow);
     }
@@ -160,7 +161,7 @@ public class UserController {
 
 
     /**
-     * 获取当前用户LocalDTO
+     * 获取当前用户
      */
     @GetMapping("/me")
     @Operation(summary = "获取当前用户")
@@ -228,20 +229,28 @@ public class UserController {
             return Result.error("用户不存在");
         }
 
-        UserAllDTO userAllDTO = new UserAllDTO();
+
+        UserGreatVO userGreatVO;
+        try {
+            userGreatVO = dtoUtils.createAndCombineDTOs(UserGreatVO.class, userLocalDTO.getId(), UserAllDTO.class, UserDetailAllDTO.class, UserFuncAllDTO.class);
+        } catch (Exception e) {
+            return Result.error(e.getMessage());
+        }
+
+       /* //查联表基础实现
+               UserAllDTO userAllDTO = new UserAllDTO();
         UserDetailAllDTO userDetailDTO = new UserDetailAllDTO();
         UserFuncAllDTO userFuncDTO = new UserFuncAllDTO();
-        UserGreatDTO userGreatDTO = new UserGreatDTO();
-        //查三张表
+
         BeanUtils.copyProperties(userService.getById(userLocalDTO.getId()), userAllDTO);
         BeanUtils.copyProperties(userDetailService.getById(userLocalDTO.getId()), userDetailDTO);
         BeanUtils.copyProperties(userFuncService.getById(userLocalDTO.getId()), userFuncDTO);
         //整合到GreatDTO
-        BeanUtils.copyProperties(userAllDTO, userGreatDTO);
-        BeanUtils.copyProperties(userDetailDTO, userGreatDTO);
-        BeanUtils.copyProperties(userFuncDTO, userGreatDTO);
+        BeanUtils.copyProperties(userAllDTO, userGreatVO);
+        BeanUtils.copyProperties(userDetailDTO, userGreatVO);
+        BeanUtils.copyProperties(userFuncDTO, userGreatVO);*/
 
-        return Result.success(userGreatDTO);
+        return Result.success(userGreatVO);
     }
     //http://localhost:8086/guest/user/info
 
