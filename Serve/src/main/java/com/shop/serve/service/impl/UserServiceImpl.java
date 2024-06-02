@@ -4,12 +4,12 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.RandomUtil;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.shop.common.constant.PasswordConstant;
 import com.shop.common.utils.RegexUtils;
 import com.shop.pojo.Result;
-import com.shop.pojo.dto.UserLocalDTO;
-import com.shop.pojo.dto.UserLoginDTO;
+import com.shop.pojo.dto.*;
 import com.shop.pojo.entity.User;
 import com.shop.pojo.entity.UserDetail;
 import com.shop.pojo.entity.UserFunc;
@@ -19,6 +19,7 @@ import com.shop.serve.service.UserFuncService;
 import com.shop.serve.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -28,8 +29,10 @@ import org.springframework.util.DigestUtils;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import static com.shop.common.utils.NewBeanUtils.getNullPropertyNames;
 import static com.shop.common.utils.RedisConstants.*;
 
 @Slf4j
@@ -89,6 +92,46 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return Result.success();
     }
 
+    @Override
+    @Transactional
+    public void updateUserGreatDTO(UserGreatDTO userGreatDTO) throws InstantiationException, IllegalAccessException {
+        Optional<User> optionalUser = Optional.ofNullable(this.getOne(Wrappers.<User>lambdaQuery().eq(User::getAccount, userGreatDTO.getAccount())));
+        if (optionalUser.isEmpty()) {
+            throw new RuntimeException("User does not exist");
+        }
+
+
+        // Split UserGreatDTO into three DTOs using the helper method
+        UserDTO userDTO = createDTOFromUserGreatDTO(userGreatDTO, UserDTO.class);
+        UserFuncDTO userFuncDTO = createDTOFromUserGreatDTO(userGreatDTO, UserFuncDTO.class);
+        UserDetailDTO userDetailDTO = createDTOFromUserGreatDTO(userGreatDTO, UserDetailDTO.class);
+
+        // Get null property names for each DTO
+        String[] nullPN4User = getNullPropertyNames(userDTO);
+        String[] nullPN4UserFunc = getNullPropertyNames(userFuncDTO);
+        String[] nullPN4UserDetail = getNullPropertyNames(userDetailDTO);
+
+        // Get target entities
+        User u_target = optionalUser.get();
+        UserFunc uf_target = userFuncService.getOne(Wrappers.<UserFunc>lambdaQuery().eq(UserFunc::getId, u_target.getId()));
+        UserDetail ud_target = userDetailService.getOne(Wrappers.<UserDetail>lambdaQuery().eq(UserDetail::getId, u_target.getId()));
+
+        // Update target entities
+        BeanUtils.copyProperties(userDTO, u_target, nullPN4User);
+        BeanUtils.copyProperties(userFuncDTO, uf_target, nullPN4UserFunc);
+        BeanUtils.copyProperties(userDetailDTO, ud_target, nullPN4UserDetail);
+
+        // Save updated entities
+        this.updateById(u_target);
+        userFuncService.updateById(uf_target);
+        userDetailService.updateById(ud_target);
+    }
+
+    private <T> T createDTOFromUserGreatDTO(UserGreatDTO userGreatDTO, Class<T> clazz) throws InstantiationException, IllegalAccessException {
+        T dto = clazz.newInstance();
+        BeanUtils.copyProperties(userGreatDTO, dto);
+        return dto;
+    }
 
     @Override
     public Result login(UserLoginDTO userLoginDTO, HttpSession session) {

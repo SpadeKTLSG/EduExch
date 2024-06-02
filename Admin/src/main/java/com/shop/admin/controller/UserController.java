@@ -3,13 +3,8 @@ package com.shop.admin.controller;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.shop.pojo.Result;
-import com.shop.pojo.dto.UserDTO;
-import com.shop.pojo.dto.UserDetailDTO;
-import com.shop.pojo.dto.UserFuncDTO;
 import com.shop.pojo.dto.UserGreatDTO;
 import com.shop.pojo.entity.User;
-import com.shop.pojo.entity.UserDetail;
-import com.shop.pojo.entity.UserFunc;
 import com.shop.pojo.vo.UserVO;
 import com.shop.serve.service.UserDetailService;
 import com.shop.serve.service.UserFuncService;
@@ -21,12 +16,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
-
-import static com.shop.common.utils.NewBeanUtils.getNullPropertyNames;
 import static com.shop.common.utils.SystemConstants.MAX_PAGE_SIZE;
 
 /**
@@ -63,8 +54,20 @@ public class UserController {
     /**
      * 选择性更新用户信息
      */
-    @Transactional
     @PutMapping("/update")
+    @Operation(summary = "Update user information selectively")
+    @Parameters(@Parameter(name = "userGreatDTO", description = "User update DTO", required = true))
+    public Result update(@RequestBody UserGreatDTO userGreatDTO) {
+        try {
+            userService.updateUserGreatDTO(userGreatDTO);
+            return Result.success();
+        } catch (RuntimeException e) {
+            return Result.error(e.getMessage());
+        }
+    }
+    //http://localhost:8085/admin/user/update
+
+    /*@PutMapping("/update")
     @Operation(summary = "选择性更新用户信息")
     @Parameters(@Parameter(name = "userGreatDTO", description = "用户更新DTO", required = true))
     public Result update(@RequestBody UserGreatDTO userGreatDTO) {
@@ -99,14 +102,14 @@ public class UserController {
         BeanUtils.copyProperties(userFuncDTO, uf_target, nullPN4UserFunc);
         BeanUtils.copyProperties(userDetailDTO, ud_target, nullPN4UserDetail);
 
-        //5update
+        //5 update
         userService.updateById(u_target);
         userFuncService.updateById(uf_target);
         userDetailService.updateById(ud_target);
 
         return Result.success();
-    }
-    //http://localhost:8085/admin/user/update
+    }*/
+
 
     //! QUERY
 
