@@ -61,13 +61,14 @@ public class UserController {
         try {
             userService.updateUserGreatDTO(userGreatDTO);
             return Result.success();
-        } catch (RuntimeException e) {
+        } catch (RuntimeException | InstantiationException | IllegalAccessException e) {
             return Result.error(e.getMessage());
         }
     }
     //http://localhost:8085/admin/user/update
 
-    /*@PutMapping("/update")
+    //旧实现: 选择性更新用户信息
+     /*@PutMapping("/update")
     @Operation(summary = "选择性更新用户信息")
     @Parameters(@Parameter(name = "userGreatDTO", description = "用户更新DTO", required = true))
     public Result update(@RequestBody UserGreatDTO userGreatDTO) {

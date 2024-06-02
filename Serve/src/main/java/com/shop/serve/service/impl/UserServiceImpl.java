@@ -5,6 +5,7 @@ import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.shop.common.constant.PasswordConstant;
 import com.shop.common.utils.RegexUtils;
@@ -94,39 +95,38 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     @Transactional
+    @SuppressWarnings("unchecked")
     public void updateUserGreatDTO(UserGreatDTO userGreatDTO) throws InstantiationException, IllegalAccessException {
         Optional<User> optionalUser = Optional.ofNullable(this.getOne(Wrappers.<User>lambdaQuery().eq(User::getAccount, userGreatDTO.getAccount())));
         if (optionalUser.isEmpty()) {
-            throw new RuntimeException("User does not exist");
+            throw new RuntimeException("用户不存在");
         }
 
+        // 用Map存储DTO和Service
+        @SuppressWarnings("rawtypes")
+        Map<Object, IService> dtoServiceMap = new HashMap<>();
+        dtoServiceMap.put(createDTOFromUserGreatDTO(userGreatDTO, UserDTO.class), this);
+        dtoServiceMap.put(createDTOFromUserGreatDTO(userGreatDTO, UserFuncDTO.class), userFuncService);
+        dtoServiceMap.put(createDTOFromUserGreatDTO(userGreatDTO, UserDetailDTO.class), userDetailService);
 
-        // Split UserGreatDTO into three DTOs using the helper method
-        UserDTO userDTO = createDTOFromUserGreatDTO(userGreatDTO, UserDTO.class);
-        UserFuncDTO userFuncDTO = createDTOFromUserGreatDTO(userGreatDTO, UserFuncDTO.class);
-        UserDetailDTO userDetailDTO = createDTOFromUserGreatDTO(userGreatDTO, UserDetailDTO.class);
+        for (@SuppressWarnings("rawtypes") Map.Entry<Object, IService> entry : dtoServiceMap.entrySet()) {
+            //找到输入的DTO和对应的Service
+            Object dto = entry.getKey();
+            @SuppressWarnings("rawtypes")
+            IService service = entry.getValue();
+            String[] nullPN = getNullPropertyNames(dto);// 判断nullPN
 
-        // Get null property names for each DTO
-        String[] nullPN4User = getNullPropertyNames(userDTO);
-        String[] nullPN4UserFunc = getNullPropertyNames(userFuncDTO);
-        String[] nullPN4UserDetail = getNullPropertyNames(userDetailDTO);
-
-        // Get target entities
-        User u_target = optionalUser.get();
-        UserFunc uf_target = userFuncService.getOne(Wrappers.<UserFunc>lambdaQuery().eq(UserFunc::getId, u_target.getId()));
-        UserDetail ud_target = userDetailService.getOne(Wrappers.<UserDetail>lambdaQuery().eq(UserDetail::getId, u_target.getId()));
-
-        // Update target entities
-        BeanUtils.copyProperties(userDTO, u_target, nullPN4User);
-        BeanUtils.copyProperties(userFuncDTO, uf_target, nullPN4UserFunc);
-        BeanUtils.copyProperties(userDetailDTO, ud_target, nullPN4UserDetail);
-
-        // Save updated entities
-        this.updateById(u_target);
-        userFuncService.updateById(uf_target);
-        userDetailService.updateById(ud_target);
+            // 获取目标对象
+            Object target = service.getOne(Wrappers.<User>lambdaQuery().eq(User::getId, optionalUser.get().getId()));
+            BeanUtils.copyProperties(dto, target, nullPN);// 利用nullPN和输入DTO更新目标对象
+            service.updateById(target); // 存储回对应位置
+        }
     }
 
+    /**
+     * 从UserGreatDTO创建DTO
+     */
+    @SuppressWarnings("deprecation")
     private <T> T createDTOFromUserGreatDTO(UserGreatDTO userGreatDTO, Class<T> clazz) throws InstantiationException, IllegalAccessException {
         T dto = clazz.newInstance();
         BeanUtils.copyProperties(userGreatDTO, dto);
