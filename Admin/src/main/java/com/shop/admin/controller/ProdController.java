@@ -44,12 +44,10 @@ public class ProdController {
     @Parameters(@Parameter(name = "prodCateDTO", description = "商品分类DTO", required = true))
     public Result saveCate(@RequestBody ProdCateDTO prodCateDTO) {
 
-        prodCateService.save(ProdCate.builder()
+        return (prodCateService.save(ProdCate.builder()
                 .name(prodCateDTO.getName())
                 .description(prodCateDTO.getDescription())
-                .build());
-
-        return Result.success();
+                .build())) ? Result.success() : Result.error("商品分类已存在");
     }
     //http://localhost:8085/admin/prod/cate/save
 
