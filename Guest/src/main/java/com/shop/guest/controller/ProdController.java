@@ -111,7 +111,7 @@ public class ProdController {
     //! QUERY
 
     /**
-     * 查询商品分类列表
+     * 分页查询商品分类列表
      * <p>用于前端填表单</p>
      */
     @GetMapping("/category/page")
@@ -121,5 +121,25 @@ public class ProdController {
         return Result.success(prodCateService.page(new Page<>(current, SystemConstants.MAX_PAGE_SIZE)));
     }
     //http://localhost:8086/guest/prod/category/page
+
+
+    /**
+     * 分页查询自己的商品列表
+     * <p>简单展示VO</p>
+     */
+
+
+    /**
+     * 查询单个商品详细信息
+     * <p>联表查询VO</p>
+     */
+
+    /**
+     * 根据分类查自己的商品列表
+     */
+
+    /**
+     * 商品冻结/恢复
+     */
 
 }
