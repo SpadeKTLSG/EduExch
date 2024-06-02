@@ -67,6 +67,10 @@ public class ProdController {
         BeanUtils.copyProperties(prodGreatDTO, prod);
         BeanUtils.copyProperties(prodGreatDTO, prodFunc);
 
+        // prod.setUserId(UserHolder.getUser().getId());
+        // 调试选项
+        prod.setUserId(1L);
+
         prodService.save(prod);
         prodFuncService.save(prodFunc);
 

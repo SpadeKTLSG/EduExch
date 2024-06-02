@@ -49,7 +49,7 @@ public class UserController {
      * 选择性更新用户信息 包治百病!
      */
     @PutMapping("/update")
-    @Operation(summary = "Update user information selectively")
+    @Operation(summary = "选择性更新用户信息")
     @Parameters(@Parameter(name = "userGreatDTO", description = "User update DTO", required = true))
     public Result update(@RequestBody UserGreatDTO userGreatDTO) {
         try {

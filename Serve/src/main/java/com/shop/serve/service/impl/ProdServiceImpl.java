@@ -42,6 +42,12 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
             throw new RuntimeException("用户不存在");
         }
 
+        //这里商品的userId是自己
+//        optionalProd.get().setUserId(UserHolder.getUser().getId());
+        // 调试选项
+        optionalProd.get().setUserId(1L);
+
+
         @SuppressWarnings("rawtypes")
         Map<Object, IService> dtoServiceMap = new HashMap<>();
         dtoServiceMap.put(createDTOFromProdGreatDTO(prodGreatDTO, ProdAllDTO.class), this);
