@@ -101,6 +101,7 @@ public class ProdController {
 
     /**
      * 用户更新商品 联表选择性更新字段
+     * <p>包括: 商品冻结/恢复</p>
      */
     @PutMapping("/update")
     @Operation(summary = "用户更新商品")
@@ -195,11 +196,6 @@ public class ProdController {
 
     }
     //http://localhost:8086/guest/prod/category/prod/0
-
-
-    /**
-     * 商品冻结/恢复
-     */
 
 
 }

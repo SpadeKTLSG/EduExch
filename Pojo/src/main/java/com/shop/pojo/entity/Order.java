@@ -38,6 +38,11 @@ public class Order {
     private Long sellerId;
 
     /**
+     * 商品ID
+     */
+    private Long prodId;
+
+    /**
      * 交易状态
      * 0 买家开启, 1 等待卖家确认, 2 交涉中, 3 正在交易, 4 交易完成, 5 终止
      */

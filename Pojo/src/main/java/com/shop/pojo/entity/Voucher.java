@@ -85,4 +85,9 @@ public class Voucher {
      */
     private String description;
 
+
+    /**
+     * 对应用户id
+     */
+    private Long userId;
 }

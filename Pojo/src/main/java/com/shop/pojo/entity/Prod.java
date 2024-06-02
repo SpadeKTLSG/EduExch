@@ -57,4 +57,8 @@ public class Prod {
      */
     private String description;
 
+    /**
+     * 对应用户的ID
+     */
+    private Long userId;
 }

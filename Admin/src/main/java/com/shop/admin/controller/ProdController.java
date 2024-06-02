@@ -30,6 +30,7 @@ public class ProdController {
     @Autowired
     private ProdCateService prodCateService;
 
+
     //! Func
 
 
@@ -52,7 +53,12 @@ public class ProdController {
     }
     //http://localhost:8085/admin/prod/cate/save
 
+
     //! DELETE
+
+    /**
+     * 管理员删除一件商品, 需要查人与对应商品关系
+     */
 
 
     //! UPDATE

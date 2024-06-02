@@ -162,9 +162,4 @@ public class UserGreatVO {
      */
     private String collections;
 
-    /**
-     * 持有的券集合, 存卷VoucherId, ','分割
-     */
-    private String vouchers;
-
 }
