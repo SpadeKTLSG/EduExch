@@ -125,7 +125,7 @@ public class ProdController {
     //! QUERY
 
     /**
-     * 分页查询商品分类列表
+     * 分页查询商品 分类 列表
      * <p>用于前端填表单</p>
      */
     @GetMapping("/category/page")
@@ -156,7 +156,7 @@ public class ProdController {
 
 
     /**
-     * name查询单个商品详细信息
+     * name查询自己单个商品详细信息
      * <p>联表查询VO</p>
      */
     @GetMapping("/{name}")
@@ -212,4 +212,39 @@ public class ProdController {
     //http://localhost:8086/guest/prod/category/prod/0
 
 
+    /**
+     * 分页查询所有商品列表(仅Prod表)
+     */
+    @GetMapping("/all/page")
+    @Operation(summary = "分页查询所有商品列表")
+    @Parameters(@Parameter(name = "current", description = "当前页", required = true))
+    public Result pageAllProd(@RequestParam(value = "current", defaultValue = "1") Integer current) {
+        return Result.success(prodService.page(new Page<>(current, SystemConstants.MAX_PAGE_SIZE)));
+    }
+    //http://localhost:8086/guest/prod/all/page
+
+    /**
+     * 分页查询一个分类下的所有商品列表(联表Prod + ProdCate)
+     * <p>用于前端用户浏览</p>
+     */
+    @GetMapping("/cateall/page/{cate}")
+    @Operation(summary = "分页查询一个分类下的所有商品列表")
+    @Parameters(@Parameter(name = "cate", description = "分类名", required = true))
+    public Result pageCateAllProd(@PathVariable("cate") String cate, @RequestParam(value = "current", defaultValue = "1") Integer current) {
+
+        ProdCate prodCate = prodCateService.getOne(Wrappers.<ProdCate>lambdaQuery()
+                .eq(ProdCate::getName, cate));
+
+        if (prodCate == null) {
+            return Result.error("该分类不存在");
+        }
+
+        Long id = prodCate.getId();
+
+        return Result.success(prodService.page(
+                new Page<>(current, SystemConstants.MAX_PAGE_SIZE),
+                Wrappers.<Prod>lambdaQuery().eq(Prod::getCategoryId, id)));
+
+    }
+    //http://localhost:8086/guest/prod/cateall/page/人类
 }

@@ -47,7 +47,8 @@ public class ProdController {
      * <p>联表修改</p>
      */
     @PutMapping("/check")
-
+    @Operation(summary = "管理员审核单件商品")
+    @Parameters(@Parameter(name = "prodLocateDTO", description = "商品定位DTO", required = true))
     public Result check(@RequestBody ProdLocateDTO prodLocateDTO) {
 
         if (prodService.query().eq("name", prodLocateDTO.getName()).count() == 0) {
