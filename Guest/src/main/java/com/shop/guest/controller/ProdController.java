@@ -178,7 +178,7 @@ public class ProdController {
 
 
     /**
-     * 根据分类查自己的商品列表分页(联表)
+     * 根据分类查自己的商品列表分页(半联表)
      */
     @GetMapping("/category/prod/{cate}")
     @Operation(summary = "根据分类获得自己的对应商品列表")
