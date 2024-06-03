@@ -2,11 +2,16 @@ package com.shop.guest.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.shop.common.utils.SystemConstants;
 import com.shop.pojo.Result;
+import com.shop.pojo.dto.OrderAllDTO;
 import com.shop.pojo.dto.ProdLocateDTO;
 import com.shop.pojo.entity.Order;
 import com.shop.pojo.entity.OrderDetail;
 import com.shop.pojo.entity.Prod;
+import com.shop.pojo.vo.OrderGreatVO;
 import com.shop.serve.service.OrderDetailService;
 import com.shop.serve.service.OrderService;
 import com.shop.serve.service.ProdService;
@@ -15,11 +20,9 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 
@@ -38,6 +41,8 @@ public class OrderController {
 
 
     //! Func
+
+    //支付模块: 委托外部支付平台进行支付(未实现)
 
 
     //! ADD
@@ -113,5 +118,83 @@ public class OrderController {
 
     //! QUERY
 
+    /**
+     * 分页查看自己的订单列表, 简要信息
+     */
+    @GetMapping("/list")
+    @Operation(summary = "分页查看自己的订单列表")
+    @Parameters(@Parameter(name = "current", description = "当前页", required = true))
+    public Result orderPage(@RequestParam(value = "current", defaultValue = "1") Integer current) {
+
+//        Long userId = UserHolder.getUser().getId();
+        // 调试选项
+        Long userId = 1L;
+
+        return Result.success(orderService.page(new Page<>(current, SystemConstants.MAX_PAGE_SIZE),
+                Wrappers.<Order>lambdaQuery()
+                        .eq(Order::getBuyerId, userId)
+                        .or()
+                        .eq(Order::getSellerId, userId)
+        ));
+    }
+    //http://localhost:8086/guest/order/list
+
+
+    /**
+     * 查看一个订单详情
+     * <p>联表</p>
+     */
+    @GetMapping("/detail/{id}")
+    @Operation(summary = "查看一个订单详情")
+    @Parameters(@Parameter(name = "id", description = "订单ID", required = true))
+    public Result orderDetails(@RequestBody OrderAllDTO orderAllDTO) {
+
+        Long sellerId = orderAllDTO.getSellerId();
+        Long buyerId = orderAllDTO.getBuyerId();
+
+        if (sellerId == null || buyerId == null) {
+            return Result.error("参数错误");
+        }
+
+        Order order = orderService.getOne(new LambdaQueryWrapper<Order>() //三个ID唯一确认订单
+                .eq(Order::getBuyerId, orderAllDTO.getBuyerId())
+                .eq(Order::getSellerId, orderAllDTO.getSellerId())
+                .eq(Order::getProdId, orderAllDTO.getProdId())
+        );
+
+        if (order == null) {
+            return Result.error("订单不存在");
+        }
+
+        OrderDetail orderDetail = orderDetailService.getOne(new LambdaQueryWrapper<OrderDetail>()
+                .eq(OrderDetail::getId, order.getId())
+        );
+
+        OrderGreatVO orderGreatVO = new OrderGreatVO();
+        BeanUtils.copyProperties(order, orderGreatVO);
+        BeanUtils.copyProperties(orderDetail, orderGreatVO);
+
+        return Result.success(orderGreatVO);
+    }
+    //http://localhost:8086/guest/order/detail/1
+
+
+    /**
+     * 计数关于自己的各种状态的订单
+     * <p>用于前端展示</p>
+     */
+    @GetMapping("/status/count/{status}")
+    @Operation(summary = "计数自己各种状态的订单")
+    @Parameters(@Parameter(name = "status", description = "订单状态", required = true))
+    public Result orderStatusCount(@PathVariable Integer status) {
+
+        return Result.success(orderService.count(new LambdaQueryWrapper<Order>()
+                        .eq(Order::getStatus, status)
+//                .and(i -> i.eq(Order::getBuyerId, UserHolder.getUser().getId()).or().eq(Order::getSellerId, UserHolder.getUser().getId()))
+                        // 调试选项
+                        .and(i -> i.eq(Order::getBuyerId, 1L).or().eq(Order::getSellerId, 1L))
+        ));
+    }
+    //http://localhost:8086/guest/order/status/count/1
 
 }
