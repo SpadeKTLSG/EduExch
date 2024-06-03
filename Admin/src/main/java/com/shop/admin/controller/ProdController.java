@@ -25,6 +25,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 商品控制
+ *
+ * @author SK
+ * @date 2024/06/03
+ */
 @Slf4j
 @Tag(name = "Prod", description = "商品")
 @RequestMapping("/admin/prod")

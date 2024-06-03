@@ -26,6 +26,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 
+/**
+ * 订单
+ *
+ * @author SK
+ * @date 2024/06/03
+ */
 @Slf4j
 @Tag(name = "Order", description = "订单")
 @RequestMapping("/guest/order")
@@ -96,8 +102,43 @@ public class OrderController {
 
 
     /**
-     * 终止当前交易
+     * 终止当前交易(任何阶段)(买家或是卖家)
      */
+    @DeleteMapping("/stop")
+    @Operation(summary = "终止当前交易")
+    @Parameters(@Parameter(name = "orderAllDTO", description = "订单DTO", required = true))
+    public Result stopOrder(@RequestBody OrderAllDTO orderAllDTO) {
+
+        Long sellerId = orderAllDTO.getSellerId();
+        Long buyerId = orderAllDTO.getBuyerId();
+
+        if (sellerId == null || buyerId == null) {
+            return Result.error("参数错误");
+        }
+        Order order1 = orderService.getOne(new LambdaQueryWrapper<Order>() //三个ID唯一确认订单
+                .eq(Order::getBuyerId, orderAllDTO.getBuyerId())
+                .eq(Order::getSellerId, orderAllDTO.getSellerId())
+                .eq(Order::getProdId, orderAllDTO.getProdId())
+        );
+
+        if (order1 == null) {
+            return Result.error("订单不存在");
+        }
+
+        //保留式删除, 将订单状态置为5, 同时将订单详情的checkoutTime置为当前时间
+        order1.setStatus(5);
+        orderService.updateById(order1);
+
+        OrderDetail orderDetail = orderDetailService.getOne(new LambdaQueryWrapper<OrderDetail>()
+                .eq(OrderDetail::getId, order1.getId())
+        );
+        orderDetail.setCheckoutTime(LocalDateTime.now());
+        orderDetailService.updateById(orderDetail);
+
+
+        return Result.success();
+    }
+    //http://localhost:8086/guest/order/stop
 
 
     //! UPDATE
@@ -106,14 +147,105 @@ public class OrderController {
     /**
      * 卖家确认, 之后进入交涉中状态
      */
+    @PutMapping("/confirm/seller/answer")
+    @Operation(summary = "卖家确认")
+    @Parameters(@Parameter(name = "orderAllDTO", description = "订单DTO", required = true))
+    public Result sellerKnowAnswer(@RequestBody OrderAllDTO orderAllDTO) {
+        Long sellerId = orderAllDTO.getSellerId();
+        Long buyerId = orderAllDTO.getBuyerId();
+
+        if (sellerId == null || buyerId == null) {
+            return Result.error("参数错误");
+        }
+        Order order1 = orderService.getOne(new LambdaQueryWrapper<Order>() //三个ID唯一确认订单
+                .eq(Order::getBuyerId, orderAllDTO.getBuyerId())
+                .eq(Order::getSellerId, orderAllDTO.getSellerId())
+                .eq(Order::getProdId, orderAllDTO.getProdId())
+        );
+
+        if (order1 == null) {
+            return Result.error("订单不存在");
+        }
+
+        order1.setStatus(2);
+        orderService.updateById(order1);
+
+        return Result.success();
+    }
+    //http://localhost:8086/guest/order/confirm/seller/answer
+
 
     /**
-     * 双方交涉完毕确认, 之后进入正在交易状态
+     * 双方交涉完毕后买家确认, 之后进入正在交易状态
      */
+    @PutMapping("/confirm/buyer/answer")
+    @Operation(summary = "交涉完毕买家确认")
+    @Parameters(@Parameter(name = "orderAllDTO", description = "订单DTO", required = true))
+    public Result buyerKnowAnswer(@RequestBody OrderAllDTO orderAllDTO) {
+        Long sellerId = orderAllDTO.getSellerId();
+        Long buyerId = orderAllDTO.getBuyerId();
+
+        if (sellerId == null || buyerId == null) {
+            return Result.error("参数错误");
+        }
+        Order order1 = orderService.getOne(new LambdaQueryWrapper<Order>() //三个ID唯一确认订单
+                .eq(Order::getBuyerId, orderAllDTO.getBuyerId())
+                .eq(Order::getSellerId, orderAllDTO.getSellerId())
+                .eq(Order::getProdId, orderAllDTO.getProdId())
+        );
+
+        if (order1 == null) {
+            return Result.error("订单不存在");
+        }
+
+        order1.setStatus(3);
+        orderService.updateById(order1);
+
+        return Result.success();
+    }
+    //http://localhost:8086/guest/order/confirm/buyer/answer
+
+
+    //双方交易完成, 之后进入交易完成状态(封存关闭交易)
 
     /**
-     * 双方交易完成, 之后进入交易完成状态(封存关闭交易)
+     * 买家确认交易后自行与卖家交易, 交易完成后卖方确认交易完成
      */
+    @PutMapping("/confirm/seller/close")
+    @Operation(summary = "卖家确认交易完成")
+    @Parameters(@Parameter(name = "orderAllDTO", description = "订单DTO", required = true))
+    public Result sellerKnowClose(@RequestBody OrderAllDTO orderAllDTO) {
+        Long sellerId = orderAllDTO.getSellerId();
+        Long buyerId = orderAllDTO.getBuyerId();
+
+        if (sellerId == null || buyerId == null) {
+            return Result.error("参数错误");
+        }
+        Order order1 = orderService.getOne(new LambdaQueryWrapper<Order>() //三个ID唯一确认订单
+                .eq(Order::getBuyerId, orderAllDTO.getBuyerId())
+                .eq(Order::getSellerId, orderAllDTO.getSellerId())
+                .eq(Order::getProdId, orderAllDTO.getProdId())
+        );
+
+        if (order1 == null) {
+            return Result.error("订单不存在");
+        }
+
+        order1.setStatus(4);
+        orderService.updateById(order1);
+
+        OrderDetail orderDetail = orderDetailService.getOne(new LambdaQueryWrapper<OrderDetail>()
+                .eq(OrderDetail::getId, order1.getId())
+        );
+        orderDetail.setCheckoutTime(LocalDateTime.now());
+        orderDetailService.updateById(orderDetail);
+
+        //TODO 其他完成交易后的操作
+
+
+        return Result.success();
+    }
+    //http://localhost:8086/guest/order/confirm/seller/close
 
 
     //! QUERY

@@ -24,6 +24,12 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * 商品
+ *
+ * @author SK
+ * @date 2024/06/03
+ */
 @Slf4j
 @Tag(name = "Prod", description = "商品")
 @RequestMapping("/guest/prod")
