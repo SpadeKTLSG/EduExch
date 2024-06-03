@@ -1,34 +1,24 @@
-package com.shop.pojo.entity;
+package com.shop.pojo.vo;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.*;
-import lombok.experimental.Accessors;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 /**
- * 券核心
+ * 优惠券完全VO
  *
  * @author SK
- * @date 2024/05/31
+ * @date 2024/06/03
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
-@Accessors(chain = true)
-@TableName("voucher")
-public class Voucher {
-
-    /**
-     * 主键
-     */
-    @TableId(value = "id", type = IdType.AUTO)
-    private Long id;
-
+public class VoucherAllVO {
 
     /**
      * 名称
@@ -85,4 +75,5 @@ public class Voucher {
      * 对应用户id
      */
     private Long userId;
+
 }
