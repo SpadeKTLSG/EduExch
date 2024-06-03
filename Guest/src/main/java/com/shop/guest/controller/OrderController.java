@@ -146,7 +146,7 @@ public class OrderController {
      */
     @GetMapping("/detail/{id}")
     @Operation(summary = "查看一个订单详情")
-    @Parameters(@Parameter(name = "id", description = "订单ID", required = true))
+    @Parameters(@Parameter(name = "orderAllDTO", description = "订单DTO", required = true))
     public Result orderDetails(@RequestBody OrderAllDTO orderAllDTO) {
 
         Long sellerId = orderAllDTO.getSellerId();
