@@ -41,6 +41,17 @@ public class ProdController {
 
     //! Func
 
+    /**
+     * 管理员审核商品
+     * Update 状态字段
+     */
+    //
+
+
+    /**
+     * 管理员分页查看需要审核商品List
+     */
+
 
     //! ADD
 
@@ -92,6 +103,30 @@ public class ProdController {
 
 
     //! QUERY
+
+    /**
+     * 查具体商品信息 -> name + userId 确定唯一商品
+     */
+    @GetMapping("/one")
+    @Operation(summary = "查具体商品信息")
+    @Parameters(@Parameter(name = "prodLocateDTO", description = "商品定位DTO", required = true))
+    public Result getByNameUser(@RequestBody ProdLocateDTO prodLocateDTO) {
+
+        if (prodService.query().eq("name", prodLocateDTO.getName()).count() == 0) {
+            return Result.error("商品不存在");
+        }
+
+        if (prodService.query().eq("user_id", prodLocateDTO.getUserId()).count() == 0) {
+            return Result.error("用户不存在");
+        }
+
+        return Result.success(prodService.getOne(new LambdaQueryWrapper<Prod>()
+                .eq(Prod::getName, prodLocateDTO.getName())
+                .eq(Prod::getUserId, prodLocateDTO.getUserId())
+        ));
+    }
+    //http://localhost:8085/admin/prod/one
+
 
     /**
      * 分页查询所有商品分类

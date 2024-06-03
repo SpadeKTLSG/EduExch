@@ -145,7 +145,12 @@ public class ProdController {
     @Operation(summary = "分页查询自己的商品列表")
     @Parameters(@Parameter(name = "current", description = "当前页", required = true))
     public Result pageProdQuery(@RequestParam(value = "current", defaultValue = "1") Integer current) {
-        return Result.success(prodService.page(new Page<>(current, SystemConstants.MAX_PAGE_SIZE)));
+        return Result.success(prodService.page(new Page<>(current, SystemConstants.MAX_PAGE_SIZE),
+                        Wrappers.<Prod>lambdaQuery()
+//                        .eq(Prod::getUserId, UserHolder.getUser().getId()))
+                                // 调试选项
+                                .eq(Prod::getUserId, 1L))
+        );
     }
     //http://localhost:8086/guest/prod/page
 
@@ -159,7 +164,12 @@ public class ProdController {
     @Parameters(@Parameter(name = "name", description = "商品名", required = true))
     public Result getByName(@PathVariable("name") String name) {
 
-        Prod prod = prodService.getOne(Wrappers.<Prod>lambdaQuery().eq(Prod::getName, name));
+        Prod prod = prodService.getOne(Wrappers.<Prod>lambdaQuery()
+                .eq(Prod::getName, name)
+//                .eq(Prod::getUserId, UserHolder.getUser().getId()));
+                // 调试选项
+                .eq(Prod::getUserId, 1L));
+
         if (prod == null) {
             return Result.error("商品不存在");
         }
