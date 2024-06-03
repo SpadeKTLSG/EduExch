@@ -49,8 +49,36 @@ public class ProdController {
 
 
     /**
-     * 管理员分页查看需要审核商品List
+     * 管理员分页查看需要审核商品
+     * <p>联表分页</p>
      */
+    @GetMapping("/page2Check")
+    @Operation(summary = "管理员分页查看需要审核商品")
+    @Parameters(@Parameter(name = "current", description = "当前页", required = true))
+    public Result page2Check(@RequestParam(value = "current", defaultValue = "1") Integer current) {
+
+        Page<ProdFunc> prodFuncPage = prodFuncService.page(new Page<>(current, SystemConstants.MAX_PAGE_SIZE),
+                new LambdaQueryWrapper<ProdFunc>().eq(ProdFunc::getStatus, 0));
+
+        List<ProdGreatDTO> mergedList = new ArrayList<>();
+
+        for (ProdFunc prodFunc : prodFuncPage.getRecords()) {
+            Prod prod = prodService.getById(prodFunc.getId());
+            if (prod != null) {
+                ProdGreatDTO prodGreatDTO = new ProdGreatDTO();
+                BeanUtils.copyProperties(prod, prodGreatDTO);
+                BeanUtils.copyProperties(prodFunc, prodGreatDTO);
+                mergedList.add(prodGreatDTO);
+            }
+        }
+
+        Page<ProdGreatDTO> mergedPage = new Page<>(current, SystemConstants.MAX_PAGE_SIZE);
+        mergedPage.setRecords(mergedList);
+        mergedPage.setTotal(mergedList.size());
+
+        return Result.success(mergedPage);
+    }
+    //http://localhost:8085/admin/prod/page2Check
 
 
     //! ADD
