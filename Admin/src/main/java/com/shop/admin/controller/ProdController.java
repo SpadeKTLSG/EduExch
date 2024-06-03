@@ -42,10 +42,36 @@ public class ProdController {
     //! Func
 
     /**
-     * 管理员审核商品
+     * 管理员审核单件商品 -> name + userId 确定唯一商品
      * Update 状态字段
+     * <p>联表修改</p>
      */
-    //
+    @PutMapping("/check")
+
+    public Result check(@RequestBody ProdLocateDTO prodLocateDTO) {
+
+        if (prodService.query().eq("name", prodLocateDTO.getName()).count() == 0) {
+            return Result.error("商品不存在");
+        }
+
+        if (prodService.query().eq("user_id", prodLocateDTO.getUserId()).count() == 0) {
+            return Result.error("用户不存在");
+        }
+
+        Prod prod = prodService.getOne(new LambdaQueryWrapper<Prod>()// 找到对应商品id, 通过id找到另一张表UserFunc, 修改状态字段
+                .eq(Prod::getName, prodLocateDTO.getName())
+                .eq(Prod::getUserId, prodLocateDTO.getUserId())
+        );
+
+        ProdFunc prodFunc = prodFuncService.getOne(new LambdaQueryWrapper<ProdFunc>()
+                .eq(ProdFunc::getId, prod.getId())
+        );
+
+        prodFunc.setStatus(1);
+        return (prodFuncService.updateById(prodFunc)) ? Result.success() : Result.error("出错了");
+
+    }
+    //http://localhost:8085/admin/prod/check
 
 
     /**
