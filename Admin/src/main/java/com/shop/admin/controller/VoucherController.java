@@ -76,10 +76,11 @@ public class VoucherController {
     //! UPDATE
     //禁止
 
+
     //! QUERY
 
     /**
-     * 分页查询软件的优惠券列表
+     * 分页查询软件的优惠券列表(全部信息)
      */
     @GetMapping("/page")
     @Operation(summary = "分页查询软件的优惠券列表")
