@@ -22,8 +22,4 @@ public class VoucherLocateDTO {
      */
     private String name;
 
-    /**
-     * 对应用户id
-     */
-    private Long userId;
 }

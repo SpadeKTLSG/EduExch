@@ -17,8 +17,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import static com.shop.common.constant.MyConstants.BUYER_USERID;
-import static com.shop.common.constant.MyConstants.STORE_USERID;
+import static com.shop.common.constant.MyConstants.*;
 import static com.shop.common.constant.SystemConstants.MAX_PAGE_SIZE;
 
 /**
@@ -54,7 +53,8 @@ public class VoucherController {
 
 
     //! UPDATE
-    //后续引入秒杀功能
+
+    //后续引入秒杀流程, 管理员发布后执行
 
 
     /**
@@ -62,6 +62,8 @@ public class VoucherController {
      * <p>不可重复领取</p>
      */
     @PutMapping("/claim")
+    @Operation(summary = "宣称(领取)优惠券")
+    @Parameters(@Parameter(name = "voucherLocateDTO", description = "优惠券定位DTO", required = true))
     public Result claimVoucher(@RequestBody VoucherLocateDTO voucherLocateDTO) {
 
         Voucher voucher = voucherService.getOne(new LambdaQueryWrapper<Voucher>()
@@ -72,11 +74,15 @@ public class VoucherController {
             return Result.error("优惠券不存在");
         }
 
+
+//        voucher.setUserId(UserHolder.getUser().getId());
+        // 调试选项
         voucher.setUserId(BUYER_USERID);
         voucherService.updateById(voucher);
 
         return Result.success();
     }
+    //http://localhost:8086/guest/voucher/claim
 
 
     //! QUERY
@@ -118,4 +124,52 @@ public class VoucherController {
                 }));
     }
     //http://localhost:8086/guest/voucher/page/buyer
+
+
+    /**
+     * 分页查询自己的卖方优惠券列表
+     * <p>之后点击可以使用</p>
+     */
+    @GetMapping("/me/page/seller")
+    @Operation(summary = "分页自己卖方优惠券列表")
+    @Parameters(@Parameter(name = "current", description = "当前页", required = true))
+    public Result pageMyVoucher4Seller(@RequestParam(value = "current", defaultValue = "1") Integer current) {
+        return Result.success(voucherService.page(new Page<>(current, MAX_PAGE_SIZE), new LambdaQueryWrapper<Voucher>()
+                        .eq(Voucher::getUser, STORE_USERID)
+                        //                        .eq(Voucher::getUserId, UserHolder.getUser().getId()))
+                        // 调试选项
+                        .eq(Voucher::getUserId, SELLER_USERID))
+                .convert(voucher -> {
+                    VoucherStoreVO voucherStoreVO = new VoucherStoreVO();
+                    BeanUtils.copyProperties(voucher, voucherStoreVO);
+                    return voucherStoreVO;
+                }));
+    }
+    //http://localhost:8086/guest/voucher/me/page/seller
+
+
+    /**
+     * 分页查询自己的买方优惠券列表
+     * <p>之后点击可以使用</p>
+     */
+    @GetMapping("/me/page/buyer")
+    @Operation(summary = "分页自己买方优惠券列表")
+    @Parameters(@Parameter(name = "current", description = "当前页", required = true))
+    public Result pageMyVoucher4Buyer(@RequestParam(value = "current", defaultValue = "1") Integer current) {
+
+        return Result.success(voucherService.page(new Page<>(current, MAX_PAGE_SIZE), new LambdaQueryWrapper<Voucher>()
+                        .eq(Voucher::getUser, STORE_USERID)
+//                        .eq(Voucher::getUserId, UserHolder.getUser().getId()))
+                        // 调试选项
+                        .eq(Voucher::getUserId, BUYER_USERID))
+
+
+                .convert(voucher -> {
+                    VoucherStoreVO voucherStoreVO = new VoucherStoreVO();
+                    BeanUtils.copyProperties(voucher, voucherStoreVO);
+                    return voucherStoreVO;
+                }));
+    }
+    //http://localhost:8086/guest/voucher/me/page/buyer
+
 }
