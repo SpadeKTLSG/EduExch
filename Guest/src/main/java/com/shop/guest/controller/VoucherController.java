@@ -47,6 +47,7 @@ public class VoucherController {
     @Autowired
     private OrderService orderService;
 
+
     //! Func
 
 
@@ -64,6 +65,8 @@ public class VoucherController {
      */
     @Transactional
     @DeleteMapping("/use/seller")
+    @Operation(summary = "使用自己的卖方优惠券")
+    @Parameters(@Parameter(name = "voucherStoreDTO", description = "优惠券存储DTO", required = true))
     public Result useVoucher4Seller(@RequestBody VoucherStoreDTO voucherStoreDTO) {
 
         Voucher voucher = voucherService.getOne(new LambdaQueryWrapper<Voucher>()
@@ -111,6 +114,7 @@ public class VoucherController {
 
         return Result.success(voucher.getFunc());
     }
+    //http://localhost:8086/guest/voucher/use/seller
 
 
     /**
@@ -120,6 +124,8 @@ public class VoucherController {
      */
     @Transactional
     @DeleteMapping("/use/buyer")
+    @Operation(summary = "使用自己的买方优惠券")
+    @Parameters(@Parameter(name = "voucherStoreDTO", description = "优惠券存储DTO", required = true))
     public Result useVoucher4Buyer(@RequestBody VoucherStoreDTO voucherStoreDTO) {
 
         Voucher voucher = voucherService.getOne(new LambdaQueryWrapper<Voucher>()
@@ -177,6 +183,7 @@ public class VoucherController {
 
         return Result.success("还没有进行交易, 奖励无发放");
     }
+    //http://localhost:8086/guest/voucher/use/buyer
 
 
     //! UPDATE

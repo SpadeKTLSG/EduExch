@@ -2,16 +2,17 @@ package com.shop.serve.service;
 
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.shop.pojo.dto.EmployeeDTO;
 import com.shop.pojo.dto.EmployeeLoginDTO;
 import com.shop.pojo.entity.Employee;
+import com.shop.pojo.vo.EmployeeLoginVO;
 
 
 public interface EmployeeService extends IService<Employee> {
 
-    /**
-     * 员工登录
-     */
-    Employee login(EmployeeLoginDTO employeeLoginDTO);
+    EmployeeLoginVO login(EmployeeLoginDTO employeeLoginDTO);
 
+    void saveOne(EmployeeDTO employeeDTO);
 
+    void updateOne(Employee employee);
 }

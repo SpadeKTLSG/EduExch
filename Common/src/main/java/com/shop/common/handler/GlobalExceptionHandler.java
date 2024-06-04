@@ -1,7 +1,7 @@
 package com.shop.common.handler;
 
 
-import com.shop.common.constant.MessageConstant;
+import com.shop.common.constant.MessageConstants;
 import com.shop.common.exception.BaseException;
 import com.shop.pojo.Result;
 import lombok.extern.slf4j.Slf4j;
@@ -43,10 +43,10 @@ public class GlobalExceptionHandler {
         if (message.contains("Duplicate entry")) { //判断是否是重复插入数据
             String[] split = message.split(" "); //按照空格分割
             String username = split[2]; //获取用户名
-            String msg = username + MessageConstant.ALREADY_EXISTS;
+            String msg = username + MessageConstants.ACCOUNT_ALIVED;
             return Result.error(msg);
         } else {
-            return Result.error(MessageConstant.UNKNOWN_ERROR);
+            return Result.error(MessageConstants.UNKNOWN_ERROR);
         }
     }
 }

@@ -1,22 +1,16 @@
 package com.shop.admin.controller;
 
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.shop.common.constant.SystemConstants;
 import com.shop.pojo.Result;
 import com.shop.pojo.dto.OrderAllDTO;
-import com.shop.pojo.entity.Order;
-import com.shop.pojo.entity.OrderDetail;
-import com.shop.pojo.vo.OrderGreatVO;
-import com.shop.serve.service.OrderDetailService;
 import com.shop.serve.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,8 +28,6 @@ public class OrderController {
 
     @Autowired
     private OrderService orderService;
-    @Autowired
-    private OrderDetailService orderDetailService;
 
 
     //! Func
@@ -70,32 +62,7 @@ public class OrderController {
      */
     @GetMapping("/detail")
     public Result orderDetail(@RequestBody OrderAllDTO orderAllDTO) {
-        Long sellerId = orderAllDTO.getSellerId();
-        Long buyerId = orderAllDTO.getBuyerId();
-
-        if (sellerId == null || buyerId == null) {
-            return Result.error("参数错误");
-        }
-
-        Order order = orderService.getOne(new LambdaQueryWrapper<Order>() //三个ID唯一确认订单
-                .eq(Order::getBuyerId, orderAllDTO.getBuyerId())
-                .eq(Order::getSellerId, orderAllDTO.getSellerId())
-                .eq(Order::getProdId, orderAllDTO.getProdId())
-        );
-
-        if (order == null) {
-            return Result.error("订单不存在");
-        }
-
-        OrderDetail orderDetail = orderDetailService.getOne(new LambdaQueryWrapper<OrderDetail>()
-                .eq(OrderDetail::getId, order.getId())
-        );
-
-        OrderGreatVO orderGreatVO = new OrderGreatVO();
-        BeanUtils.copyProperties(order, orderGreatVO);
-        BeanUtils.copyProperties(orderDetail, orderGreatVO);
-
-        return Result.success(orderGreatVO);
+        return Result.success(orderService.showOne(orderAllDTO));
     }
     //http://localhost:8085/admin/order/detail
 

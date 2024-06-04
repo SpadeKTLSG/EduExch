@@ -12,7 +12,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
- * 新的BeanUtils
+ * 自制BeanUtils工具类
  *
  * @author SK
  * @date 2024/06/01
