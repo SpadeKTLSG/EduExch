@@ -66,6 +66,11 @@ public class Voucher {
     private Integer value;
 
     /**
+     * 库存
+     */
+    private Integer stock;
+
+    /**
      * 生效时间
      */
     private LocalDateTime beginTime;

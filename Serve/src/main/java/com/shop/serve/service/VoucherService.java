@@ -4,4 +4,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.shop.pojo.entity.Voucher;
 
 public interface VoucherService extends IService<Voucher> {
+    void addSeckillVoucher(Voucher voucher);
 }

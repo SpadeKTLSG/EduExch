@@ -10,4 +10,12 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class VoucherServiceImpl extends ServiceImpl<VoucherMapper, Voucher> implements VoucherService {
+
+    /**
+     * 新增秒杀券
+     */
+    @Override
+    public void addSeckillVoucher(Voucher voucher) {
+
+    }
 }

@@ -38,9 +38,11 @@ public class VoucherController {
     /**
      * 新增秒杀券
      */
-    @PostMapping("seckill")
+    @PostMapping("/add/seckill")
     public Result addSeckillVoucher(@RequestBody VoucherAllDTO voucherAllDTO) {
-//        voucherService.addSeckillVoucher(voucher);
+        Voucher voucher = new Voucher();
+        BeanUtils.copyProperties(voucherAllDTO, voucher);
+        voucherService.addSeckillVoucher(voucher);
         return Result.success();
     }
 
