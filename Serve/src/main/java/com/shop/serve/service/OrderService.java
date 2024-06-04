@@ -7,17 +7,18 @@ import com.shop.pojo.entity.Order;
 import com.shop.pojo.vo.OrderGreatVO;
 
 public interface OrderService extends IService<Order> {
-    OrderGreatVO showOne(OrderAllDTO orderAllDTO);
 
-    void openOrder(ProdLocateDTO prodLocateDTO);
+    OrderGreatVO orderDetail(OrderAllDTO orderAllDTO);
+
+    void startOrder(ProdLocateDTO prodLocateDTO);
 
     void closeOrder(OrderAllDTO orderAllDTO);
 
-    void sellerCheck(OrderAllDTO orderAllDTO);
+    void sellerKnowAnswer(OrderAllDTO orderAllDTO);
 
-    void buyerCheck(OrderAllDTO orderAllDTO);
+    void buyerKnowAnswer(OrderAllDTO orderAllDTO);
 
-    void allCheck(OrderAllDTO orderAllDTO);
+    void sellerKnowClose(OrderAllDTO orderAllDTO);
 
-    OrderGreatVO getOrderDetails(OrderAllDTO orderAllDTO);
+    OrderGreatVO orderDetails(OrderAllDTO orderAllDTO);
 }

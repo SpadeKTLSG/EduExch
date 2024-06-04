@@ -56,27 +56,8 @@ public class ProdController {
     @Operation(summary = "管理员审核单件商品")
     @Parameters(@Parameter(name = "prodLocateDTO", description = "商品定位DTO", required = true))
     public Result check(@RequestBody ProdLocateDTO prodLocateDTO) {
-
-        if (prodService.query().eq("name", prodLocateDTO.getName()).count() == 0) {
-            return Result.error("商品不存在");
-        }
-
-        if (prodService.query().eq("user_id", prodLocateDTO.getUserId()).count() == 0) {
-            return Result.error("用户不存在");
-        }
-
-        Prod prod = prodService.getOne(new LambdaQueryWrapper<Prod>()// 找到对应商品id, 通过id找到另一张表UserFunc, 修改状态字段
-                .eq(Prod::getName, prodLocateDTO.getName())
-                .eq(Prod::getUserId, prodLocateDTO.getUserId())
-        );
-
-        ProdFunc prodFunc = prodFuncService.getOne(new LambdaQueryWrapper<ProdFunc>()
-                .eq(ProdFunc::getId, prod.getId())
-        );
-
-        prodFunc.setStatus(1);
-        return (prodFuncService.updateById(prodFunc)) ? Result.success() : Result.error("出错了");
-
+        prodService.check(prodLocateDTO);
+        return Result.success();
     }
     //http://localhost:8085/admin/prod/check
 
@@ -89,27 +70,7 @@ public class ProdController {
     @Operation(summary = "管理员分页查看需要审核商品")
     @Parameters(@Parameter(name = "current", description = "当前页", required = true))
     public Result page2Check(@RequestParam(value = "current", defaultValue = "1") Integer current) {
-
-        Page<ProdFunc> prodFuncPage = prodFuncService.page(new Page<>(current, SystemConstants.MAX_PAGE_SIZE),
-                new LambdaQueryWrapper<ProdFunc>().eq(ProdFunc::getStatus, 0));
-
-        List<ProdGreatDTO> mergedList = new ArrayList<>();
-
-        for (ProdFunc prodFunc : prodFuncPage.getRecords()) {
-            Prod prod = prodService.getById(prodFunc.getId());
-            if (prod != null) {
-                ProdGreatDTO prodGreatDTO = new ProdGreatDTO();
-                BeanUtils.copyProperties(prod, prodGreatDTO);
-                BeanUtils.copyProperties(prodFunc, prodGreatDTO);
-                mergedList.add(prodGreatDTO);
-            }
-        }
-
-        Page<ProdGreatDTO> mergedPage = new Page<>(current, SystemConstants.MAX_PAGE_SIZE);
-        mergedPage.setRecords(mergedList);
-        mergedPage.setTotal(mergedList.size());
-
-        return Result.success(mergedPage);
+        return Result.success(prodService.page2Check(current));
     }
     //http://localhost:8085/admin/prod/page2Check
 

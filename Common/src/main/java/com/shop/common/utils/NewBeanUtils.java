@@ -54,9 +54,8 @@ public class NewBeanUtils {
      * DTO映射服务
      */
     public static <T> void dtoMapService(Map<Object, IService> dtoServiceMap, Long id, Optional<T> optionalProd) {
-        for (@SuppressWarnings("rawtypes") Map.Entry<Object, IService> entry : dtoServiceMap.entrySet()) {
+        for (Map.Entry<Object, IService> entry : dtoServiceMap.entrySet()) {
             Object dto = entry.getKey();
-            @SuppressWarnings("rawtypes")
             IService service = entry.getValue();
             String[] nullPN = getNullPropertyNames(dto);// 判断nullPN
             Object target = service.getOne(Wrappers.<User>lambdaQuery().eq(User::getId, id));

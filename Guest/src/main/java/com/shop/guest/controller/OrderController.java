@@ -53,7 +53,7 @@ public class OrderController {
     @Operation(summary = "用户开启交易")
     @Parameters(@Parameter(name = "prodLocateDTO", description = "商品定位DTO", required = true))
     public Result startOrder(@RequestBody ProdLocateDTO prodLocateDTO) {
-        orderService.openOrder(prodLocateDTO);
+        orderService.startOrder(prodLocateDTO);
         return Result.success();
     }
     //http://localhost:8086/guest/order/start
@@ -85,7 +85,7 @@ public class OrderController {
     @Operation(summary = "卖家确认")
     @Parameters(@Parameter(name = "orderAllDTO", description = "订单DTO", required = true))
     public Result sellerKnowAnswer(@RequestBody OrderAllDTO orderAllDTO) {
-        orderService.sellerCheck(orderAllDTO);
+        orderService.sellerKnowAnswer(orderAllDTO);
         return Result.success();
     }
     //http://localhost:8086/guest/order/confirm/seller/answer
@@ -98,7 +98,7 @@ public class OrderController {
     @Operation(summary = "交涉完毕买家确认")
     @Parameters(@Parameter(name = "orderAllDTO", description = "订单DTO", required = true))
     public Result buyerKnowAnswer(@RequestBody OrderAllDTO orderAllDTO) {
-        orderService.buyerCheck(orderAllDTO);
+        orderService.buyerKnowAnswer(orderAllDTO);
         return Result.success();
     }
     //http://localhost:8086/guest/order/confirm/buyer/answer
@@ -112,7 +112,7 @@ public class OrderController {
     @Operation(summary = "卖家确认交易完成")
     @Parameters(@Parameter(name = "orderAllDTO", description = "订单DTO", required = true))
     public Result sellerKnowClose(@RequestBody OrderAllDTO orderAllDTO) {
-        orderService.allCheck(orderAllDTO);
+        orderService.sellerKnowClose(orderAllDTO);
         return Result.success();
     }
     //http://localhost:8086/guest/order/confirm/seller/close
@@ -150,7 +150,7 @@ public class OrderController {
     @Operation(summary = "查看一个订单详情")
     @Parameters(@Parameter(name = "orderAllDTO", description = "订单DTO", required = true))
     public Result orderDetails(@RequestBody OrderAllDTO orderAllDTO) {
-        return Result.success(orderService.getOrderDetails(orderAllDTO));
+        return Result.success(orderService.orderDetails(orderAllDTO));
     }
     //http://localhost:8086/guest/order/detail
 

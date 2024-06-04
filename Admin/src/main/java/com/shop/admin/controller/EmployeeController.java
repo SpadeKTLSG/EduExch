@@ -72,7 +72,7 @@ public class EmployeeController {
     @PostMapping("/save")
     @Operation(summary = "新增员工")
     @Parameters(@Parameter(name = "employeeDTO", description = "员工DTO", required = true))
-    public Result save(@RequestBody EmployeeDTO employeeDTO) {
+    public Result saveOne(@RequestBody EmployeeDTO employeeDTO) {
         employeeService.saveOne(employeeDTO);
         return Result.success();
     }
@@ -106,7 +106,7 @@ public class EmployeeController {
     @PutMapping("/update")
     @Operation(summary = "选择性更新员工信息")
     @Parameters(@Parameter(name = "employee", description = "员工", required = true))
-    public Result update(@RequestBody Employee employee) {
+    public Result updateOne(@RequestBody Employee employee) {
         employeeService.updateOne(employee);
         return Result.success();
     }

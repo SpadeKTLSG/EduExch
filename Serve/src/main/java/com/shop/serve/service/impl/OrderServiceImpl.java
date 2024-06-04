@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -34,7 +35,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     private ProdService prodService;
 
     @Override
-    public OrderGreatVO showOne(OrderAllDTO orderAllDTO) {
+    public OrderGreatVO orderDetail(OrderAllDTO orderAllDTO) {
 
         Order order = dtoFindEntity(orderAllDTO);
 
@@ -51,7 +52,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
 
     @Override
-    public void openOrder(ProdLocateDTO prodLocateDTO) {
+    @Transactional
+    public void startOrder(ProdLocateDTO prodLocateDTO) {
         String name = prodLocateDTO.getName();
         Long userId = prodLocateDTO.getUserId();
 
@@ -104,7 +106,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
 
     @Override
-    public void sellerCheck(OrderAllDTO orderAllDTO) {
+    public void sellerKnowAnswer(OrderAllDTO orderAllDTO) {
         Order order1 = dtoFindEntity(orderAllDTO);
         order1.setStatus(2);
         this.updateById(order1);
@@ -112,7 +114,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
 
     @Override
-    public void buyerCheck(OrderAllDTO orderAllDTO) {
+    public void buyerKnowAnswer(OrderAllDTO orderAllDTO) {
         Order order1 = dtoFindEntity(orderAllDTO);
         order1.setStatus(3);
         this.updateById(order1);
@@ -120,7 +122,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
 
     @Override
-    public void allCheck(OrderAllDTO orderAllDTO) {
+    public void sellerKnowClose(OrderAllDTO orderAllDTO) {
         Order order1 = dtoFindEntity(orderAllDTO);
         order1.setStatus(4);
         this.updateById(order1);
@@ -138,7 +140,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
 
     @Override
-    public OrderGreatVO getOrderDetails(OrderAllDTO orderAllDTO) {
+    public OrderGreatVO orderDetails(OrderAllDTO orderAllDTO) {
         Order order = dtoFindEntity(orderAllDTO);
 
         OrderDetail orderDetail = orderDetailService.getOne(new LambdaQueryWrapper<OrderDetail>()

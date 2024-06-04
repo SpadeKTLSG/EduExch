@@ -62,7 +62,7 @@ public class OrderController {
      */
     @GetMapping("/detail")
     public Result orderDetail(@RequestBody OrderAllDTO orderAllDTO) {
-        return Result.success(orderService.showOne(orderAllDTO));
+        return Result.success(orderService.orderDetail(orderAllDTO));
     }
     //http://localhost:8085/admin/order/detail
 
