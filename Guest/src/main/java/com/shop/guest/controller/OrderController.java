@@ -4,7 +4,7 @@ package com.shop.guest.controller;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.shop.common.utils.SystemConstants;
+import com.shop.common.constant.SystemConstants;
 import com.shop.pojo.Result;
 import com.shop.pojo.dto.OrderAllDTO;
 import com.shop.pojo.dto.ProdLocateDTO;

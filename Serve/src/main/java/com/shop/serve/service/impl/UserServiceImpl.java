@@ -36,8 +36,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import static com.shop.common.constant.RedisConstants.*;
 import static com.shop.common.utils.NewBeanUtils.dtoMapService;
-import static com.shop.common.utils.RedisConstants.*;
 
 @Slf4j
 @Service

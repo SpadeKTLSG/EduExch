@@ -27,8 +27,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.shop.common.constant.SystemConstants.MAX_PAGE_SIZE;
 import static com.shop.common.utils.NewBeanUtils.getNullPropertyNames;
-import static com.shop.common.utils.SystemConstants.MAX_PAGE_SIZE;
 
 
 /**

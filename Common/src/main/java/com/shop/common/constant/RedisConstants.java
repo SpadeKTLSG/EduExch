@@ -1,4 +1,4 @@
-package com.shop.common.utils;
+package com.shop.common.constant;
 
 public class RedisConstants {
     public static final String LOGIN_CODE_KEY = "login:code:";

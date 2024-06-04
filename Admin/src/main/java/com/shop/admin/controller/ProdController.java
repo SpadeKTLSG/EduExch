@@ -2,7 +2,7 @@ package com.shop.admin.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.shop.common.utils.SystemConstants;
+import com.shop.common.constant.SystemConstants;
 import com.shop.pojo.Result;
 import com.shop.pojo.dto.ProdCateDTO;
 import com.shop.pojo.dto.ProdGreatDTO;

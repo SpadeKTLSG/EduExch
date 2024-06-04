@@ -1,4 +1,4 @@
-package com.shop.common.utils;
+package com.shop.common.constant;
 
 public class SystemConstants {
     public static final String IMAGE_UPLOAD_DIR = "D:\\lesson\\nginx-1.18.0\\html\\hmdp\\imgs\\"; //TODO

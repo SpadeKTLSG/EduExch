@@ -1,6 +1,6 @@
 package com.shop.guest.controller;
 
-import com.shop.common.utils.UserHolder;
+import com.shop.common.context.UserHolder;
 import com.shop.pojo.Result;
 import com.shop.pojo.dto.*;
 import com.shop.pojo.vo.UserGreatVO;
