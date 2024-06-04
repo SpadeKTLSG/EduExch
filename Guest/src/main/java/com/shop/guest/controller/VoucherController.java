@@ -5,8 +5,11 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.shop.pojo.Result;
 import com.shop.pojo.dto.VoucherLocateDTO;
+import com.shop.pojo.dto.VoucherStoreDTO;
+import com.shop.pojo.entity.UserFunc;
 import com.shop.pojo.entity.Voucher;
 import com.shop.pojo.vo.VoucherStoreVO;
+import com.shop.serve.service.UserFuncService;
 import com.shop.serve.service.VoucherService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -16,6 +19,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 
 import static com.shop.common.constant.MyConstants.*;
 import static com.shop.common.constant.SystemConstants.MAX_PAGE_SIZE;
@@ -34,6 +39,8 @@ public class VoucherController {
 
     @Autowired
     private VoucherService voucherService;
+    @Autowired
+    private UserFuncService userFuncService;
 
     //! Func
 
@@ -46,10 +53,109 @@ public class VoucherController {
 
 
     /**
-     * 使用优惠券
+     * 使用自己的卖方优惠券
      * <p>进行优惠券功能时需要判断权限和对象</p>
      * <p>保留式删除</p>
      */
+    @DeleteMapping("/use/seller")
+    public Result useVoucher4Seller(@RequestBody VoucherStoreDTO voucherStoreDTO) {
+
+        Voucher voucher = voucherService.getOne(new LambdaQueryWrapper<Voucher>()
+                .eq(Voucher::getName, voucherStoreDTO.getName())
+//                .eq(Voucher::getUserId, UserHolder.getUser().getId()));
+                // 调试选项
+                .eq(Voucher::getUserId, SELLER_USERID));
+
+        if (voucher == null) {
+            return Result.error("优惠券不存在");
+        }
+        if (voucher.getStatus() == 1 || voucher.getStatus() == 2 || voucher.getStock() == 0) {
+            return Result.error("优惠券已使用或已过期(指使用后持续时间结束)");
+        }
+        if (voucher.getUser() == 1) {
+            return Result.error("参数错误");
+        }
+
+
+        //执行功能
+        voucher.setStatus(1);
+        voucher.setStock(0);
+        voucher.setBeginTime(LocalDateTime.now());
+
+        if (voucher.getFunc() == 0) { //基础功能类型
+            voucher.setEndTime(LocalDateTime.now().plusDays(1)); // 1天
+        } else if (voucher.getFunc() == 1) { //高级功能类型
+            voucher.setEndTime(LocalDateTime.now().plusDays(3)); // 3天
+        } else if (voucher.getFunc() == 2) { //超级功能类型
+            voucher.setEndTime(LocalDateTime.now().plusDays(7)); // 7天
+        }
+
+
+        //UserFunc userFunc = userFuncService.getById(UserHolder.getUser().getId());
+        //调试选项
+
+        UserFunc userFunc = userFuncService.getById(SELLER_USERID);
+        int value2Add = voucher.getType() == 0 ? voucher.getValue() : voucher.getValue() * 2;
+
+        userFunc.setCredit(userFunc.getCredit() + value2Add);
+        userFuncService.updateById(userFunc);
+
+        //回传给前端定位对象
+        //TODO
+        return Result.success(); //后续前端打开窗口, 让用户指定商品对象进行Update操作 -> UserFunc字段修改
+    }
+
+
+    /**
+     * 使用自己的买方优惠券
+     * <p>进行优惠券功能时需要判断权限和对象</p>
+     * <p>保留式删除</p>
+     */
+    @DeleteMapping("/use/buyer")
+    public Result useVoucher4Buyer(@RequestBody VoucherStoreDTO voucherStoreDTO) {
+
+        Voucher voucher = voucherService.getOne(new LambdaQueryWrapper<Voucher>()
+                .eq(Voucher::getName, voucherStoreDTO.getName())
+//                .eq(Voucher::getUserId, UserHolder.getUser().getId()));
+                // 调试选项
+                .eq(Voucher::getUserId, SELLER_USERID));
+
+        if (voucher == null) {
+            return Result.error("优惠券不存在");
+        }
+        if (voucher.getStatus() == 1 || voucher.getStatus() == 2 || voucher.getStock() == 0) {
+            return Result.error("优惠券已使用或已过期");
+        }
+        if (voucher.getUser() == 1) {
+            return Result.error("参数错误");
+        }
+
+
+        //执行功能
+        voucher.setStatus(1);
+        voucher.setStock(0);
+        voucher.setBeginTime(LocalDateTime.now());
+
+        if (voucher.getFunc() == 0) { //基础功能类型
+            voucher.setEndTime(LocalDateTime.now().plusDays(1)); // 1天
+        } else if (voucher.getFunc() == 1) { //高级功能类型
+            voucher.setEndTime(LocalDateTime.now().plusDays(3)); // 3天
+        } else if (voucher.getFunc() == 2) { //超级功能类型
+            voucher.setEndTime(LocalDateTime.now().plusDays(7)); // 7天
+        }
+
+
+        //UserFunc userFunc = userFuncService.getById(UserHolder.getUser().getId());
+        //调试选项
+
+        UserFunc userFunc = userFuncService.getById(SELLER_USERID);
+        int value2Add = voucher.getType() == 0 ? voucher.getValue() : voucher.getValue() * 2;
+
+        userFunc.setCredit(userFunc.getCredit() + value2Add);
+        userFuncService.updateById(userFunc);
+
+        return Result.success();
+    }
 
 
     //! UPDATE
@@ -78,6 +184,8 @@ public class VoucherController {
 //        voucher.setUserId(UserHolder.getUser().getId());
         // 调试选项
         voucher.setUserId(BUYER_USERID);
+        //数量调整: 原来的数量是指仓库管理员持有的数量, 这里是用户持有的数量, 限制只能同种的一张
+        voucher.setStock(1);
         voucherService.updateById(voucher);
 
         return Result.success();
