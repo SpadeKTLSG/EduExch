@@ -6,9 +6,11 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.shop.pojo.Result;
 import com.shop.pojo.dto.VoucherLocateDTO;
 import com.shop.pojo.dto.VoucherStoreDTO;
+import com.shop.pojo.entity.Order;
 import com.shop.pojo.entity.UserFunc;
 import com.shop.pojo.entity.Voucher;
 import com.shop.pojo.vo.VoucherStoreVO;
+import com.shop.serve.service.OrderService;
 import com.shop.serve.service.UserFuncService;
 import com.shop.serve.service.VoucherService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,6 +20,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -41,6 +44,8 @@ public class VoucherController {
     private VoucherService voucherService;
     @Autowired
     private UserFuncService userFuncService;
+    @Autowired
+    private OrderService orderService;
 
     //! Func
 
@@ -57,6 +62,7 @@ public class VoucherController {
      * <p>进行优惠券功能时需要判断权限和对象</p>
      * <p>保留式删除</p>
      */
+    @Transactional
     @DeleteMapping("/use/seller")
     public Result useVoucher4Seller(@RequestBody VoucherStoreDTO voucherStoreDTO) {
 
@@ -100,17 +106,19 @@ public class VoucherController {
         userFunc.setCredit(userFunc.getCredit() + value2Add);
         userFuncService.updateById(userFunc);
 
-        //回传给前端定位对象
-        //TODO
-        return Result.success(); //后续前端打开窗口, 让用户指定商品对象进行Update操作 -> UserFunc字段修改
+        //回传给前端效果字段 : voucher.getFunc(), 0 - 1 - 2 指明其功能类型, 用于后续前端打开窗口,
+        // 让用户指定商品对象进行Update操作-> ProdFunc字段修改, 请求见ProdController
+
+        return Result.success(voucher.getFunc());
     }
 
 
     /**
-     * 使用自己的买方优惠券
+     * 使用自己的买方优惠券 -> 下一步直接发起交易,
      * <p>进行优惠券功能时需要判断权限和对象</p>
      * <p>保留式删除</p>
      */
+    @Transactional
     @DeleteMapping("/use/buyer")
     public Result useVoucher4Buyer(@RequestBody VoucherStoreDTO voucherStoreDTO) {
 
@@ -118,7 +126,7 @@ public class VoucherController {
                 .eq(Voucher::getName, voucherStoreDTO.getName())
 //                .eq(Voucher::getUserId, UserHolder.getUser().getId()));
                 // 调试选项
-                .eq(Voucher::getUserId, SELLER_USERID));
+                .eq(Voucher::getUserId, BUYER_USERID));
 
         if (voucher == null) {
             return Result.error("优惠券不存在");
@@ -148,13 +156,26 @@ public class VoucherController {
         //UserFunc userFunc = userFuncService.getById(UserHolder.getUser().getId());
         //调试选项
 
-        UserFunc userFunc = userFuncService.getById(SELLER_USERID);
+        UserFunc userFunc = userFuncService.getById(BUYER_USERID);
         int value2Add = voucher.getType() == 0 ? voucher.getValue() : voucher.getValue() * 2;
 
         userFunc.setCredit(userFunc.getCredit() + value2Add);
         userFuncService.updateById(userFunc);
 
-        return Result.success();
+        //后续: 直接对目前开启的交易判定是否存在, 存在则视为一次准入成功, 对用户进行增加嘉奖值操作(否则没有奖励)
+
+
+        Order order = orderService.getOne(new LambdaQueryWrapper<Order>()
+                .eq(Order::getBuyerId, BUYER_USERID));
+
+        if (order != null) {
+            UserFunc userFunc2 = userFuncService.getById(BUYER_USERID);
+            userFunc2.setGodhit(userFunc2.getGodhit() + 1);
+            userFuncService.updateById(userFunc2);
+            return Result.success("交易成功, 奖励10嘉奖值");
+        }
+
+        return Result.success("还没有进行交易, 奖励无发放");
     }
 
 

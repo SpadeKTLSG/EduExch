@@ -1,5 +1,6 @@
 package com.shop.guest.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.shop.common.constant.SystemConstants;
@@ -7,6 +8,7 @@ import com.shop.pojo.Result;
 import com.shop.pojo.dto.ProdAllDTO;
 import com.shop.pojo.dto.ProdFuncAllDTO;
 import com.shop.pojo.dto.ProdGreatDTO;
+import com.shop.pojo.dto.ProdLocateDTO;
 import com.shop.pojo.entity.Prod;
 import com.shop.pojo.entity.ProdCate;
 import com.shop.pojo.entity.ProdFunc;
@@ -23,6 +25,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 
 /**
  * 商品
@@ -128,6 +132,54 @@ public class ProdController {
     //http://localhost:8086/guest/prod/update
 
 
+    /**
+     * 优惠券触发商品状态修改
+     */
+    @PutMapping("/update/status/{func}")
+
+    public Result updateStatus(@RequestBody ProdLocateDTO prodLocateDTO, @PathVariable("func") Integer func) {
+
+
+        String name = prodLocateDTO.getName();
+        Long userId = prodLocateDTO.getUserId();
+
+        if (name == null || userId == null) {
+            return Result.error("参数错误");
+        }
+
+        Prod prod = prodService.getOne(new LambdaQueryWrapper<Prod>()
+                .eq(Prod::getName, name)
+                .eq(Prod::getUserId, userId)
+        );
+
+        if (prod == null) {
+            return Result.error("商品不存在");
+        }
+
+        ProdFunc prodFunc = prodFuncService.getOne(new LambdaQueryWrapper<ProdFunc>()
+                .eq(ProdFunc::getId, prod.getId())
+        );
+
+        if (func == 0) {
+
+            prodFunc.setShowoffStatus(0);  //基础功能类型: 无展示提升
+            prodFunc.setShowoffEndtime(LocalDateTime.now().plusDays(1)); // 1天
+
+        } else if (func == 1) {
+
+            prodFunc.setShowoffStatus(1); //高级功能类型: 3days展示提升 : 首页提升榜单
+            prodFunc.setShowoffEndtime(LocalDateTime.now().plusDays(3)); // 3天
+        } else {
+
+            prodFunc.setShowoffStatus(2); //超级功能类型: 7days展示提升 : 首页提升榜单 + 首页轮播图
+            prodFunc.setShowoffEndtime(LocalDateTime.now().plusDays(7)); // 7天
+        }
+
+        prodFuncService.updateById(prodFunc);
+
+        return Result.success();
+    }
+
     //! QUERY
 
     /**
@@ -228,6 +280,7 @@ public class ProdController {
         return Result.success(prodService.page(new Page<>(current, SystemConstants.MAX_PAGE_SIZE)));
     }
     //http://localhost:8086/guest/prod/all/page
+
 
     /**
      * 分页查询一个分类下的所有商品列表(联表Prod + ProdCate)
