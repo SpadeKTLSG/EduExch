@@ -36,18 +36,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Override
     public OrderGreatVO showOne(OrderAllDTO orderAllDTO) {
 
-        Long sellerId = orderAllDTO.getSellerId();
-        Long buyerId = orderAllDTO.getBuyerId();
-
-        if (sellerId == null || buyerId == null) throw new BadArgsException(BAD_ARGS);
-
-        Order order = this.getOne(new LambdaQueryWrapper<Order>() //三个ID唯一确认订单
-                .eq(Order::getBuyerId, orderAllDTO.getBuyerId())
-                .eq(Order::getSellerId, orderAllDTO.getSellerId())
-                .eq(Order::getProdId, orderAllDTO.getProdId())
-        );
-
-        if (order == null) throw new SthNotFoundException(OBJECT_NOT_ALIVE);
+        Order order = dtoFindEntity(orderAllDTO);
 
         OrderDetail orderDetail = orderDetailService.getOne(new LambdaQueryWrapper<OrderDetail>()
                 .eq(OrderDetail::getId, order.getId())
@@ -66,9 +55,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         String name = prodLocateDTO.getName();
         Long userId = prodLocateDTO.getUserId();
 
-        if (name == null || userId == null) {
-            throw new BadArgsException(BAD_ARGS);
-        }
+        if (name == null || userId == null) throw new BadArgsException(BAD_ARGS);
+
 
         Prod prod = prodService.getOne(new LambdaQueryWrapper<Prod>()
                 .eq(Prod::getName, name)
@@ -94,6 +82,93 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 .build();
         orderDetailService.save(orderDetail);
 
+    }
+
+
+    @Override
+    public void closeOrder(OrderAllDTO orderAllDTO) {
+        Order order1 = dtoFindEntity(orderAllDTO);
+
+        //保留式删除, 将订单状态置为5, 同时将订单详情的checkoutTime置为当前时间
+        order1.setStatus(5);
+        this.updateById(order1);
+
+        OrderDetail orderDetail = orderDetailService.getOne(new LambdaQueryWrapper<OrderDetail>()
+                .eq(OrderDetail::getId, order1.getId())
+        );
+        orderDetail.setCheckoutTime(LocalDateTime.now());
+
+        orderDetailService.updateById(orderDetail);
+
+    }
+
+
+    @Override
+    public void sellerCheck(OrderAllDTO orderAllDTO) {
+        Order order1 = dtoFindEntity(orderAllDTO);
+        order1.setStatus(2);
+        this.updateById(order1);
+    }
+
+
+    @Override
+    public void buyerCheck(OrderAllDTO orderAllDTO) {
+        Order order1 = dtoFindEntity(orderAllDTO);
+        order1.setStatus(3);
+        this.updateById(order1);
+    }
+
+
+    @Override
+    public void allCheck(OrderAllDTO orderAllDTO) {
+        Order order1 = dtoFindEntity(orderAllDTO);
+        order1.setStatus(4);
+        this.updateById(order1);
+
+        //完成交易
+        OrderDetail orderDetail = orderDetailService.getOne(new LambdaQueryWrapper<OrderDetail>()
+                .eq(OrderDetail::getId, order1.getId())
+        );
+
+        //订单详情的checkoutTime置为当前时间
+        orderDetail.setCheckoutTime(LocalDateTime.now());
+        orderDetailService.updateById(orderDetail);
+        //TODO 其他完成交易后的操作
+    }
+
+
+    @Override
+    public OrderGreatVO getOrderDetails(OrderAllDTO orderAllDTO) {
+        Order order = dtoFindEntity(orderAllDTO);
+
+        OrderDetail orderDetail = orderDetailService.getOne(new LambdaQueryWrapper<OrderDetail>()
+                .eq(OrderDetail::getId, order.getId())
+        );
+
+        OrderGreatVO orderGreatVO = new OrderGreatVO();
+        BeanUtils.copyProperties(order, orderGreatVO);
+        BeanUtils.copyProperties(orderDetail, orderGreatVO);
+        return orderGreatVO;
+    }
+
+
+    /**
+     * 根据订单DTO查找订单实体
+     */
+    private Order dtoFindEntity(OrderAllDTO orderAllDTO) {
+        Long sellerId = orderAllDTO.getSellerId();
+        Long buyerId = orderAllDTO.getBuyerId();
+
+        if (sellerId == null || buyerId == null) throw new BadArgsException(BAD_ARGS);
+
+        Order order1 = this.getOne(new LambdaQueryWrapper<Order>() //三个ID唯一确认订单
+                .eq(Order::getBuyerId, orderAllDTO.getBuyerId())
+                .eq(Order::getSellerId, orderAllDTO.getSellerId())
+                .eq(Order::getProdId, orderAllDTO.getProdId())
+        );
+
+        if (order1 == null) throw new SthNotFoundException(OBJECT_NOT_ALIVE);
+        return order1;
     }
 
 

@@ -10,4 +10,14 @@ public interface OrderService extends IService<Order> {
     OrderGreatVO showOne(OrderAllDTO orderAllDTO);
 
     void openOrder(ProdLocateDTO prodLocateDTO);
+
+    void closeOrder(OrderAllDTO orderAllDTO);
+
+    void sellerCheck(OrderAllDTO orderAllDTO);
+
+    void buyerCheck(OrderAllDTO orderAllDTO);
+
+    void allCheck(OrderAllDTO orderAllDTO);
+
+    OrderGreatVO getOrderDetails(OrderAllDTO orderAllDTO);
 }
