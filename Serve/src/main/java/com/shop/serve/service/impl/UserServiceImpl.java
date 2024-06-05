@@ -8,18 +8,23 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.shop.common.constant.PasswordConstant;
+import com.shop.common.context.UserHolder;
 import com.shop.common.exception.AccountNotFoundException;
+import com.shop.common.exception.BaseException;
+import com.shop.common.exception.UserNotLoginException;
 import com.shop.common.utils.RegexUtils;
 import com.shop.pojo.Result;
 import com.shop.pojo.dto.*;
 import com.shop.pojo.entity.User;
 import com.shop.pojo.entity.UserDetail;
 import com.shop.pojo.entity.UserFunc;
+import com.shop.pojo.vo.UserGreatVO;
 import com.shop.pojo.vo.UserVO;
 import com.shop.serve.mapper.UserMapper;
 import com.shop.serve.service.UserDetailService;
 import com.shop.serve.service.UserFuncService;
 import com.shop.serve.service.UserService;
+import com.shop.serve.tool.NewDTOUtils;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -38,7 +43,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import static com.shop.common.constant.MessageConstants.ACCOUNT_NOT_FOUND;
+import static com.shop.common.constant.MessageConstants.*;
 import static com.shop.common.constant.RedisConstants.*;
 import static com.shop.common.utils.NewBeanUtils.dtoMapService;
 
@@ -52,6 +57,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private UserFuncService userFuncService;
     @Autowired
     private UserDetailService userDetailService;
+    @Autowired
+    private NewDTOUtils dtoUtils;
 
 
     @Transactional
@@ -260,10 +267,54 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public UserVO getByUserId(Long id) {
         User user = this.getById(id);
         if (user == null) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
-        
+
         UserVO userVO = new UserVO();
         BeanUtils.copyProperties(user, userVO);
         return userVO;
+    }
+
+    @Override
+    public UserGreatVO info() {
+
+//        UserLocalDTO userLocalDTO = UserHolder.getUser(); //从ThreadLocal中获取用户信息id
+        //测试时使用id = 1测试账号
+        UserLocalDTO userLocalDTO = new UserLocalDTO();
+        BeanUtils.copyProperties(this.getById(1L), userLocalDTO);
+
+        if (userLocalDTO == null) throw new UserNotLoginException(USER_NOT_LOGIN);
+
+        if (this.getById(userLocalDTO.getId()) == null) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
+
+
+        UserGreatVO userGreatVO;
+        try {
+            userGreatVO = dtoUtils.createAndCombineDTOs(UserGreatVO.class, userLocalDTO.getId(), UserAllDTO.class, UserDetailAllDTO.class, UserFuncAllDTO.class);
+        } catch (Exception e) {
+            throw new BaseException(UNKNOWN_ERROR);
+        }
+
+       /* //查联表基础实现
+               UserAllDTO userAllDTO = new UserAllDTO();
+        UserDetailAllDTO userDetailDTO = new UserDetailAllDTO();
+        UserFuncAllDTO userFuncDTO = new UserFuncAllDTO();
+
+        BeanUtils.copyProperties(userService.getById(userLocalDTO.getId()), userAllDTO);
+        BeanUtils.copyProperties(userDetailService.getById(userLocalDTO.getId()), userDetailDTO);
+        BeanUtils.copyProperties(userFuncService.getById(userLocalDTO.getId()), userFuncDTO);
+        //整合到GreatDTO
+        BeanUtils.copyProperties(userAllDTO, userGreatVO);
+        BeanUtils.copyProperties(userDetailDTO, userGreatVO);
+        BeanUtils.copyProperties(userFuncDTO, userGreatVO);*/
+        return userGreatVO;
+    }
+
+
+    @Override
+    public void killMyAccount() {
+        UserLocalDTO userLocalDTO = UserHolder.getUser();
+        this.removeById(userLocalDTO.getId());
+        userDetailService.removeById(userLocalDTO.getId());
+        userFuncService.removeById(userLocalDTO.getId());
     }
 
 

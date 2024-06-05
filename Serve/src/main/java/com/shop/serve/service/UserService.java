@@ -5,6 +5,7 @@ import com.shop.pojo.Result;
 import com.shop.pojo.dto.UserGreatDTO;
 import com.shop.pojo.dto.UserLoginDTO;
 import com.shop.pojo.entity.User;
+import com.shop.pojo.vo.UserGreatVO;
 import com.shop.pojo.vo.UserVO;
 import jakarta.servlet.http.HttpSession;
 
@@ -27,4 +28,8 @@ public interface UserService extends IService<User> {
     UserVO getByAccount(String account);
 
     UserVO getByUserId(Long id);
+
+    UserGreatVO info();
+
+    void killMyAccount();
 }

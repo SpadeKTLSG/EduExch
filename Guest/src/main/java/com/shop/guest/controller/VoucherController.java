@@ -6,12 +6,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.shop.pojo.Result;
 import com.shop.pojo.dto.VoucherLocateDTO;
 import com.shop.pojo.dto.VoucherStoreDTO;
-import com.shop.pojo.entity.Order;
-import com.shop.pojo.entity.UserFunc;
 import com.shop.pojo.entity.Voucher;
 import com.shop.pojo.vo.VoucherStoreVO;
-import com.shop.serve.service.OrderService;
-import com.shop.serve.service.UserFuncService;
 import com.shop.serve.service.VoucherService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -22,8 +18,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
 
 import static com.shop.common.constant.MyConstants.*;
 import static com.shop.common.constant.SystemConstants.MAX_PAGE_SIZE;
@@ -42,10 +36,7 @@ public class VoucherController {
 
     @Autowired
     private VoucherService voucherService;
-    @Autowired
-    private UserFuncService userFuncService;
-    @Autowired
-    private OrderService orderService;
+
 
 
     //! Func
@@ -68,51 +59,7 @@ public class VoucherController {
     @Operation(summary = "使用自己的卖方优惠券")
     @Parameters(@Parameter(name = "voucherStoreDTO", description = "优惠券存储DTO", required = true))
     public Result useVoucher4Seller(@RequestBody VoucherStoreDTO voucherStoreDTO) {
-
-        Voucher voucher = voucherService.getOne(new LambdaQueryWrapper<Voucher>()
-                .eq(Voucher::getName, voucherStoreDTO.getName())
-//                .eq(Voucher::getUserId, UserHolder.getUser().getId()));
-                // 调试选项
-                .eq(Voucher::getUserId, SELLER_USERID));
-
-        if (voucher == null) {
-            return Result.error("优惠券不存在");
-        }
-        if (voucher.getStatus() == 1 || voucher.getStatus() == 2 || voucher.getStock() == 0) {
-            return Result.error("优惠券已使用或已过期(指使用后持续时间结束)");
-        }
-        if (voucher.getUser() == 1) {
-            return Result.error("参数错误");
-        }
-
-
-        //执行功能
-        voucher.setStatus(1);
-        voucher.setStock(0);
-        voucher.setBeginTime(LocalDateTime.now());
-
-        if (voucher.getFunc() == 0) { //基础功能类型
-            voucher.setEndTime(LocalDateTime.now().plusDays(1)); // 1天
-        } else if (voucher.getFunc() == 1) { //高级功能类型
-            voucher.setEndTime(LocalDateTime.now().plusDays(3)); // 3天
-        } else if (voucher.getFunc() == 2) { //超级功能类型
-            voucher.setEndTime(LocalDateTime.now().plusDays(7)); // 7天
-        }
-
-
-        //UserFunc userFunc = userFuncService.getById(UserHolder.getUser().getId());
-        //调试选项
-
-        UserFunc userFunc = userFuncService.getById(SELLER_USERID);
-        int value2Add = voucher.getType() == 0 ? voucher.getValue() : voucher.getValue() * 2;
-
-        userFunc.setCredit(userFunc.getCredit() + value2Add);
-        userFuncService.updateById(userFunc);
-
-        //回传给前端效果字段 : voucher.getFunc(), 0 - 1 - 2 指明其功能类型, 用于后续前端打开窗口,
-        // 让用户指定商品对象进行Update操作-> ProdFunc字段修改, 请求见ProdController
-
-        return Result.success(voucher.getFunc());
+        return Result.success(voucherService.useVoucher4Seller(voucherStoreDTO));
     }
     //http://localhost:8086/guest/voucher/use/seller
 
@@ -127,61 +74,7 @@ public class VoucherController {
     @Operation(summary = "使用自己的买方优惠券")
     @Parameters(@Parameter(name = "voucherStoreDTO", description = "优惠券存储DTO", required = true))
     public Result useVoucher4Buyer(@RequestBody VoucherStoreDTO voucherStoreDTO) {
-
-        Voucher voucher = voucherService.getOne(new LambdaQueryWrapper<Voucher>()
-                .eq(Voucher::getName, voucherStoreDTO.getName())
-//                .eq(Voucher::getUserId, UserHolder.getUser().getId()));
-                // 调试选项
-                .eq(Voucher::getUserId, BUYER_USERID));
-
-        if (voucher == null) {
-            return Result.error("优惠券不存在");
-        }
-        if (voucher.getStatus() == 1 || voucher.getStatus() == 2 || voucher.getStock() == 0) {
-            return Result.error("优惠券已使用或已过期");
-        }
-        if (voucher.getUser() == 1) {
-            return Result.error("参数错误");
-        }
-
-
-        //执行功能
-        voucher.setStatus(1);
-        voucher.setStock(0);
-        voucher.setBeginTime(LocalDateTime.now());
-
-        if (voucher.getFunc() == 0) { //基础功能类型
-            voucher.setEndTime(LocalDateTime.now().plusDays(1)); // 1天
-        } else if (voucher.getFunc() == 1) { //高级功能类型
-            voucher.setEndTime(LocalDateTime.now().plusDays(3)); // 3天
-        } else if (voucher.getFunc() == 2) { //超级功能类型
-            voucher.setEndTime(LocalDateTime.now().plusDays(7)); // 7天
-        }
-
-
-        //UserFunc userFunc = userFuncService.getById(UserHolder.getUser().getId());
-        //调试选项
-
-        UserFunc userFunc = userFuncService.getById(BUYER_USERID);
-        int value2Add = voucher.getType() == 0 ? voucher.getValue() : voucher.getValue() * 2;
-
-        userFunc.setCredit(userFunc.getCredit() + value2Add);
-        userFuncService.updateById(userFunc);
-
-        //后续: 直接对目前开启的交易判定是否存在, 存在则视为一次准入成功, 对用户进行增加嘉奖值操作(否则没有奖励)
-
-
-        Order order = orderService.getOne(new LambdaQueryWrapper<Order>()
-                .eq(Order::getBuyerId, BUYER_USERID));
-
-        if (order != null) {
-            UserFunc userFunc2 = userFuncService.getById(BUYER_USERID);
-            userFunc2.setGodhit(userFunc2.getGodhit() + 1);
-            userFuncService.updateById(userFunc2);
-            return Result.success("交易成功, 奖励10嘉奖值");
-        }
-
-        return Result.success("还没有进行交易, 奖励无发放");
+        return voucherService.useVoucher4Buyer(voucherStoreDTO) ? Result.success(true) : Result.success(false);  //是否能成功获得Bonus
     }
     //http://localhost:8086/guest/voucher/use/buyer
 
@@ -199,23 +92,7 @@ public class VoucherController {
     @Operation(summary = "宣称(领取)优惠券")
     @Parameters(@Parameter(name = "voucherLocateDTO", description = "优惠券定位DTO", required = true))
     public Result claimVoucher(@RequestBody VoucherLocateDTO voucherLocateDTO) {
-
-        Voucher voucher = voucherService.getOne(new LambdaQueryWrapper<Voucher>()
-                .eq(Voucher::getName, voucherLocateDTO.getName())
-                .eq(Voucher::getUserId, STORE_USERID));
-
-        if (voucher == null) {
-            return Result.error("优惠券不存在");
-        }
-
-
-//        voucher.setUserId(UserHolder.getUser().getId());
-        // 调试选项
-        voucher.setUserId(BUYER_USERID);
-        //数量调整: 原来的数量是指仓库管理员持有的数量, 这里是用户持有的数量, 限制只能同种的一张
-        voucher.setStock(1);
-        voucherService.updateById(voucher);
-
+        voucherService.claimVoucher(voucherLocateDTO);
         return Result.success();
     }
     //http://localhost:8086/guest/voucher/claim
@@ -231,6 +108,7 @@ public class VoucherController {
     @Operation(summary = "分页仓库里卖方优惠券列表")
     @Parameters(@Parameter(name = "current", description = "当前页", required = true))
     public Result pageVoucher4Seller(@RequestParam(value = "current", defaultValue = "1") Integer current) {
+
         return Result.success(voucherService.page(new Page<>(current, MAX_PAGE_SIZE), new LambdaQueryWrapper<Voucher>()
                         .eq(Voucher::getUser, STORE_USERID))
                 .convert(voucher -> {
@@ -270,6 +148,7 @@ public class VoucherController {
     @Operation(summary = "分页自己卖方优惠券列表")
     @Parameters(@Parameter(name = "current", description = "当前页", required = true))
     public Result pageMyVoucher4Seller(@RequestParam(value = "current", defaultValue = "1") Integer current) {
+
         return Result.success(voucherService.page(new Page<>(current, MAX_PAGE_SIZE), new LambdaQueryWrapper<Voucher>()
                         .eq(Voucher::getUser, STORE_USERID)
                         //                        .eq(Voucher::getUserId, UserHolder.getUser().getId()))

@@ -2,20 +2,17 @@ package com.shop.guest.controller;
 
 import com.shop.common.context.UserHolder;
 import com.shop.pojo.Result;
-import com.shop.pojo.dto.*;
-import com.shop.pojo.vo.UserGreatVO;
-import com.shop.serve.service.UserDetailService;
+import com.shop.pojo.dto.UserGreatDTO;
+import com.shop.pojo.dto.UserLocalDTO;
+import com.shop.pojo.dto.UserLoginDTO;
 import com.shop.serve.service.UserFollowService;
-import com.shop.serve.service.UserFuncService;
 import com.shop.serve.service.UserService;
-import com.shop.serve.tool.NewDTOUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,14 +32,8 @@ public class UserController {
     @Autowired
     private UserService userService;
     @Autowired
-    private UserFuncService userFuncService;
-    @Autowired
-    private UserDetailService userDetailService;
-    @Autowired
     private UserFollowService userFollowService;
 
-    @Autowired
-    private NewDTOUtils dtoUtils;
 
     //! Func
 
@@ -179,11 +170,8 @@ public class UserController {
      */
     @DeleteMapping("/delete")
     @Operation(summary = "销号")
-    public Result delete() {
-        UserLocalDTO userLocalDTO = UserHolder.getUser();
-        userService.removeById(userLocalDTO.getId());
-        userDetailService.removeById(userLocalDTO.getId());
-        userFuncService.removeById(userLocalDTO.getId());
+    public Result killMyAccount() {
+        userService.killMyAccount();
         return Result.success();
     }
     //http://localhost:8086/guest/user/delete
@@ -216,41 +204,7 @@ public class UserController {
     @GetMapping("/info")
     @Operation(summary = "查用户自己全部信息")
     public Result info() {
-//        UserLocalDTO userLocalDTO = UserHolder.getUser(); //从ThreadLocal中获取用户信息id
-        //测试时使用id = 1测试账号
-        UserLocalDTO userLocalDTO = new UserLocalDTO();
-        BeanUtils.copyProperties(userService.getById(1L), userLocalDTO);
-
-        if (userLocalDTO == null) {
-            return Result.error("用户未登录");
-        }
-
-        if (userService.getById(userLocalDTO.getId()) == null) {
-            return Result.error("用户不存在");
-        }
-
-
-        UserGreatVO userGreatVO;
-        try {
-            userGreatVO = dtoUtils.createAndCombineDTOs(UserGreatVO.class, userLocalDTO.getId(), UserAllDTO.class, UserDetailAllDTO.class, UserFuncAllDTO.class);
-        } catch (Exception e) {
-            return Result.error(e.getMessage());
-        }
-
-       /* //查联表基础实现
-               UserAllDTO userAllDTO = new UserAllDTO();
-        UserDetailAllDTO userDetailDTO = new UserDetailAllDTO();
-        UserFuncAllDTO userFuncDTO = new UserFuncAllDTO();
-
-        BeanUtils.copyProperties(userService.getById(userLocalDTO.getId()), userAllDTO);
-        BeanUtils.copyProperties(userDetailService.getById(userLocalDTO.getId()), userDetailDTO);
-        BeanUtils.copyProperties(userFuncService.getById(userLocalDTO.getId()), userFuncDTO);
-        //整合到GreatDTO
-        BeanUtils.copyProperties(userAllDTO, userGreatVO);
-        BeanUtils.copyProperties(userDetailDTO, userGreatVO);
-        BeanUtils.copyProperties(userFuncDTO, userGreatVO);*/
-
-        return Result.success(userGreatVO);
+        return Result.success(userService.info());
     }
     //http://localhost:8086/guest/user/info
 
