@@ -5,6 +5,7 @@ import com.shop.pojo.Result;
 import com.shop.pojo.dto.UserGreatDTO;
 import com.shop.pojo.dto.UserLoginDTO;
 import com.shop.pojo.entity.User;
+import com.shop.pojo.vo.UserVO;
 import jakarta.servlet.http.HttpSession;
 
 
@@ -22,4 +23,6 @@ public interface UserService extends IService<User> {
     Result sign();
 
     Result signCount();
+
+    UserVO getByAccount(String account);
 }

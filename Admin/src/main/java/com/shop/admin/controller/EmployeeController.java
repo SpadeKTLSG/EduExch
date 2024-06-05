@@ -1,6 +1,5 @@
 package com.shop.admin.controller;
 
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.shop.pojo.Result;
 import com.shop.pojo.dto.EmployeeDTO;
@@ -37,6 +36,7 @@ public class EmployeeController {
 
 
     //! Func
+
 
     /**
      * 登录
@@ -87,12 +87,8 @@ public class EmployeeController {
     @DeleteMapping("/delete/{account}")
     @Operation(summary = "删除员工")
     @Parameters(@Parameter(name = "account", description = "员工账号", required = true))
-    public Result delete(@PathVariable("account") String account) {
-        Employee employee = employeeService.getOne(Wrappers.<Employee>lambdaQuery().eq(Employee::getAccount, account));
-        if (employee == null) {
-            return Result.error("员工不存在");
-        }
-        employeeService.removeById(employee.getId());
+    public Result deleteByAccount(@PathVariable("account") String account) {
+        employeeService.deleteByAccount(account);
         return Result.success();
     }
     //http://localhost:8085/admin/employee/delete
@@ -122,13 +118,7 @@ public class EmployeeController {
     @Operation(summary = "Account查员工")
     @Parameters(@Parameter(name = "account", description = "员工账号", required = true))
     public Result getByAccount(@PathVariable("account") String account) {
-        Employee employee = employeeService.getOne(Wrappers.<Employee>lambdaQuery().eq(Employee::getAccount, account));
-        if (employee == null) {
-            return Result.error("员工不存在");
-        }
-        EmployeeVO employeeVO = new EmployeeVO();
-        BeanUtils.copyProperties(employee, employeeVO);
-        return Result.success(employeeVO);
+        return Result.success(employeeService.getByAccount(account));
     }
     //http://localhost:8085/admin/employee/Account查员工
 

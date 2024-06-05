@@ -1,6 +1,5 @@
 package com.shop.admin.controller;
 
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.shop.pojo.Result;
 import com.shop.pojo.dto.UserGreatDTO;
@@ -115,13 +114,7 @@ public class UserController {
     @Operation(summary = "Account查用户")
     @Parameters(@Parameter(name = "account", description = "用户账号", required = true))
     public Result getByAccount(@PathVariable("account") String account) {
-        User user = userService.getOne(Wrappers.<User>lambdaQuery().eq(User::getAccount, account));
-        if (user == null) {
-            return Result.error("用户不存在");
-        }
-        UserVO userVO = new UserVO();
-        BeanUtils.copyProperties(user, userVO);
-        return Result.success(userVO);
+        return Result.success(userService.getByAccount(account));
     }
     //http://localhost:8085/admin/user/cwxtlsg
 

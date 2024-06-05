@@ -127,6 +127,28 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
         );
     }
 
+    @Override
+    public Page<ProdGreatDTO> pageProd(Integer current) {
+        Page<Prod> prodPage = this.page(new Page<>(current, SystemConstants.MAX_PAGE_SIZE));
+        Page<ProdFunc> prodFuncPage = prodFuncService.page(new Page<>(current, SystemConstants.MAX_PAGE_SIZE));
+        List<ProdGreatDTO> mergedList = new ArrayList<>(); // 存储合并后的结果
+
+        for (int i = 0; i < prodPage.getRecords().size(); i++) {
+            Prod prod = prodPage.getRecords().get(i);
+            ProdFunc prodFunc = prodFuncPage.getRecords().get(i);
+
+            ProdGreatDTO prodGreatDTO = new ProdGreatDTO();
+            BeanUtils.copyProperties(prod, prodGreatDTO);
+            BeanUtils.copyProperties(prodFunc, prodGreatDTO);
+            mergedList.add(prodGreatDTO);
+        }
+
+        Page<ProdGreatDTO> mergedPage = new Page<>(current, SystemConstants.MAX_PAGE_SIZE);
+        mergedPage.setRecords(mergedList);
+        mergedPage.setTotal(prodPage.getTotal() + prodFuncPage.getTotal());
+        return mergedPage;
+    }
+
 
     /**
      * 从ProdGreatDTO创建DTO

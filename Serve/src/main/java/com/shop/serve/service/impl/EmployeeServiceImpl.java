@@ -16,6 +16,7 @@ import com.shop.pojo.dto.EmployeeDTO;
 import com.shop.pojo.dto.EmployeeLoginDTO;
 import com.shop.pojo.entity.Employee;
 import com.shop.pojo.vo.EmployeeLoginVO;
+import com.shop.pojo.vo.EmployeeVO;
 import com.shop.serve.mapper.EmployeeMapper;
 import com.shop.serve.service.EmployeeService;
 import lombok.extern.slf4j.Slf4j;
@@ -102,6 +103,24 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
                 .ifPresent(password -> e2.setPassword(DigestUtils.md5DigestAsHex(password.getBytes())));
 
         this.updateById(e2);
+    }
+
+
+    @Override
+    public void deleteByAccount(String account) {
+        Employee employee = this.getOne(Wrappers.<Employee>lambdaQuery().eq(Employee::getAccount, account));
+        if (employee == null) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
+        this.removeById(employee.getId());
+    }
+
+    @Override
+    public EmployeeVO getByAccount(String account) {
+        Employee employee = this.getOne(Wrappers.<Employee>lambdaQuery().eq(Employee::getAccount, account));
+        if (employee == null) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
+
+        EmployeeVO employeeVO = new EmployeeVO();
+        BeanUtils.copyProperties(employee, employeeVO);
+        return employeeVO;
     }
 
 

@@ -8,12 +8,14 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.shop.common.constant.PasswordConstant;
+import com.shop.common.exception.AccountNotFoundException;
 import com.shop.common.utils.RegexUtils;
 import com.shop.pojo.Result;
 import com.shop.pojo.dto.*;
 import com.shop.pojo.entity.User;
 import com.shop.pojo.entity.UserDetail;
 import com.shop.pojo.entity.UserFunc;
+import com.shop.pojo.vo.UserVO;
 import com.shop.serve.mapper.UserMapper;
 import com.shop.serve.service.UserDetailService;
 import com.shop.serve.service.UserFuncService;
@@ -36,6 +38,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import static com.shop.common.constant.MessageConstants.ACCOUNT_NOT_FOUND;
 import static com.shop.common.constant.RedisConstants.*;
 import static com.shop.common.utils.NewBeanUtils.dtoMapService;
 
@@ -240,6 +243,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             num >>>= 1;// 把数字右移一位，抛弃最后一个bit位，继续下一个bit位
         }
         return Result.success(count);
+    }
+
+
+    @Override
+    public UserVO getByAccount(String account) {
+        User user = this.getOne(Wrappers.<User>lambdaQuery().eq(User::getAccount, account));
+        if (user == null) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
+
+        UserVO userVO = new UserVO();
+        BeanUtils.copyProperties(user, userVO);
+        return userVO;
     }
 
 

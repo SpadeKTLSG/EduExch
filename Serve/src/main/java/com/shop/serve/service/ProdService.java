@@ -17,4 +17,6 @@ public interface ProdService extends IService<Prod> {
     void deleteByNameUser(ProdLocateDTO prodLocateDTO);
 
     Prod getByNameUser(ProdLocateDTO prodLocateDTO);
+
+    Page<ProdGreatDTO> pageProd(Integer current);
 }
