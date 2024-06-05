@@ -1,7 +1,12 @@
 package com.shop.common.interceptor;
 
 
+import com.shop.common.constant.JwtClaimsConstant;
+import com.shop.common.context.UserHolder;
 import com.shop.common.properties.JwtProperties;
+import com.shop.common.utils.JwtUtil;
+import com.shop.pojo.dto.UserLocalDTO;
+import io.jsonwebtoken.Claims;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -25,6 +30,7 @@ public class JwtTokenAdminInterceptor implements HandlerInterceptor {
     @Autowired
     private JwtProperties jwtProperties;
 
+
     /**
      * 校验jwt
      *
@@ -35,36 +41,26 @@ public class JwtTokenAdminInterceptor implements HandlerInterceptor {
      * @throws Exception 异常
      */
     public boolean preHandle(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, @Nonnull Object handler) throws Exception {
-        //判断当前拦截到的是Controller的方法还是其他资源
-        if (!(handler instanceof HandlerMethod)) {
-            //当前拦截到的不是动态方法，直接放行
+
+        if (!(handler instanceof HandlerMethod)) {//当前拦截到的不是动态方法，直接放行
             return true;
         }
 
-        //1、从请求头中获取令牌
-//        String token = request.getHeader(jwtProperties.getAdminTokenName());
+        String token = request.getHeader(jwtProperties.getAdminTokenName());//获取令牌
 
-
-        //2、校验令牌
         try {
-//            log.info("jwt校验:{}", token);
-//            Claims claims = JwtUtil.parseJWT(jwtProperties.getAdminSecretKey(), token);
-//            Long empId = Long.valueOf(claims.get(JwtClaimsConstant.EMP_ID).toString());
-//            log.info("当前员工id：{}", empId);
-//
-//            BaseContext.setCurrentId(empId);            //将用户id存储到ThreadLocal
+            log.info("jwt校验:{}", token);
+            Claims claims = JwtUtil.parseJWT(jwtProperties.getAdminSecretKey(), token);
+            Long empId = Long.valueOf(claims.get(JwtClaimsConstant.EMP_ID).toString());
 
-            //3、通过，放行
+            UserHolder.saveUser(UserLocalDTO.builder().id(empId).build());
+            log.info("当前员工id：{}", empId);
             return true;
+
         } catch (Exception ex) {
-            //4、不通过，响应401状态码
-//            response.setStatus(401);
-            //调试: 都放行
+            response.setStatus(401);
             return true;
-//            return false;
         }
 
-
-//        return true;
     }
 }

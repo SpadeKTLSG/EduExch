@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2024/06/03
  */
 @Slf4j
-@Tag(name = "Upload", description = "上传")
-@RequestMapping("/upload")
+@Tag(name = "Common")
+@RequestMapping("/common")
 @RestController
-public class UploadController {
+public class CommonController {
     //TODO
 }

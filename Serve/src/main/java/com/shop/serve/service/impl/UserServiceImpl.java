@@ -11,7 +11,7 @@ import com.shop.common.constant.PasswordConstant;
 import com.shop.common.context.UserHolder;
 import com.shop.common.exception.AccountNotFoundException;
 import com.shop.common.exception.BaseException;
-import com.shop.common.exception.UserNotLoginException;
+import com.shop.common.exception.NotLoginException;
 import com.shop.common.utils.RegexUtils;
 import com.shop.pojo.Result;
 import com.shop.pojo.dto.*;
@@ -281,7 +281,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         UserLocalDTO userLocalDTO = new UserLocalDTO();
         BeanUtils.copyProperties(this.getById(1L), userLocalDTO);
 
-        if (userLocalDTO == null) throw new UserNotLoginException(USER_NOT_LOGIN);
+        if (userLocalDTO == null) throw new NotLoginException(USER_NOT_LOGIN);
 
         if (this.getById(userLocalDTO.getId()) == null) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
 

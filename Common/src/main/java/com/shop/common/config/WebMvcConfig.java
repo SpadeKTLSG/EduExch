@@ -12,7 +12,7 @@ import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 
 import java.util.List;
 
@@ -24,7 +24,7 @@ import java.util.List;
  */
 @Configuration
 @Slf4j
-public class WebMvcConfig implements WebMvcConfigurer {
+public class WebMvcConfig extends WebMvcConfigurationSupport {
 
     @Autowired
     private JwtTokenAdminInterceptor jwtTokenAdminInterceptor;
@@ -37,25 +37,25 @@ public class WebMvcConfig implements WebMvcConfigurer {
      */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        //TODO 打开拦截器
-        log.info("开始注册自定义拦截器...");
+
+        log.info("自定义拦截器启动");
+
         registry.addInterceptor(jwtTokenAdminInterceptor)
-//                .addPathPatterns("/admin/**")
-//                .excludePathPatterns("/admin/employee/login");'
+                .addPathPatterns("/admin/**")
+                .excludePathPatterns("/admin/employee/login")
                 .excludePathPatterns("/swagger-ui/**").excludePathPatterns("/swagger-ui.html").excludePathPatterns("/doc.html").excludePathPatterns("/webjars/**"); //Swagger
 
-        registry.addInterceptor(jwtTokenUserInterceptor)
-//                .addPathPatterns("/user/**")
-//                .excludePathPatterns("/user/user/login")
-//                .excludePathPatterns("/user/shop/status");
+     /*   registry.addInterceptor(jwtTokenUserInterceptor)
+                .addPathPatterns("/guest/**")
+                .excludePathPatterns("/guest/user/login")
+                .excludePathPatterns("/guest/user/sendCode")
                 .excludePathPatterns("/swagger-ui/**").excludePathPatterns("/swagger-ui.html").excludePathPatterns("/doc.html").excludePathPatterns("/webjars/**");//Swagger
-
+*/
     }
 
 
     /**
-     * 扩展Spring MVC框架的消息转化器
-     * 可以完成时间的格式化
+     * 配置消息转换器
      */
     @Override
     public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
@@ -69,6 +69,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
     }
 
 
+    /**
+     * 配置静态资源映射
+     */
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/swagger-ui/**").addResourceLocations("classpath:/META-INF/resources/webjars/springfox-swagger-ui/").resourceChain(false);
