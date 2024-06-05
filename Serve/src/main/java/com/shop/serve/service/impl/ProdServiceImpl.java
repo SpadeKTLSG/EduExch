@@ -63,7 +63,6 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
     public void check(ProdLocateDTO prodLocateDTO) {
         if (this.query().eq("name", prodLocateDTO.getName()).count() == 0) throw new SthNotFoundException(OBJECT_NOT_ALIVE);
 
-
         if (this.query().eq("user_id", prodLocateDTO.getUserId()).count() == 0) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
 
 
@@ -102,6 +101,30 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
         mergedPage.setTotal(mergedList.size());
 
         return mergedPage;
+    }
+
+    @Override
+    public void deleteByNameUser(ProdLocateDTO prodLocateDTO) {
+        if (this.query().eq("name", prodLocateDTO.getName()).count() == 0) throw new SthNotFoundException(OBJECT_NOT_ALIVE);
+
+        if (this.query().eq("user_id", prodLocateDTO.getUserId()).count() == 0) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
+
+        this.remove(new LambdaQueryWrapper<Prod>()
+                .eq(Prod::getName, prodLocateDTO.getName())
+                .eq(Prod::getUserId, prodLocateDTO.getUserId())
+        );
+    }
+
+    @Override
+    public Prod getByNameUser(ProdLocateDTO prodLocateDTO) {
+        if (this.query().eq("name", prodLocateDTO.getName()).count() == 0) throw new SthNotFoundException(OBJECT_NOT_ALIVE);
+
+        if (this.query().eq("user_id", prodLocateDTO.getUserId()).count() == 0) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
+
+        return this.getOne(new LambdaQueryWrapper<Prod>()
+                .eq(Prod::getName, prodLocateDTO.getName())
+                .eq(Prod::getUserId, prodLocateDTO.getUserId())
+        );
     }
 
 

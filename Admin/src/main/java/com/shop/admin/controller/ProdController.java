@@ -1,6 +1,5 @@
 package com.shop.admin.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.shop.common.constant.SystemConstants;
 import com.shop.pojo.Result;
@@ -8,7 +7,6 @@ import com.shop.pojo.dto.ProdCateDTO;
 import com.shop.pojo.dto.ProdGreatDTO;
 import com.shop.pojo.dto.ProdLocateDTO;
 import com.shop.pojo.entity.Prod;
-import com.shop.pojo.entity.ProdCate;
 import com.shop.pojo.entity.ProdFunc;
 import com.shop.serve.service.ProdCateService;
 import com.shop.serve.service.ProdFuncService;
@@ -84,11 +82,8 @@ public class ProdController {
     @Operation(summary = "添加商品分类")
     @Parameters(@Parameter(name = "prodCateDTO", description = "商品分类DTO", required = true))
     public Result saveCate(@RequestBody ProdCateDTO prodCateDTO) {
-
-        return (prodCateService.save(ProdCate.builder()
-                .name(prodCateDTO.getName())
-                .description(prodCateDTO.getDescription())
-                .build())) ? Result.success() : Result.error("商品分类已存在");
+        prodCateService.saveCate(prodCateDTO);
+        return Result.success();
     }
     //http://localhost:8085/admin/prod/cate/save
 
@@ -103,19 +98,8 @@ public class ProdController {
     @Operation(summary = "管理员删除一件商品")
     @Parameters(@Parameter(name = "prodLocateDTO", description = "商品定位DTO", required = true))
     public Result deleteByNameUser(@RequestBody ProdLocateDTO prodLocateDTO) {
-
-        if (prodService.query().eq("name", prodLocateDTO.getName()).count() == 0) {
-            return Result.error("商品不存在");
-        }
-
-        if (prodService.query().eq("user_id", prodLocateDTO.getUserId()).count() == 0) {
-            return Result.error("用户不存在");
-        }
-
-        return (prodService.remove(new LambdaQueryWrapper<Prod>()
-                .eq(Prod::getName, prodLocateDTO.getName())
-                .eq(Prod::getUserId, prodLocateDTO.getUserId())
-        )) ? Result.success() : Result.error("商品不存在");
+        prodService.deleteByNameUser(prodLocateDTO);
+        return Result.success();
     }
     //http://localhost:8085/admin/prod/delete/one
 
@@ -133,19 +117,7 @@ public class ProdController {
     @Operation(summary = "查具体商品信息")
     @Parameters(@Parameter(name = "prodLocateDTO", description = "商品定位DTO", required = true))
     public Result getByNameUser(@RequestBody ProdLocateDTO prodLocateDTO) {
-
-        if (prodService.query().eq("name", prodLocateDTO.getName()).count() == 0) {
-            return Result.error("商品不存在");
-        }
-
-        if (prodService.query().eq("user_id", prodLocateDTO.getUserId()).count() == 0) {
-            return Result.error("用户不存在");
-        }
-
-        return Result.success(prodService.getOne(new LambdaQueryWrapper<Prod>()
-                .eq(Prod::getName, prodLocateDTO.getName())
-                .eq(Prod::getUserId, prodLocateDTO.getUserId())
-        ));
+        return Result.success(prodService.getByNameUser(prodLocateDTO));
     }
     //http://localhost:8085/admin/prod/one
 
@@ -157,7 +129,6 @@ public class ProdController {
     @Operation(summary = "分页查询所有商品分类")
     @Parameters(@Parameter(name = "current", description = "当前页", required = true))
     public Result pageCate(@RequestParam(value = "current", defaultValue = "1") Integer current) {
-
         return Result.success(prodService.page(new Page<>(current, SystemConstants.MAX_PAGE_SIZE)));
     }
     //http://localhost:8085/admin/prod/cate/page
