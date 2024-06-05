@@ -14,6 +14,9 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 /**
  * jwt令牌校验的拦截器
+ *
+ * @author SK
+ * @date 2024/06/05
  */
 @Component
 @Slf4j

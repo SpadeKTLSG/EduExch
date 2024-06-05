@@ -4,6 +4,12 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+/**
+ * 阿里云OSS配置属性
+ *
+ * @author SK
+ * @date 2024/06/05
+ */
 @Component
 @ConfigurationProperties(prefix = "eduexch.alioss")
 @Data

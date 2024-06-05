@@ -4,6 +4,12 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+/**
+ * jwt配置属性
+ *
+ * @author SK
+ * @date 2024/06/05
+ */
 @Component
 @ConfigurationProperties(prefix = "eduexch.jwt")
 @Data
@@ -16,6 +22,7 @@ public class JwtProperties {
     private long adminTtl;
     private String adminTokenName;
 
+    //TODO test
     /**
      * 用户端用户生成jwt令牌相关配置
      */

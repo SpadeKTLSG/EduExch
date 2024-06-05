@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * 用户全部信息DTO 3表
+ * 用户超级DTO (包含用户和用户功能和用户详细信息)
  *
  * @author SK
  * @date 2024/06/01

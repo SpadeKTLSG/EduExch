@@ -9,10 +9,16 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Map;
 
+/**
+ * Jwt工具类
+ *
+ * @author SK
+ * @date 2024/06/05
+ */
 public class JwtUtil {
     /**
      * 生成jwt
-     * 使用Hs256算法, 私匙使用固定秘钥
+     * 使用Hs256算法, 私钥使用固定秘钥
      *
      * @param secretKey jwt秘钥
      * @param ttlMillis jwt过期时间(毫秒)

@@ -7,6 +7,12 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
+/**
+ * 管理端启动类
+ *
+ * @author SK
+ * @date 2024/06/05
+ */
 @Slf4j
 @SpringBootApplication
 @ComponentScan("com.shop")

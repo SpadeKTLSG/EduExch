@@ -1,8 +1,15 @@
 package com.shop.common.constant;
 
+/**
+ * Redis常量
+ *
+ * @author SK
+ * @date 2024/06/05
+ */
 public class RedisConstants {
+
     public static final String LOGIN_CODE_KEY = "login:code:";
-    public static final Long LOGIN_CODE_TTL = 10L; // 10分钟
+    public static final Long LOGIN_CODE_TTL = 1800L; // 3小时 : 1800L
     public static final String LOGIN_USER_KEY = "login:token:";
     public static final Long LOGIN_USER_TTL = 36000L; // 10小时
 

@@ -10,6 +10,12 @@ import org.springframework.context.annotation.Configuration;
 
 import javax.sql.DataSource;
 
+/**
+ * Druid配置
+ *
+ * @author SK
+ * @date 2024/06/05
+ */
 @Slf4j
 @Configuration
 public class DruidConfig {

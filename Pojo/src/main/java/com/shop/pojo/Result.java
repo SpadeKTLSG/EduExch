@@ -1,5 +1,6 @@
 package com.shop.pojo;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,11 +16,27 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "通用返回结果")
 public class Result {
 
+    /**
+     * 是否成功
+     */
     private Boolean success;
+
+    /**
+     * 错误信息
+     */
     private String errorMsg;
+
+    /**
+     * 数据
+     */
     private Object data;
+
+    /**
+     * 总数
+     */
     private Long total;
 
     /**

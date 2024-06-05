@@ -12,7 +12,6 @@ import jakarta.servlet.http.HttpSession;
 
 public interface UserService extends IService<User> {
 
-
     Result login(UserLoginDTO userLoginDTO, HttpSession session);
 
     Result sendCode(String phone, HttpSession session);

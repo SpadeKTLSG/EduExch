@@ -20,5 +20,4 @@ public class ProdCateServiceImpl extends ServiceImpl<ProdCateMapper, ProdCate> i
                 .build());
     }
 
-
 }

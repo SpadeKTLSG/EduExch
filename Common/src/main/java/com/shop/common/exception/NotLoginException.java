@@ -6,12 +6,12 @@ package com.shop.common.exception;
  * @author SK
  * @date 2024/06/04
  */
-public class UserNotLoginException extends BaseException {
+public class NotLoginException extends BaseException {
 
-    public UserNotLoginException() {
+    public NotLoginException() {
     }
 
-    public UserNotLoginException(String msg) {
+    public NotLoginException(String msg) {
         super(msg);
     }
 

@@ -8,7 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 用来保存用户登录信息
+ * 用户登录信息DTO
  *
  * @author SK
  * @date 2024/06/01

@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
 import static com.shop.common.constant.MessageConstants.*;
-import static com.shop.common.constant.MyConstants.*;
+import static com.shop.common.constant.TestsConstants.*;
 
 @Slf4j
 @Service

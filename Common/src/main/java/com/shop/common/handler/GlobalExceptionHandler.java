@@ -12,16 +12,18 @@ import java.sql.SQLIntegrityConstraintViolationException;
 
 /**
  * 全局异常处理器，处理项目中抛出的业务异常
+ *
+ * @author SK
+ * @date 2024/06/05
  */
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
 
+    //TODO test
     /**
      * 捕获业务异常
      *
-     * @param ex 业务异常
-     * @return 统一响应结果
      */
     @ExceptionHandler
     public Result exceptionHandler(BaseException ex) {
@@ -33,8 +35,6 @@ public class GlobalExceptionHandler {
     /**
      * 处理SQL异常
      *
-     * @param ex SQL异常
-     * @return 错误信息
      */
     @ExceptionHandler
     public Result exceptionHandler(SQLIntegrityConstraintViolationException ex) {

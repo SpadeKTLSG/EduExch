@@ -10,6 +10,12 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.ByteArrayInputStream;
 
+/**
+ * 阿里云OSS工具类
+ *
+ * @author SK
+ * @date 2024/06/05
+ */
 @Data
 @AllArgsConstructor
 @Slf4j

@@ -3,7 +3,7 @@ package com.shop.common.aspect;
 
 import com.shop.common.annotation.AutoFill;
 import com.shop.common.constant.AutoFillConstant;
-import com.shop.common.context.BaseContext;
+import com.shop.common.context.UserHolder;
 import com.shop.common.enumeration.OperationType;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
@@ -55,7 +55,7 @@ public class AutoFillAspect {
 
         //准备赋值的数据
         LocalDateTime now = LocalDateTime.now();
-        Long currentId = BaseContext.getCurrentId();
+        Long currentId = UserHolder.getUser().getId();
 
         //根据当前不同的操作类型，为对应的属性通过反射来赋值
         if (operationType == OperationType.INSERT) {

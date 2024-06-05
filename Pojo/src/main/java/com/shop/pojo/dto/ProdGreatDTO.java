@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * 商品全部信息DTO 2表
+ * 商品超级DTO (包含商品和商品功能)
  *
  * @author SK
  * @date 2024/06/02

@@ -18,6 +18,9 @@ import java.util.List;
 
 /**
  * 配置类，注册web层相关组件
+ *
+ * @author SK
+ * @date 2024/06/05
  */
 @Configuration
 @Slf4j
@@ -34,6 +37,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
      */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        //TODO 打开拦截器
         log.info("开始注册自定义拦截器...");
         registry.addInterceptor(jwtTokenAdminInterceptor)
 //                .addPathPatterns("/admin/**")
@@ -63,6 +67,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
         converters.add(0, new ByteArrayHttpMessageConverter());// 默认第0个转换器是ByteArrayHttpMessageConverter，处理byte[]数据的转换(springdoc问题)
         converters.add(1, fastJsonHttpMessageConverter);// 添加FastJson的转换器, 放在第1个位置
     }
+
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {

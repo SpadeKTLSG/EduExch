@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 券视图传递
+ * 券视图传递DTO
  * <p>用于传递券的信息</p>
  *
  * @author SK

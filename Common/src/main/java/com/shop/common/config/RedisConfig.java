@@ -8,6 +8,12 @@ import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSeriali
 import org.springframework.data.redis.serializer.RedisSerializer;
 
 
+/**
+ * Redis配置
+ *
+ * @author SK
+ * @date 2024/06/05
+ */
 @Configuration
 public class RedisConfig {
 

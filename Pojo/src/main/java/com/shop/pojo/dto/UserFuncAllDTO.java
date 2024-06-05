@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 用户功能DTO
+ * 用户功能完全DTO
  *
  * @author SK
  * @date 2024/06/02

@@ -1,10 +1,11 @@
 package com.shop.common.constant;
 
 /**
+ * 调试常量
  * @author SK
  * @date 2024/06/04
  */
-public class MyConstants {
+public class TestsConstants {
 
     /**
      * 仓库管理虚拟用户ID 1

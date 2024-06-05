@@ -7,6 +7,12 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+/**
+ * 订单超级DTO (包含订单和订单详情)
+ *
+ * @author SK
+ * @date 2024/06/05
+ */
 @Data
 @Builder
 @NoArgsConstructor

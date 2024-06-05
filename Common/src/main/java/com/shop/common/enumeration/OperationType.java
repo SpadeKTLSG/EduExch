@@ -2,6 +2,9 @@ package com.shop.common.enumeration;
 
 /**
  * 数据库操作类型
+ *
+ * @author SK
+ * @date 2024/06/05
  */
 public enum OperationType {
 

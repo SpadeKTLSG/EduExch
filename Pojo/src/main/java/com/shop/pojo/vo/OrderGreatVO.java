@@ -1,5 +1,6 @@
 package com.shop.pojo.vo;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,10 +9,17 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 
+/**
+ * 订单超级VO (包含订单和订单功能)
+ *
+ * @author SK
+ * @date 2024/06/05
+ */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "订单超级VO")
 public class OrderGreatVO {
 
 
