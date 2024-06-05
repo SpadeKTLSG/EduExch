@@ -3,7 +3,6 @@ package com.shop.admin.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.shop.pojo.Result;
 import com.shop.pojo.dto.UserGreatDTO;
-import com.shop.pojo.entity.User;
 import com.shop.pojo.vo.UserVO;
 import com.shop.serve.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -125,14 +124,8 @@ public class UserController {
     @GetMapping("/specify/{id}")
     @Operation(summary = "ID查用户")
     @Parameters(@Parameter(name = "id", description = "用户ID", required = true))
-    public Result getById(@PathVariable("id") Long id) {
-        User user = userService.getById(id);
-        if (user == null) {
-            return Result.error("用户不存在");
-        }
-        UserVO userVO = new UserVO();
-        BeanUtils.copyProperties(user, userVO);
-        return Result.success(userVO);
+    public Result getByUserId(@PathVariable("id") Long id) {
+        return Result.success(userService.getByUserId(id));
     }
     //http://localhost:8085/admin/user/specify/1
 
@@ -145,13 +138,11 @@ public class UserController {
     @Parameters(@Parameter(name = "current", description = "当前页", required = true))
     public Result pageQuery(@RequestParam(value = "current", defaultValue = "1") Integer current) {
 
-        Page<UserVO> userVOPage = (Page<UserVO>) userService.page(new Page<>(current, MAX_PAGE_SIZE)).convert(user -> {
+        return Result.success(userService.page(new Page<>(current, MAX_PAGE_SIZE)).convert(user -> {
             UserVO userVO = new UserVO();
             BeanUtils.copyProperties(user, userVO);
             return userVO;
-        });
-
-        return Result.success(userVOPage);
+        }));
     }
     //http://localhost:8085/admin/user/page
 

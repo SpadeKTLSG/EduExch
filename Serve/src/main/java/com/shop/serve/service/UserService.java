@@ -25,4 +25,6 @@ public interface UserService extends IService<User> {
     Result signCount();
 
     UserVO getByAccount(String account);
+
+    UserVO getByUserId(Long id);
 }

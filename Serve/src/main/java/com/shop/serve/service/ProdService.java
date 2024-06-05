@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.shop.pojo.dto.ProdGreatDTO;
 import com.shop.pojo.dto.ProdLocateDTO;
 import com.shop.pojo.entity.Prod;
+import com.shop.pojo.vo.ProdGreatVO;
 
 public interface ProdService extends IService<Prod> {
 
@@ -19,4 +20,16 @@ public interface ProdService extends IService<Prod> {
     Prod getByNameUser(ProdLocateDTO prodLocateDTO);
 
     Page<ProdGreatDTO> pageProd(Integer current);
+
+    void publishGood(ProdGreatDTO prodGreatDTO);
+
+    void deleteGood(String name);
+
+    void updateStatus(ProdLocateDTO prodLocateDTO, Integer func);
+
+    ProdGreatVO GetByNameSingle(String name);
+
+    Page<Prod> getPageByCate(String cate, Integer current);
+
+    Page<Prod> pageCateAllProd(String cate, Integer current);
 }

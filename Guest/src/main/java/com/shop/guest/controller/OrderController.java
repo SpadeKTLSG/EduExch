@@ -9,7 +9,6 @@ import com.shop.pojo.Result;
 import com.shop.pojo.dto.OrderAllDTO;
 import com.shop.pojo.dto.ProdLocateDTO;
 import com.shop.pojo.entity.Order;
-import com.shop.serve.service.OrderDetailService;
 import com.shop.serve.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -34,8 +33,6 @@ public class OrderController {
 
     @Autowired
     private OrderService orderService;
-    @Autowired
-    private OrderDetailService orderDetailService;
 
 
     //! Func

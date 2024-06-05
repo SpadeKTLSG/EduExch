@@ -1,32 +1,21 @@
 package com.shop.guest.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.shop.common.constant.SystemConstants;
 import com.shop.pojo.Result;
-import com.shop.pojo.dto.ProdAllDTO;
-import com.shop.pojo.dto.ProdFuncAllDTO;
 import com.shop.pojo.dto.ProdGreatDTO;
 import com.shop.pojo.dto.ProdLocateDTO;
 import com.shop.pojo.entity.Prod;
-import com.shop.pojo.entity.ProdCate;
-import com.shop.pojo.entity.ProdFunc;
-import com.shop.pojo.vo.ProdGreatVO;
 import com.shop.serve.service.ProdCateService;
-import com.shop.serve.service.ProdFuncService;
 import com.shop.serve.service.ProdService;
-import com.shop.serve.tool.NewDTOUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
 
 /**
  * 商品
@@ -43,12 +32,7 @@ public class ProdController {
     @Autowired
     private ProdService prodService;
     @Autowired
-    private ProdFuncService prodFuncService;
-    @Autowired
     private ProdCateService prodCateService;
-
-    @Autowired
-    private NewDTOUtils dtoUtils;
 
 
     //! Func
@@ -63,27 +47,8 @@ public class ProdController {
     @PostMapping("/save")
     @Operation(summary = "用户添加商品")
     @Parameters(@Parameter(name = "prodGreatDTO", description = "商品添加DTO", required = true))
-    public Result save(@RequestBody ProdGreatDTO prodGreatDTO) {
-
-        // 需要拆分为两个实体 : prod 和 prodFunc
-
-        if (prodService.query().eq("name", prodGreatDTO.getName()).count() > 0) {
-            return Result.success("商品已存在");
-        }
-
-        Prod prod = new Prod();
-        ProdFunc prodFunc = new ProdFunc();
-
-        BeanUtils.copyProperties(prodGreatDTO, prod);
-        BeanUtils.copyProperties(prodGreatDTO, prodFunc);
-
-        // prod.setUserId(UserHolder.getUser().getId());
-        // 调试选项
-        prod.setUserId(1L);
-
-        prodService.save(prod);
-        prodFuncService.save(prodFunc);
-
+    public Result publishGood(@RequestBody ProdGreatDTO prodGreatDTO) {
+        prodService.publishGood(prodGreatDTO);
         return Result.success();
     }
     //http://localhost:8086/guest/prod/save
@@ -98,14 +63,8 @@ public class ProdController {
     @DeleteMapping("/delete/{name}")
     @Operation(summary = "用户删除商品")
     @Parameters(@Parameter(name = "name", description = "商品名", required = true))
-    public Result delete(@PathVariable("name") String name) {
-        Prod prod = prodService.getOne(Wrappers.<Prod>lambdaQuery().eq(Prod::getName, name));
-        if (prod == null) {
-            return Result.error("商品不存在");
-        }
-        //TODO: 需要判断有无开启交易
-        prodService.removeById(prod.getId());
-        prodFuncService.removeById(prod.getId());
+    public Result deleteGood(@PathVariable("name") String name) {
+        prodService.deleteGood(name);
         return Result.success();
     }
     //http://localhost:8086/guest/prod/delete
@@ -138,44 +97,7 @@ public class ProdController {
     @PutMapping("/update/status/{func}")
 
     public Result updateStatus(@RequestBody ProdLocateDTO prodLocateDTO, @PathVariable("func") Integer func) {
-
-
-        String name = prodLocateDTO.getName();
-        Long userId = prodLocateDTO.getUserId();
-
-        if (name == null || userId == null) {
-            return Result.error("参数错误");
-        }
-
-        Prod prod = prodService.getOne(new LambdaQueryWrapper<Prod>()
-                .eq(Prod::getName, name)
-                .eq(Prod::getUserId, userId)
-        );
-
-        if (prod == null) {
-            return Result.error("商品不存在");
-        }
-
-        ProdFunc prodFunc = prodFuncService.getOne(new LambdaQueryWrapper<ProdFunc>()
-                .eq(ProdFunc::getId, prod.getId())
-        );
-
-        if (func == 0) {
-
-            prodFunc.setShowoffStatus(0);  //基础功能类型: 无展示提升
-            prodFunc.setShowoffEndtime(LocalDateTime.now().plusDays(1)); // 1天
-
-        } else if (func == 1) {
-
-            prodFunc.setShowoffStatus(1); //高级功能类型: 3days展示提升 : 首页提升榜单
-            prodFunc.setShowoffEndtime(LocalDateTime.now().plusDays(3)); // 3天
-        } else {
-
-            prodFunc.setShowoffStatus(2); //超级功能类型: 7days展示提升 : 首页提升榜单 + 首页轮播图
-            prodFunc.setShowoffEndtime(LocalDateTime.now().plusDays(7)); // 7天
-        }
-
-        prodFuncService.updateById(prodFunc);
+        prodService.updateStatus(prodLocateDTO, func);
 
         return Result.success();
     }
@@ -220,27 +142,8 @@ public class ProdController {
     @GetMapping("/{name}")
     @Operation(summary = "查询单个商品详细信息")
     @Parameters(@Parameter(name = "name", description = "商品名", required = true))
-    public Result getByName(@PathVariable("name") String name) {
-
-        Prod prod = prodService.getOne(Wrappers.<Prod>lambdaQuery()
-                .eq(Prod::getName, name)
-//                .eq(Prod::getUserId, UserHolder.getUser().getId()));
-                // 调试选项
-                .eq(Prod::getUserId, 1L));
-
-        if (prod == null) {
-            return Result.error("商品不存在");
-        }
-
-
-        ProdGreatVO prodGreatVO;
-        try {
-            prodGreatVO = dtoUtils.createAndCombineDTOs(ProdGreatVO.class, prod.getId(), ProdAllDTO.class, ProdFuncAllDTO.class);
-        } catch (Exception e) {
-            return Result.error(e.getMessage());
-        }
-
-        return Result.success(prodGreatVO);
+    public Result getByNameSingle(@PathVariable("name") String name) {
+        return Result.success(prodService.GetByNameSingle(name));
     }
     //http://localhost:8086/guest/prod/
 
@@ -252,20 +155,7 @@ public class ProdController {
     @Operation(summary = "根据分类获得自己的对应商品列表")
     @Parameters(@Parameter(name = "cate", description = "分类名", required = true))
     public Result getPageByCate(@PathVariable("cate") String cate, @RequestParam(value = "current", defaultValue = "1") Integer current) {
-
-        ProdCate prodCate = prodCateService.getOne(Wrappers.<ProdCate>lambdaQuery()
-                .eq(ProdCate::getName, cate));
-
-        if (prodCate == null) {
-            return Result.error("该分类不存在");
-        }
-
-        Long id = prodCate.getId();
-
-        return Result.success(prodService.page(
-                new Page<>(current, SystemConstants.MAX_PAGE_SIZE),
-                Wrappers.<Prod>lambdaQuery().eq(Prod::getCategoryId, id)));
-
+        return Result.success(prodService.getPageByCate(cate, current));
     }
     //http://localhost:8086/guest/prod/category/prod/0
 
@@ -290,20 +180,7 @@ public class ProdController {
     @Operation(summary = "分页查询一个分类下的所有商品列表")
     @Parameters(@Parameter(name = "cate", description = "分类名", required = true))
     public Result pageCateAllProd(@PathVariable("cate") String cate, @RequestParam(value = "current", defaultValue = "1") Integer current) {
-
-        ProdCate prodCate = prodCateService.getOne(Wrappers.<ProdCate>lambdaQuery()
-                .eq(ProdCate::getName, cate));
-
-        if (prodCate == null) {
-            return Result.error("该分类不存在");
-        }
-
-        Long id = prodCate.getId();
-
-        return Result.success(prodService.page(
-                new Page<>(current, SystemConstants.MAX_PAGE_SIZE),
-                Wrappers.<Prod>lambdaQuery().eq(Prod::getCategoryId, id)));
-
+        return Result.success(prodService.pageCateAllProd(cate, current));
     }
     //http://localhost:8086/guest/prod/cateall/page/人类
 }

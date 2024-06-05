@@ -256,5 +256,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return userVO;
     }
 
+    @Override
+    public UserVO getByUserId(Long id) {
+        User user = this.getById(id);
+        if (user == null) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
+        
+        UserVO userVO = new UserVO();
+        BeanUtils.copyProperties(user, userVO);
+        return userVO;
+    }
+
 
 }
