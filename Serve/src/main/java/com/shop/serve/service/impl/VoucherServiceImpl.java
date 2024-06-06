@@ -2,6 +2,7 @@ package com.shop.serve.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.shop.common.context.UserHolder;
 import com.shop.common.exception.BadArgsException;
 import com.shop.common.exception.SthNotFoundException;
 import com.shop.common.exception.TrashException;
@@ -64,9 +65,8 @@ public class VoucherServiceImpl extends ServiceImpl<VoucherMapper, Voucher> impl
         if (voucher == null) throw new SthNotFoundException(OBJECT_NOT_ALIVE);
 
 
-//        voucher.setUserId(UserHolder.getUser().getId());
-        // 调试选项
-        voucher.setUserId(BUYER_USERID);
+        voucher.setUserId(UserHolder.getUser().getId());
+
         //数量调整: 原来的数量是指仓库管理员持有的数量, 这里是用户持有的数量, 限制只能同种的一张
         voucher.setStock(1);
         this.updateById(voucher);
@@ -78,9 +78,7 @@ public class VoucherServiceImpl extends ServiceImpl<VoucherMapper, Voucher> impl
 
         Voucher voucher = this.getOne(new LambdaQueryWrapper<Voucher>()
                 .eq(Voucher::getName, voucherStoreDTO.getName())
-//                .eq(Voucher::getUserId, UserHolder.getUser().getId()));
-                // 调试选项
-                .eq(Voucher::getUserId, SELLER_USERID));
+                .eq(Voucher::getUserId, UserHolder.getUser().getId()));
 
         if (voucher == null) throw new SthNotFoundException(OBJECT_NOT_ALIVE);
 
@@ -103,10 +101,8 @@ public class VoucherServiceImpl extends ServiceImpl<VoucherMapper, Voucher> impl
         }
 
 
-        //UserFunc userFunc = userFuncService.getById(UserHolder.getUser().getId());
-        //调试选项
+        UserFunc userFunc = userFuncService.getById(UserHolder.getUser().getId());
 
-        UserFunc userFunc = userFuncService.getById(SELLER_USERID);
         int value2Add = voucher.getType() == 0 ? voucher.getValue() : voucher.getValue() * 2;
 
         userFunc.setCredit(userFunc.getCredit() + value2Add);
@@ -124,9 +120,7 @@ public class VoucherServiceImpl extends ServiceImpl<VoucherMapper, Voucher> impl
 
         Voucher voucher = this.getOne(new LambdaQueryWrapper<Voucher>()
                 .eq(Voucher::getName, voucherStoreDTO.getName())
-//                .eq(Voucher::getUserId, UserHolder.getUser().getId()));
-                // 调试选项
-                .eq(Voucher::getUserId, BUYER_USERID));
+                .eq(Voucher::getUserId, UserHolder.getUser().getId()));
 
         if (voucher == null) throw new SthNotFoundException(OBJECT_NOT_ALIVE);
 
@@ -149,10 +143,8 @@ public class VoucherServiceImpl extends ServiceImpl<VoucherMapper, Voucher> impl
         }
 
 
-        //UserFunc userFunc = userFuncService.getById(UserHolder.getUser().getId());
-        //调试选项
+        UserFunc userFunc = userFuncService.getById(UserHolder.getUser().getId());
 
-        UserFunc userFunc = userFuncService.getById(BUYER_USERID);
         int value2Add = voucher.getType() == 0 ? voucher.getValue() : voucher.getValue() * 2;
 
         userFunc.setCredit(userFunc.getCredit() + value2Add);

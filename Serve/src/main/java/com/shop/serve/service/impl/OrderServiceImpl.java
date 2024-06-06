@@ -2,6 +2,7 @@ package com.shop.serve.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.shop.common.context.UserHolder;
 import com.shop.common.exception.BadArgsException;
 import com.shop.common.exception.SthNotFoundException;
 import com.shop.pojo.dto.OrderAllDTO;
@@ -66,9 +67,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         );
         Long prod_id = prod.getId();
 
-//        Long buyer_id = UserHolder.getUser().getId();
-        // 调试选项
-        Long buyer_id = 1L;
+        Long buyer_id = UserHolder.getUser().getId();
         Long seller_id = prod.getUserId();
 
         Order order = Order.builder()

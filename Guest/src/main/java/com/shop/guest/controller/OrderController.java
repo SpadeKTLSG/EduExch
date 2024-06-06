@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.shop.common.constant.SystemConstants;
+import com.shop.common.context.UserHolder;
 import com.shop.pojo.Result;
 import com.shop.pojo.dto.OrderAllDTO;
 import com.shop.pojo.dto.ProdLocateDTO;
@@ -125,9 +126,8 @@ public class OrderController {
     @Parameters(@Parameter(name = "current", description = "当前页", required = true))
     public Result orderPage(@RequestParam(value = "current", defaultValue = "1") Integer current) {
 
-//        Long userId = UserHolder.getUser().getId();
-        // 调试选项
-        Long userId = 1L;
+        Long userId = UserHolder.getUser().getId();
+
 
         return Result.success(orderService.page(new Page<>(current, SystemConstants.MAX_PAGE_SIZE),
                 Wrappers.<Order>lambdaQuery()
@@ -163,9 +163,7 @@ public class OrderController {
 
         return Result.success(orderService.count(new LambdaQueryWrapper<Order>()
                         .eq(Order::getStatus, status)
-//                .and(i -> i.eq(Order::getBuyerId, UserHolder.getUser().getId()).or().eq(Order::getSellerId, UserHolder.getUser().getId()))
-                        // 调试选项
-                        .and(i -> i.eq(Order::getBuyerId, 1L).or().eq(Order::getSellerId, 1L))
+                .and(i -> i.eq(Order::getBuyerId, UserHolder.getUser().getId()).or().eq(Order::getSellerId, UserHolder.getUser().getId()))
         ));
     }
     //http://localhost:8086/guest/order/status/count/1

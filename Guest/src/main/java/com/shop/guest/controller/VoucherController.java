@@ -3,6 +3,7 @@ package com.shop.guest.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.shop.common.context.UserHolder;
 import com.shop.pojo.Result;
 import com.shop.pojo.dto.VoucherLocateDTO;
 import com.shop.pojo.dto.VoucherStoreDTO;
@@ -19,8 +20,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import static com.shop.common.constant.TestsConstants.*;
 import static com.shop.common.constant.SystemConstants.MAX_PAGE_SIZE;
+import static com.shop.common.constant.TestsConstants.BUYER_USERID;
+import static com.shop.common.constant.TestsConstants.STORE_USERID;
 
 /**
  * 优惠券控制
@@ -36,7 +38,6 @@ public class VoucherController {
 
     @Autowired
     private VoucherService voucherService;
-
 
 
     //! Func
@@ -151,9 +152,7 @@ public class VoucherController {
 
         return Result.success(voucherService.page(new Page<>(current, MAX_PAGE_SIZE), new LambdaQueryWrapper<Voucher>()
                         .eq(Voucher::getUser, STORE_USERID)
-                        //                        .eq(Voucher::getUserId, UserHolder.getUser().getId()))
-                        // 调试选项
-                        .eq(Voucher::getUserId, SELLER_USERID))
+                        .eq(Voucher::getUserId, UserHolder.getUser().getId()))
                 .convert(voucher -> {
                     VoucherStoreVO voucherStoreVO = new VoucherStoreVO();
                     BeanUtils.copyProperties(voucher, voucherStoreVO);
@@ -174,9 +173,7 @@ public class VoucherController {
 
         return Result.success(voucherService.page(new Page<>(current, MAX_PAGE_SIZE), new LambdaQueryWrapper<Voucher>()
                         .eq(Voucher::getUser, STORE_USERID)
-//                        .eq(Voucher::getUserId, UserHolder.getUser().getId()))
-                        // 调试选项
-                        .eq(Voucher::getUserId, BUYER_USERID))
+                        .eq(Voucher::getUserId, UserHolder.getUser().getId()))
 
 
                 .convert(voucher -> {

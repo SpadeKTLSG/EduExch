@@ -13,12 +13,12 @@ public class TestsConstants {
     public static final Long STORE_USERID = 1L;
 
     /**
-     * 调试选项 -> 买家用户ID 2
+     * 调试变量 -> 买家用户ID 2
      */
     public static final Long BUYER_USERID = 2L;
 
     /**
-     * 调试选项 -> 卖家用户ID 3
+     * 调试变量 -> 卖家用户ID 3
      */
     public static final Long SELLER_USERID = 3L;
 

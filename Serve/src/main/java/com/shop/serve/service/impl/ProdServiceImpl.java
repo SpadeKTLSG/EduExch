@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.shop.common.constant.SystemConstants;
+import com.shop.common.context.UserHolder;
 import com.shop.common.exception.*;
 import com.shop.pojo.dto.ProdAllDTO;
 import com.shop.pojo.dto.ProdFuncAllDTO;
@@ -51,10 +52,7 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
         Optional<Prod> optionalProd = Optional.ofNullable(this.getOne(Wrappers.<Prod>lambdaQuery().eq(Prod::getName, prodGreatDTO.getName())));
         if (optionalProd.isEmpty()) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
 
-        //这里商品的userId是自己
-//        optionalProd.get().setUserId(UserHolder.getUser().getId());
-        // 调试选项
-        optionalProd.get().setUserId(1L);
+        optionalProd.get().setUserId(UserHolder.getUser().getId());//这里商品的userId是自己
 
         Map<Object, IService> dtoServiceMap = new HashMap<>();
         dtoServiceMap.put(createDTOFromProdGreatDTO(prodGreatDTO, ProdAllDTO.class), this);
@@ -170,9 +168,7 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
         BeanUtils.copyProperties(prodGreatDTO, prod);
         BeanUtils.copyProperties(prodGreatDTO, prodFunc);
 
-        // prod.setUserId(UserHolder.getUser().getId());
-        // 调试选项
-        prod.setUserId(1L);
+        prod.setUserId(UserHolder.getUser().getId());
 
         this.save(prod);
         prodFuncService.save(prodFunc);
@@ -234,9 +230,8 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
 
         Prod prod = this.getOne(Wrappers.<Prod>lambdaQuery()
                 .eq(Prod::getName, name)
-//                .eq(Prod::getUserId, UserHolder.getUser().getId()));
-                // 调试选项
-                .eq(Prod::getUserId, 1L));
+                .eq(Prod::getUserId, UserHolder.getUser().getId()));
+
 
         if (prod == null) throw new SthNotFoundException(OBJECT_NOT_ALIVE);
 

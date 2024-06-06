@@ -3,6 +3,7 @@ package com.shop.guest.controller;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.shop.common.constant.SystemConstants;
+import com.shop.common.context.UserHolder;
 import com.shop.pojo.Result;
 import com.shop.pojo.dto.ProdGreatDTO;
 import com.shop.pojo.dto.ProdLocateDTO;
@@ -126,10 +127,8 @@ public class ProdController {
     @Parameters(@Parameter(name = "current", description = "当前页", required = true))
     public Result pageProdQuery(@RequestParam(value = "current", defaultValue = "1") Integer current) {
         return Result.success(prodService.page(new Page<>(current, SystemConstants.MAX_PAGE_SIZE),
-                        Wrappers.<Prod>lambdaQuery()
-//                        .eq(Prod::getUserId, UserHolder.getUser().getId()))
-                                // 调试选项
-                                .eq(Prod::getUserId, 1L))
+                Wrappers.<Prod>lambdaQuery()
+                        .eq(Prod::getUserId, UserHolder.getUser().getId()))
         );
     }
     //http://localhost:8086/guest/prod/page
