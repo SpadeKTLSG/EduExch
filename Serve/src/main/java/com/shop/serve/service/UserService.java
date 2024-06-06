@@ -32,4 +32,6 @@ public interface UserService extends IService<User> {
     void killMyAccount();
 
     void logout();
+
+    void updateUserCode(UserLoginDTO userLoginDTO);
 }

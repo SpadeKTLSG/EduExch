@@ -92,11 +92,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         userFuncService.save(userFunc);
     }
 
+
     @Override
     @Transactional
-
     public void updateUserGreatDTO(UserGreatDTO userGreatDTO) throws InstantiationException, IllegalAccessException {
         //? 联表选择性更新字段示例
+        userGreatDTO.setPassword(DigestUtils.md5DigestAsHex(userGreatDTO.getPassword().getBytes())); //预先处理密码
 
         Optional<User> optionalUser = Optional.ofNullable(this.getOne(Wrappers.<User>lambdaQuery().eq(User::getAccount, userGreatDTO.getAccount())));
         if (optionalUser.isEmpty()) {
@@ -145,7 +146,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (user == null) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
 
 
-
         // 随机生成token，作为登录令牌
         String token = UUID.randomUUID().toString(true);
         UserLocalDTO userDTO = BeanUtil.copyProperties(user, UserLocalDTO.class);
@@ -170,6 +170,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (keys != null) {
             stringRedisTemplate.delete(keys);
         }
+    }
+
+    @Override
+    public void updateUserCode(UserLoginDTO userLoginDTO) {
+
+        if (this.getOne(Wrappers.<User>lambdaQuery().eq(User::getAccount, userLoginDTO.getAccount())) == null) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
+
+        User user = User.builder()
+                .account(userLoginDTO.getAccount())
+                .password(DigestUtils.md5DigestAsHex(userLoginDTO.getPassword().getBytes()))
+                .build();
+
+        this.update(user, Wrappers.<User>lambdaUpdate().eq(User::getAccount, userLoginDTO.getAccount()));
     }
 
 

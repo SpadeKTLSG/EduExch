@@ -1,13 +1,17 @@
 package com.shop.serve.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.shop.common.context.UserHolder;
 import com.shop.pojo.Result;
 import com.shop.pojo.dto.UserLocalDTO;
 import com.shop.pojo.entity.UserFollow;
+import com.shop.pojo.entity.UserFunc;
 import com.shop.serve.mapper.UserFollowMapper;
 import com.shop.serve.service.UserFollowService;
+import com.shop.serve.service.UserFuncService;
 import com.shop.serve.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,14 +31,14 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
     private StringRedisTemplate stringRedisTemplate;
     @Autowired
     private UserService userService;
+    @Autowired
+    private UserFuncService userFuncService;
 
 
     @Override
     public Result follow(Long followUserId, Boolean isFollow) {
 
-//        Long userId = UserHolder.getUser().getId(); //获取当前登录用户
-        //调试选项:
-        Long userId = 1L;
+        Long userId = UserHolder.getUser().getId(); //获取当前登录用户
         String key = "follows:" + userId;
 
         if (isFollow && save(UserFollow.builder() //关注 -> 新增
@@ -53,14 +57,26 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
             stringRedisTemplate.opsForSet().remove(key, followUserId.toString()); //Redis集合中移除关注用户的id
         }
 
+        //添加关注与被关注双方的计数器count
+        UserFunc fan_userFunc = userFuncService.getOne(new LambdaQueryWrapper<>(UserFunc.class)
+                .eq(UserFunc::getId, userId));
+        UserFunc follower_userFunc = userFuncService.getOne(new LambdaQueryWrapper<>(UserFunc.class)
+                .eq(UserFunc::getId, followUserId));
+
+        fan_userFunc.setFollowee(fan_userFunc.getFollowee() + 1);
+        follower_userFunc.setFans(follower_userFunc.getFans() + 1);
+
+        userFuncService.updateById(fan_userFunc);
+        userFuncService.updateById(follower_userFunc);
+
         return Result.success();
     }
 
+
     @Override
     public Result isFollow(Long followUserId) {
-//        Long userId = UserHolder.getUser().getId();
-        //调试选项:
-        Long userId = 1L;
+
+        Long userId = UserHolder.getUser().getId();
 
         Long count = query()  // 查询是否关注
                 .eq("follower_id", userId)
@@ -73,9 +89,8 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
 
     @Override
     public Result shareFollow(Long id) {
-//        Long userId = UserHolder.getUser().getId();
-        //调试选项:
-        Long userId = 1L;
+        Long userId = UserHolder.getUser().getId();
+
         String key1 = "follows:" + userId;
         String key2 = "follows:" + id;
 

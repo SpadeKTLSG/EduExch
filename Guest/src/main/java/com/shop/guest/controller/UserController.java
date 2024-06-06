@@ -195,6 +195,20 @@ public class UserController {
     //http://localhost:8086/guest/user/update
 
 
+    /**
+     * 修改密码
+     * <p>可以用上面的选择更新替代</p>
+     */
+    @PutMapping("/update/code")
+    @Operation(summary = "修改密码")
+    @Parameters(@Parameter(name = "userLoginDTO", description = "User update DTO", required = true))
+    public Result updateUserCode(@RequestBody UserLoginDTO userLoginDTO) {
+        userService.updateUserCode(userLoginDTO);
+        return Result.success();
+    }
+    //http://localhost:8086/guest/user/update/code
+
+
     //! QUERY
 
     /**
