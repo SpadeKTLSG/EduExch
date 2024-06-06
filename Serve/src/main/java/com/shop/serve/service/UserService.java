@@ -30,4 +30,6 @@ public interface UserService extends IService<User> {
     UserGreatVO info();
 
     void killMyAccount();
+
+    void logout();
 }

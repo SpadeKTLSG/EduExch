@@ -126,6 +126,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public String login(UserLoginDTO userLoginDTO, HttpSession session) {
 
+        //删除掉之前的所有登陆令牌
+        Set<String> keys = stringRedisTemplate.keys(LOGIN_USER_KEY + "*");
+        if (keys != null) {
+            stringRedisTemplate.delete(keys);
+        }
+
         String phone = userLoginDTO.getPhone();
         if (RegexUtils.isPhoneInvalid(phone)) throw new InvalidInputException(PHONE_INVALID);
 
@@ -138,11 +144,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         User user = query().eq("account", userLoginDTO.getAccount()).one();
         if (user == null) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
 
-        //删除掉之前的所有登陆令牌
-        Set<String> keys = stringRedisTemplate.keys(LOGIN_USER_KEY + "*");
-        if (keys != null) {
-            stringRedisTemplate.delete(keys);
-        }
+
 
         // 随机生成token，作为登录令牌
         String token = UUID.randomUUID().toString(true);
@@ -158,6 +160,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         stringRedisTemplate.expire(tokenKey, LOGIN_USER_TTL, TimeUnit.MINUTES);
 
         return token;
+    }
+
+
+    @Override
+    public void logout() {
+        //删除掉之前的所有登陆令牌
+        Set<String> keys = stringRedisTemplate.keys(LOGIN_USER_KEY + "*");
+        if (keys != null) {
+            stringRedisTemplate.delete(keys);
+        }
     }
 
 
@@ -182,9 +194,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public void sign() {
 
-//        Long userId = UserHolder.getUser().getId();
-        //调试选项:
-        Long userId = 1L;
+        Long userId = UserHolder.getUser().getId();
 
         LocalDateTime now = LocalDateTime.now();
         String keySuffix = now.format(DateTimeFormatter.ofPattern(":yyyyMM"));  // 拼接key
@@ -198,10 +208,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public int signCount() {
 
-//        Long userId = UserHolder.getUser().getId();
-        //调试选项:
-        Long userId = 1L;
-
+        Long userId = UserHolder.getUser().getId();
 
         LocalDateTime now = LocalDateTime.now();
         String keySuffix = now.format(DateTimeFormatter.ofPattern(":yyyyMM"));  // 拼接key

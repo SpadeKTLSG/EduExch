@@ -69,6 +69,7 @@ public class UserController {
     @Operation(summary = "退出")
     @Parameters(@Parameter(name = "无", description = "无", required = true))
     public Result logout() {
+        userService.logout();
         return Result.success();
     }
     //http://localhost:8086/guest/user/logout

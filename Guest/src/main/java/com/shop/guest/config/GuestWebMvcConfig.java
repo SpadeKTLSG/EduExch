@@ -44,20 +44,22 @@ public class GuestWebMvcConfig implements WebMvcConfigurer {
 
         //登录拦截器
         registry.addInterceptor(new LoginInterceptor())
-                .excludePathPatterns(
-                        "/admin/**",
+
+                .excludePathPatterns("/admin/**", // 管理员端
+                        "/guest.html", "/swagger-ui/**", "/swagger-ui.html", "/doc.html", "/webjars/**", "/swagger-resources/**", "/swagger-ui/**", "/v3/**", "/error", // swagger 3.0 (坑死了)
                         "/guest/user/login",
                         "/guest/user/register",
                         "/guest/user/code"
                 ).order(1);
+
         // token刷新拦截器
         registry.addInterceptor(new RefreshTokenInterceptor(stringRedisTemplate))
+
                 .addPathPatterns("/**")
-                .excludePathPatterns(
-                        "/admin/**",
+                .excludePathPatterns("/admin/**",  // 管理员端
+                        "/guest.html", "/swagger-ui/**", "/swagger-ui.html", "/doc.html", "/webjars/**", "/swagger-resources/**", "/swagger-ui/**", "/v3/**", "/error",// swagger 3.0 (坑死了)
                         "/guest/user/login",
-                        "/guest/user/register",
-                        "/guest/user/code")
+                        "/guest/user/register", "/guest/user/code")
                 .order(0);
 
     }
