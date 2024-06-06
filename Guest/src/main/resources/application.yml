@@ -104,8 +104,6 @@ logging:
 # 自定义
 eduexch:
 
-  # 没有使用JWT, 采用更高规格的加密手段
-
   # AliOSS
   alioss:
     endpoint: ${eduexch.alioss.endpoint}

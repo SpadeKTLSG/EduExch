@@ -42,13 +42,23 @@ public class GuestWebMvcConfig implements WebMvcConfigurer {
 
         log.info("自定义用户端拦截器启动");
 
-        // 登录拦截器
+        //登录拦截器
         registry.addInterceptor(new LoginInterceptor())
                 .excludePathPatterns(
-                        "/guest/user/login"
+                        "/admin/**",
+                        "/guest/user/login",
+                        "/guest/user/register",
+                        "/guest/user/code"
                 ).order(1);
-        // token刷新的拦截器
-        registry.addInterceptor(new RefreshTokenInterceptor(stringRedisTemplate)).addPathPatterns("/**").order(0);
+        // token刷新拦截器
+        registry.addInterceptor(new RefreshTokenInterceptor(stringRedisTemplate))
+                .addPathPatterns("/**")
+                .excludePathPatterns(
+                        "/admin/**",
+                        "/guest/user/login",
+                        "/guest/user/register",
+                        "/guest/user/code")
+                .order(0);
 
     }
 

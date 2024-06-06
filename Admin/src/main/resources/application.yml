@@ -103,15 +103,6 @@ logging:
 # 自定义
 eduexch:
 
-  # JWT
-  # 管理员端使用简单JWT + 半明文传输
-  jwt:
-    # Admin
-    admin-secret-key: adminkey    # 设置jwt签名加密时使用的秘钥
-    admin-ttl: 86400000 # 设置jwt过期时间: 一天 : 86400000
-    admin-token-name: token    # 设置前端传递过来的令牌名称
-
-
   # AliOSS
   alioss:
     endpoint: ${eduexch.alioss.endpoint}

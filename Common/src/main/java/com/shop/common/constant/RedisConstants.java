@@ -8,10 +8,29 @@ package com.shop.common.constant;
  */
 public class RedisConstants {
 
+    /**
+     * 验证码Key前缀 login:code:
+     */
     public static final String LOGIN_CODE_KEY = "login:code:";
-    public static final Long LOGIN_CODE_TTL = 1800L; // 3小时 : 1800L
+
+    /**
+     *
+     */
+    public static final Long LOGIN_CODE_TTL = 172800L; // 2天
+
+    /**
+     * 登录接受Key前缀 login:token:
+     */
     public static final String LOGIN_USER_KEY = "login:token:";
+
+    /**
+     *
+     */
     public static final Long LOGIN_USER_TTL = 36000L; // 10小时
+    /**
+     *
+     */
+    public static final String USER_SIGN_KEY = "sign:";
 
     public static final Long CACHE_NULL_TTL = 2L;
 
@@ -25,5 +44,5 @@ public class RedisConstants {
     public static final String BLOG_LIKED_KEY = "blog:liked:";
     public static final String FEED_KEY = "feed:";
     public static final String SHOP_GEO_KEY = "shop:geo:";
-    public static final String USER_SIGN_KEY = "sign:";
+
 }

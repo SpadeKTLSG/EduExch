@@ -4,8 +4,6 @@ package com.shop.admin.config;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.support.config.FastJsonConfig;
 import com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter;
-import com.shop.common.interceptor.LoginInterceptor;
-import com.shop.common.interceptor.RefreshTokenInterceptor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -42,13 +40,13 @@ public class AdminWebMvcConfig implements WebMvcConfigurer {
 
         log.info("自定义管理员端拦截器启动");
 
-        // 登录拦截器
-        registry.addInterceptor(new LoginInterceptor())
-                .excludePathPatterns(
-                        "/guest/user/login"
-                ).order(1);
-        // token刷新的拦截器
-        registry.addInterceptor(new RefreshTokenInterceptor(stringRedisTemplate)).addPathPatterns("/**").order(0);
+//        // 登录拦截器
+//        registry.addInterceptor(new LoginInterceptor())
+//                .excludePathPatterns(
+//                        "/guest/user/login"
+//                ).order(1);
+//        // token刷新的拦截器
+//        registry.addInterceptor(new RefreshTokenInterceptor(stringRedisTemplate)).addPathPatterns("/**").order(0);
 
     }
 

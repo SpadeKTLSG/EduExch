@@ -3,6 +3,8 @@ package com.shop.common.interceptor;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import com.shop.common.context.UserHolder;
+import com.shop.common.exception.AccountNotFoundException;
+import com.shop.common.exception.NotLoginException;
 import com.shop.pojo.dto.UserLocalDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,10 +14,18 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import static com.shop.common.constant.MessageConstants.ACCOUNT_NOT_FOUND;
+import static com.shop.common.constant.MessageConstants.USER_NOT_LOGIN;
 import static com.shop.common.constant.RedisConstants.LOGIN_USER_KEY;
 import static com.shop.common.constant.RedisConstants.LOGIN_USER_TTL;
 
 
+/**
+ * 刷新token拦截器
+ *
+ * @author SK
+ * @date 2024/06/06
+ */
 public class RefreshTokenInterceptor implements HandlerInterceptor {
 
     private StringRedisTemplate stringRedisTemplate;
@@ -29,15 +39,25 @@ public class RefreshTokenInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         // 1.获取请求头中的token
         String token = request.getHeader("authorization");
-        if (StrUtil.isBlank(token)) {
-            return true;
+        if (StrUtil.isBlank(token)) throw new NotLoginException(USER_NOT_LOGIN);
+
+
+        // 2. Remove the "Bearer " prefix from the token
+        if (token.startsWith("Bearer ")) {
+            token = token.substring(7);
         }
+
         // 2.基于TOKEN获取redis中的用户
         String key = LOGIN_USER_KEY + token;
+        System.out.println("Key: " + key);
+
+
         Map<Object, Object> userMap = stringRedisTemplate.opsForHash().entries(key);
-        // 3.判断用户是否存在
+        System.out.println("User data: " + userMap);
+
+        // 4. If the user data is empty, check if the key exists in Redis
         if (userMap.isEmpty()) {
-            return true;
+            throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
         }
         // 5.将查询到的hash数据转为UserDTO
         UserLocalDTO userLocalDTO = BeanUtil.fillBeanWithMap(userMap, new UserLocalDTO(), false);
