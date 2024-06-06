@@ -21,7 +21,7 @@ public class MessageConstants {
     public static final String OBJECT_HAS_ALIVE = "对象已存在";
     public static final String ACCOUNT_NOT_FOUND = "账号不存在";
     public static final String PASSWORD_ERROR = "密码错误";
-    public static final String UNKNOWN_ERROR = "未知错误";
+    public static final String UNKNOWN_ERROR = "未知错误, 请联系管理员";
     public static final String TRASH_ERROR = "已使用或过期";
     public static final String BLOCK_ACTION = "达咩达呐, 哒咩哟";
     public static final String UPLOAD_FAILED = "文件上传失败";
