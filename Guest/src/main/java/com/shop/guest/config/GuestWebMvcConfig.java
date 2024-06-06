@@ -1,13 +1,15 @@
-package com.shop.common.config;
+package com.shop.guest.config;
 
 
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.support.config.FastJsonConfig;
 import com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter;
-import com.shop.common.interceptor.AdminJwtTokenInterceptor;
+import com.shop.common.interceptor.LoginInterceptor;
+import com.shop.common.interceptor.RefreshTokenInterceptor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -26,10 +28,10 @@ import java.util.List;
  */
 @Slf4j
 @Configuration
-public class WebMvcConfig implements WebMvcConfigurer {
+public class GuestWebMvcConfig implements WebMvcConfigurer {
 
     @Autowired
-    private AdminJwtTokenInterceptor adminJwtTokenInterceptor;
+    private StringRedisTemplate stringRedisTemplate;
 
 
     /**
@@ -38,13 +40,15 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
 
-        log.info("自定义拦截器启动");
+        log.info("自定义用户端拦截器启动");
 
-        registry.addInterceptor(adminJwtTokenInterceptor)
-                .addPathPatterns("/admin/**")
-                .excludePathPatterns("/admin/employee/login")
-                .excludePathPatterns("/swagger-ui/**").excludePathPatterns("/swagger-ui.html").excludePathPatterns("/doc.html").excludePathPatterns("/webjars/**"); //Swagger
-
+        // 登录拦截器
+        registry.addInterceptor(new LoginInterceptor())
+                .excludePathPatterns(
+                        "/guest/user/login"
+                ).order(1);
+        // token刷新的拦截器
+        registry.addInterceptor(new RefreshTokenInterceptor(stringRedisTemplate)).addPathPatterns("/**").order(0);
 
     }
 

@@ -4,14 +4,11 @@ package com.shop.serve.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.shop.common.constant.JwtClaimsConstant;
 import com.shop.common.constant.MessageConstants;
 import com.shop.common.constant.PasswordConstant;
 import com.shop.common.exception.AccountAlivedException;
 import com.shop.common.exception.AccountNotFoundException;
 import com.shop.common.exception.PasswordErrorException;
-import com.shop.common.properties.JwtProperties;
-import com.shop.common.utils.JwtUtil;
 import com.shop.pojo.dto.EmployeeDTO;
 import com.shop.pojo.dto.EmployeeLoginDTO;
 import com.shop.pojo.entity.Employee;
@@ -25,8 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 import static com.shop.common.constant.MessageConstants.ACCOUNT_ALIVED;
@@ -39,8 +34,7 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
 
     @Autowired
     private EmployeeMapper employeeMapper;
-    @Autowired
-    private JwtProperties jwtProperties;
+
 
     @Override
     public EmployeeLoginVO login(EmployeeLoginDTO employeeLoginDTO) {
@@ -54,18 +48,9 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
             throw new PasswordErrorException(MessageConstants.PASSWORD_ERROR);//密码错误
         }
 
-        //管理端使用JWT令牌简单实现登录
-        Map<String, Object> claims = new HashMap<>();
-        claims.put(JwtClaimsConstant.EMP_ID, employee.getId());
-
-        String token = JwtUtil.createJWT(
-                jwtProperties.getAdminSecretKey(),
-                jwtProperties.getAdminTtl(),
-                claims);
 
         EmployeeLoginVO employeeLoginVO = new EmployeeLoginVO();
         BeanUtils.copyProperties(employee, employeeLoginVO);
-        employeeLoginVO.setToken(token);
         return employeeLoginVO;
     }
 
