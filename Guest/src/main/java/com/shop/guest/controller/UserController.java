@@ -82,7 +82,8 @@ public class UserController {
     @Operation(summary = " 用户关注")
     @Parameters({@Parameter(name = "id", description = "被关注用户id", required = true), @Parameter(name = "isFollow", description = "是否关注", required = true)})
     public Result follow(@PathVariable("id") Long followUserId, @PathVariable("isFollow") Boolean isFollow) {
-        return userFollowService.follow(followUserId, isFollow);
+        userFollowService.follow(followUserId, isFollow);
+        return Result.success();
     }
     //http://localhost:8086/guest/user/follow/2/true
 
@@ -94,7 +95,8 @@ public class UserController {
     @Operation(summary = "是否关注")
     @Parameters(@Parameter(name = "id", description = "被关注用户id", required = true))
     public Result isFollow(@PathVariable("id") Long followUserId) {
-        return userFollowService.isFollow(followUserId);
+
+        return Result.success(userFollowService.isFollow(followUserId));
     }
     //http://localhost:8086/guest/user/follow/ornot/2
 
@@ -106,7 +108,7 @@ public class UserController {
     @Operation(summary = "关注的人")
     @Parameters(@Parameter(name = "id", description = "用户id", required = true))
     public Result shareFollow(@PathVariable("id") Long id) {
-        return userFollowService.shareFollow(id);
+        return Result.success(userFollowService.shareFollow(id));
     }
     //http://localhost:8086/guest/user/follow/share/2
 

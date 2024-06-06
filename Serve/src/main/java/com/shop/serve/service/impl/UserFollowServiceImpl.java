@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.shop.common.context.UserHolder;
-import com.shop.pojo.Result;
 import com.shop.pojo.dto.UserLocalDTO;
 import com.shop.pojo.entity.UserFollow;
 import com.shop.pojo.entity.UserFunc;
@@ -36,10 +35,16 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
 
 
     @Override
-    public Result follow(Long followUserId, Boolean isFollow) {
+    public void follow(Long followUserId, Boolean isFollow) {
 
         Long userId = UserHolder.getUser().getId(); //获取当前登录用户
         String key = "follows:" + userId;
+
+
+        UserFunc fan_userFunc = userFuncService.getOne(new LambdaQueryWrapper<>(UserFunc.class)
+                .eq(UserFunc::getId, userId));
+        UserFunc follower_userFunc = userFuncService.getOne(new LambdaQueryWrapper<>(UserFunc.class)
+                .eq(UserFunc::getId, followUserId));
 
         if (isFollow && save(UserFollow.builder() //关注 -> 新增
                 .followerId(userId)
@@ -47,34 +52,30 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
                 .build())) {
 
             stringRedisTemplate.opsForSet().add(key, followUserId.toString()); //Redis集合中添加关注用户的id
-            return Result.success();
-        }
 
-        if (remove(new QueryWrapper<UserFollow>() // 关注 -> 删除
-                .eq("follower_id", userId)
-                .eq("followed_id", followUserId))) {
+            fan_userFunc.setFollowee(fan_userFunc.getFollowee() + 1);
+            follower_userFunc.setFans(follower_userFunc.getFans() + 1);
+
+        } else {
+
+            remove(new QueryWrapper<UserFollow>() // 关注 -> 删除
+                    .eq("follower_id", userId)
+                    .eq("followed_id", followUserId));
 
             stringRedisTemplate.opsForSet().remove(key, followUserId.toString()); //Redis集合中移除关注用户的id
+
+            fan_userFunc.setFollowee(fan_userFunc.getFollowee() - 1);
+            follower_userFunc.setFans(follower_userFunc.getFans() - 1);
         }
-
-        //添加关注与被关注双方的计数器count
-        UserFunc fan_userFunc = userFuncService.getOne(new LambdaQueryWrapper<>(UserFunc.class)
-                .eq(UserFunc::getId, userId));
-        UserFunc follower_userFunc = userFuncService.getOne(new LambdaQueryWrapper<>(UserFunc.class)
-                .eq(UserFunc::getId, followUserId));
-
-        fan_userFunc.setFollowee(fan_userFunc.getFollowee() + 1);
-        follower_userFunc.setFans(follower_userFunc.getFans() + 1);
 
         userFuncService.updateById(fan_userFunc);
         userFuncService.updateById(follower_userFunc);
 
-        return Result.success();
     }
 
 
     @Override
-    public Result isFollow(Long followUserId) {
+    public boolean isFollow(Long followUserId) {
 
         Long userId = UserHolder.getUser().getId();
 
@@ -83,12 +84,12 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
                 .eq("followed_id", followUserId)
                 .count();
 
-        return Result.success(count > 0);
+        return count > 0;
     }
 
 
     @Override
-    public Result shareFollow(Long id) {
+    public List<UserLocalDTO> shareFollow(Long id) {
         Long userId = UserHolder.getUser().getId();
 
         String key1 = "follows:" + userId;
@@ -97,7 +98,7 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
         Set<String> intersect = stringRedisTemplate.opsForSet().intersect(key1, key2); //求交集
 
         if (intersect == null || intersect.isEmpty()) {
-            return Result.success(Collections.emptyList());
+            return Collections.emptyList();
         }
 
 
@@ -111,6 +112,6 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
                 .map(user -> BeanUtil.copyProperties(user, UserLocalDTO.class))
                 .collect(Collectors.toList());   // 查询用户
 
-        return Result.success(users);
+        return users;
     }
 }

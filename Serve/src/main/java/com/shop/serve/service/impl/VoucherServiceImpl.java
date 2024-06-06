@@ -150,8 +150,7 @@ public class VoucherServiceImpl extends ServiceImpl<VoucherMapper, Voucher> impl
         userFunc.setCredit(userFunc.getCredit() + value2Add);
         userFuncService.updateById(userFunc);
 
-        //后续: 直接对目前开启的交易判定是否存在, 存在则视为一次准入成功, 对用户进行增加嘉奖值操作(否则没有奖励)
-
+        //对目前开启的交易判定是否存在, 存在则视为一次准入成功, 对用户进行增加嘉奖值操作(否则没有奖励)
 
         Order order = orderService.getOne(new LambdaQueryWrapper<Order>()
                 .eq(Order::getBuyerId, BUYER_USERID));
