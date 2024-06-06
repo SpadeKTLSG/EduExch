@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 /**
- * 用户端登录拦截器
+ * 管理端登录拦截器
  *
  * @author SK
  * @date 2024/06/06

@@ -22,7 +22,7 @@ import static com.shop.common.constant.RedisConstants.LOGIN_USER_TTL_ADMIN;
 
 
 /**
- * 用户端刷新token拦截器
+ * 管理端刷新token拦截器
  *
  * @author SK
  * @date 2024/06/06
