@@ -4,8 +4,8 @@ package com.shop.admin.config;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.support.config.FastJsonConfig;
 import com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter;
-import com.shop.common.interceptor.LoginInterceptor;
-import com.shop.common.interceptor.RefreshTokenInterceptor;
+import com.shop.common.interceptor.AdminLoginInterceptor;
+import com.shop.common.interceptor.AdminRefreshTokenInterceptor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -43,24 +43,25 @@ public class AdminWebMvcConfig implements WebMvcConfigurer {
         log.info("自定义管理员端拦截器启动");
 
         //登录拦截器
-        registry.addInterceptor(new LoginInterceptor())
+        registry.addInterceptor(new AdminLoginInterceptor())
 
-                .excludePathPatterns("/admin/**", // 用户端
+                .excludePathPatterns("/guest/**", // 用户端
                         "/admin.html", "/swagger-ui/**", "/swagger-ui.html", "/doc.html", "/webjars/**", "/swagger-resources/**", "/swagger-ui/**", "/v3/**", "/error", // swagger 3.0 (坑死了)
-                        "/admin/user/login",
-                        "/admin/user/register",
-                        "/admin/user/code"
+                        "/admin/employee/login",
+                        "/admin/employee/register",
+                        "/admin/employee/code"
                 ).order(1);
 
         // token刷新拦截器
-        registry.addInterceptor(new RefreshTokenInterceptor(stringRedisTemplate))
+        registry.addInterceptor(new AdminRefreshTokenInterceptor(stringRedisTemplate))
 
                 .addPathPatterns("/**")
-                .excludePathPatterns("/admin/**",  // 用户端
-                        "/guest.html", "/swagger-ui/**", "/swagger-ui.html", "/doc.html", "/webjars/**", "/swagger-resources/**", "/swagger-ui/**", "/v3/**", "/error",// swagger 3.0 (坑死了)
-                        "/guest/user/login",
-                        "/guest/user/register", "/guest/user/code")
-                .order(0);
+                .excludePathPatterns("/guest/**",  // 用户端
+                        "/admin.html", "/swagger-ui/**", "/swagger-ui.html", "/doc.html", "/webjars/**", "/swagger-resources/**", "/swagger-ui/**", "/v3/**", "/error", // swagger 3.0 (坑死了)
+                        "/admin/employee/login",
+                        "/admin/employee/register",
+                        "/admin/employee/code"
+                ).order(0);
     }
 
 

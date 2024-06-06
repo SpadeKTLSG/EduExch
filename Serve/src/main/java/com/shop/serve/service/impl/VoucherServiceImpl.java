@@ -50,7 +50,7 @@ public class VoucherServiceImpl extends ServiceImpl<VoucherMapper, Voucher> impl
     public void addVoucher(VoucherAllDTO voucherAllDTO) {
         Voucher voucher = new Voucher();
         BeanUtils.copyProperties(voucherAllDTO, voucher);
-        voucher.setUserId(1L); //存到默认仓库用户 TODO 公共字段
+        voucher.setUserId(STORE_USERID); //存到默认仓库用户
         this.save(voucher);
     }
 

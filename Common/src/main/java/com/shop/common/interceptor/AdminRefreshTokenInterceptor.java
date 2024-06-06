@@ -2,10 +2,10 @@ package com.shop.common.interceptor;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
-import com.shop.common.context.UserHolder;
+import com.shop.common.context.EmployeeHolder;
 import com.shop.common.exception.AccountNotFoundException;
 import com.shop.common.exception.NotLoginException;
-import com.shop.pojo.dto.UserLocalDTO;
+import com.shop.pojo.dto.EmployeeLocalDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -17,22 +17,22 @@ import java.util.concurrent.TimeUnit;
 
 import static com.shop.common.constant.MessageConstants.ACCOUNT_NOT_FOUND;
 import static com.shop.common.constant.MessageConstants.USER_NOT_LOGIN;
-import static com.shop.common.constant.RedisConstants.LOGIN_USER_KEY_GUEST;
-import static com.shop.common.constant.RedisConstants.LOGIN_USER_TTL_GUEST;
+import static com.shop.common.constant.RedisConstants.LOGIN_USER_KEY_ADMIN;
+import static com.shop.common.constant.RedisConstants.LOGIN_USER_TTL_ADMIN;
 
 
 /**
- * 刷新token拦截器
+ * 用户端刷新token拦截器
  *
  * @author SK
  * @date 2024/06/06
  */
 @Slf4j
-public class RefreshTokenInterceptor implements HandlerInterceptor {
+public class AdminRefreshTokenInterceptor implements HandlerInterceptor {
 
     private StringRedisTemplate stringRedisTemplate;
 
-    public RefreshTokenInterceptor(StringRedisTemplate stringRedisTemplate) {
+    public AdminRefreshTokenInterceptor(StringRedisTemplate stringRedisTemplate) {
         this.stringRedisTemplate = stringRedisTemplate;
     }
 
@@ -48,23 +48,22 @@ public class RefreshTokenInterceptor implements HandlerInterceptor {
         }
 
 
-        String key = LOGIN_USER_KEY_GUEST + token;     //基于TOKEN获取redis中的用户
-        Map<Object, Object> userMap = stringRedisTemplate.opsForHash().entries(key);
-        log.info("操作用户信息: " + userMap);
+        String key = LOGIN_USER_KEY_ADMIN + token;     //基于TOKEN获取redis中的管理员
+        Map<Object, Object> employeeMap = stringRedisTemplate.opsForHash().entries(key);
+        log.info("操作管理员信息: " + employeeMap);
 
-        if (userMap.isEmpty()) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
+        if (employeeMap.isEmpty()) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
 
-        // 转为UserDTO, 保存用户信息到 ThreadLocal
-        UserLocalDTO userLocalDTO = BeanUtil.fillBeanWithMap(userMap, new UserLocalDTO(), false);
-        UserHolder.saveUser(userLocalDTO);
+        EmployeeLocalDTO employeeLocalDTO = BeanUtil.fillBeanWithMap(employeeMap, new EmployeeLocalDTO(), false);
+        EmployeeHolder.saveEmployee(employeeLocalDTO);
 
-        stringRedisTemplate.expire(key, LOGIN_USER_TTL_GUEST, TimeUnit.MINUTES);      // 一次用户操作, 能够刷新token有效期
+        stringRedisTemplate.expire(key, LOGIN_USER_TTL_ADMIN, TimeUnit.MINUTES);      // 一次用户操作, 能够刷新token有效期
 
         return true;
     }
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
-        UserHolder.removeUser();    // 移除用户
+        EmployeeHolder.removeEmployee(); // 移除管理员
     }
 }

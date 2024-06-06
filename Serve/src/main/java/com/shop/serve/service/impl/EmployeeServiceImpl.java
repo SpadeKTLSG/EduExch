@@ -4,6 +4,7 @@ package com.shop.serve.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.lang.UUID;
+import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.shop.common.constant.PasswordConstant;
@@ -14,7 +15,6 @@ import com.shop.common.utils.RegexUtils;
 import com.shop.pojo.dto.EmployeeDTO;
 import com.shop.pojo.dto.EmployeeLocalDTO;
 import com.shop.pojo.dto.EmployeeLoginDTO;
-import com.shop.pojo.dto.UserLocalDTO;
 import com.shop.pojo.entity.Employee;
 import com.shop.pojo.vo.EmployeeVO;
 import com.shop.serve.mapper.EmployeeMapper;
@@ -69,15 +69,15 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
 
         // 随机生成token，作为登录令牌
         String token = UUID.randomUUID().toString(true);
-        EmployeeLocalDTO employeeLocalDTO = BeanUtil.copyProperties(employeeLocalDTO, UserLocalDTO.class);
-        Map<String, Object> userMap = BeanUtil.beanToMap(userDTO, new HashMap<>(),
+        EmployeeLocalDTO employeeLocalDTO = BeanUtil.copyProperties(employee, EmployeeLocalDTO.class);
+        Map<String, Object> employeeMap = BeanUtil.beanToMap(employeeLocalDTO, new HashMap<>(),
                 CopyOptions.create()
                         .setIgnoreNullValue(true)
                         .setFieldValueEditor((fieldName, fieldValue) -> fieldValue.toString()));
 
         // 存储
         String tokenKey = LOGIN_USER_KEY_ADMIN + token;
-        stringRedisTemplate.opsForHash().putAll(tokenKey, userMap);
+        stringRedisTemplate.opsForHash().putAll(tokenKey, employeeMap);
         stringRedisTemplate.expire(tokenKey, LOGIN_USER_TTL_ADMIN, TimeUnit.MINUTES);
 
         return token;
@@ -85,12 +85,28 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
 
     @Override
     public String sendCode(String phone, HttpSession session) {
-        return null;
+
+        if (RegexUtils.isPhoneInvalid(phone)) throw new InvalidInputException(PHONE_INVALID);
+
+        Set<String> keys = stringRedisTemplate.keys(LOGIN_USER_KEY_ADMIN + phone + "*"); //删除之前的验证码
+        if (keys != null) {
+            stringRedisTemplate.delete(keys);
+        }
+
+        String code = RandomUtil.randomNumbers(6); //生成
+
+        stringRedisTemplate.opsForValue().set(LOGIN_CODE_KEY_ADMIN + phone, code, LOGIN_CODE_TTL_ADMIN, TimeUnit.MINUTES);
+
+        return code; //调试环境: 返回验证码; 未来引入邮箱发送验证码
     }
 
     @Override
     public void logout() {
-
+        //删除掉之前的所有登陆令牌
+        Set<String> keys = stringRedisTemplate.keys(LOGIN_USER_KEY_ADMIN + "*");
+        if (keys != null) {
+            stringRedisTemplate.delete(keys);
+        }
     }
 
 
