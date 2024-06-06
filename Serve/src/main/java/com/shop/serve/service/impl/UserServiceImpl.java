@@ -63,7 +63,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (RegexUtils.isPhoneInvalid(phone)) throw new InvalidInputException(PHONE_INVALID);
 
         //从redis获取验证码并校验
-        String cacheCode = stringRedisTemplate.opsForValue().get(LOGIN_CODE_KEY + phone);
+        String cacheCode = stringRedisTemplate.opsForValue().get(LOGIN_CODE_KEY_GUEST + phone);
         String code = userLoginDTO.getCode();
         if (cacheCode == null || !cacheCode.equals(code)) throw new InvalidInputException(CODE_INVALID);
 
@@ -128,7 +128,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public String login(UserLoginDTO userLoginDTO, HttpSession session) {
 
         //删除掉之前的所有登陆令牌
-        Set<String> keys = stringRedisTemplate.keys(LOGIN_USER_KEY + "*");
+        Set<String> keys = stringRedisTemplate.keys(LOGIN_USER_KEY_GUEST + "*");
         if (keys != null) {
             stringRedisTemplate.delete(keys);
         }
@@ -137,7 +137,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (RegexUtils.isPhoneInvalid(phone)) throw new InvalidInputException(PHONE_INVALID);
 
         //从redis获取验证码并校验
-        String cacheCode = stringRedisTemplate.opsForValue().get(LOGIN_CODE_KEY + phone);
+        String cacheCode = stringRedisTemplate.opsForValue().get(LOGIN_CODE_KEY_GUEST + phone);
         String code = userLoginDTO.getCode();
         if (cacheCode == null || !cacheCode.equals(code)) throw new InvalidInputException(CODE_INVALID);
 
@@ -155,9 +155,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                         .setFieldValueEditor((fieldName, fieldValue) -> fieldValue.toString()));
 
         // 存储
-        String tokenKey = LOGIN_USER_KEY + token;
+        String tokenKey = LOGIN_USER_KEY_GUEST + token;
         stringRedisTemplate.opsForHash().putAll(tokenKey, userMap);
-        stringRedisTemplate.expire(tokenKey, LOGIN_USER_TTL, TimeUnit.MINUTES);
+        stringRedisTemplate.expire(tokenKey, LOGIN_USER_TTL_GUEST, TimeUnit.MINUTES);
 
         return token;
     }
@@ -166,7 +166,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public void logout() {
         //删除掉之前的所有登陆令牌
-        Set<String> keys = stringRedisTemplate.keys(LOGIN_USER_KEY + "*");
+        Set<String> keys = stringRedisTemplate.keys(LOGIN_USER_KEY_GUEST + "*");
         if (keys != null) {
             stringRedisTemplate.delete(keys);
         }
@@ -191,14 +191,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         if (RegexUtils.isPhoneInvalid(phone)) throw new InvalidInputException(PHONE_INVALID);
 
-        Set<String> keys = stringRedisTemplate.keys(LOGIN_USER_KEY + phone + "*"); //删除之前的验证码
+        Set<String> keys = stringRedisTemplate.keys(LOGIN_USER_KEY_GUEST + phone + "*"); //删除之前的验证码
         if (keys != null) {
             stringRedisTemplate.delete(keys);
         }
 
         String code = RandomUtil.randomNumbers(6); //生成
 
-        stringRedisTemplate.opsForValue().set(LOGIN_CODE_KEY + phone, code, LOGIN_CODE_TTL, TimeUnit.MINUTES);
+        stringRedisTemplate.opsForValue().set(LOGIN_CODE_KEY_GUEST + phone, code, LOGIN_CODE_TTL_GUEST, TimeUnit.MINUTES);
 
         return code; //调试环境: 返回验证码; 未来引入邮箱发送验证码
     }

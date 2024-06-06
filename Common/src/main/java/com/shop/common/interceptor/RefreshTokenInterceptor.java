@@ -17,8 +17,8 @@ import java.util.concurrent.TimeUnit;
 
 import static com.shop.common.constant.MessageConstants.ACCOUNT_NOT_FOUND;
 import static com.shop.common.constant.MessageConstants.USER_NOT_LOGIN;
-import static com.shop.common.constant.RedisConstants.LOGIN_USER_KEY;
-import static com.shop.common.constant.RedisConstants.LOGIN_USER_TTL;
+import static com.shop.common.constant.RedisConstants.LOGIN_USER_KEY_GUEST;
+import static com.shop.common.constant.RedisConstants.LOGIN_USER_TTL_GUEST;
 
 
 /**
@@ -48,7 +48,7 @@ public class RefreshTokenInterceptor implements HandlerInterceptor {
         }
 
 
-        String key = LOGIN_USER_KEY + token;     //基于TOKEN获取redis中的用户
+        String key = LOGIN_USER_KEY_GUEST + token;     //基于TOKEN获取redis中的用户
         Map<Object, Object> userMap = stringRedisTemplate.opsForHash().entries(key);
         log.info("操作用户信息: " + userMap);
 
@@ -58,7 +58,7 @@ public class RefreshTokenInterceptor implements HandlerInterceptor {
         UserLocalDTO userLocalDTO = BeanUtil.fillBeanWithMap(userMap, new UserLocalDTO(), false);
         UserHolder.saveUser(userLocalDTO);
 
-        stringRedisTemplate.expire(key, LOGIN_USER_TTL, TimeUnit.MINUTES);      // 一次用户操作, 能够刷新token有效期
+        stringRedisTemplate.expire(key, LOGIN_USER_TTL_GUEST, TimeUnit.MINUTES);      // 一次用户操作, 能够刷新token有效期
 
         return true;
     }

@@ -9,17 +9,30 @@ import com.shop.pojo.dto.UserLocalDTO;
  * @date 2024/06/05
  */
 public class UserHolder {
-    private static final ThreadLocal<UserLocalDTO> tl = new ThreadLocal<>();
 
+    /**
+     * 用户ThreadLocal
+     */
+    private static final ThreadLocal<UserLocalDTO> userTL = new ThreadLocal<>();
+
+    /**
+     * 保存用户
+     */
     public static void saveUser(UserLocalDTO user) {
-        tl.set(user);
+        userTL.set(user);
     }
 
+    /**
+     * 获取用户
+     */
     public static UserLocalDTO getUser() {
-        return tl.get();
+        return userTL.get();
     }
 
+    /**
+     * 移除用户
+     */
     public static void removeUser() {
-        tl.remove();
+        userTL.remove();
     }
 }

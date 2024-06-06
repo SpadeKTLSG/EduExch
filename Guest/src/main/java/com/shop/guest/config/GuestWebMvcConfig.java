@@ -21,7 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
- * 配置类，注册web层相关组件
+ * Guest的WebMvc配置
  *
  * @author SK
  * @date 2024/06/05

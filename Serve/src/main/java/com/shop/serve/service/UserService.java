@@ -15,6 +15,8 @@ public interface UserService extends IService<User> {
 
     String sendCode(String phone, HttpSession session);
 
+    void logout();
+
     void register(UserLoginDTO userLoginDTO, HttpSession session);
 
     void updateUserGreatDTO(UserGreatDTO userGreatDTO) throws InstantiationException, IllegalAccessException;
@@ -31,7 +33,6 @@ public interface UserService extends IService<User> {
 
     void killMyAccount();
 
-    void logout();
 
     void updateUserCode(UserLoginDTO userLoginDTO);
 }

@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,21 +45,31 @@ public class EmployeeController {
     @PostMapping("/login")
     @Operation(summary = "登录")
     @Parameters(@Parameter(name = "employeeLoginDTO", description = "员工登录DTO", required = true))
-    public Result login(@RequestBody EmployeeLoginDTO employeeLoginDTO) {
-        return Result.success(employeeService.login(employeeLoginDTO));
+    public Result login(@RequestBody EmployeeLoginDTO employeeLoginDTO, HttpSession session) {
+        return Result.success(employeeService.login(employeeLoginDTO, session));
     }
     //http://localhost:8085/admin/employee/login
 
 
     /**
-     * 退出
+     * 发送验证码
+     */
+    @PostMapping("code")
+    @Operation(summary = "发送手机验证码")
+    @Parameters(@Parameter(name = "phone", description = "手机号", required = true))
+    public Result sendCode(@RequestParam("phone") String phone, HttpSession session) {
+        return Result.success(employeeService.sendCode(phone, session));
+    }
+    //http://localhost:8085/admin/employee/code?phone=15985785169
+
+
+    /**
+     * 登出功能
      */
     @PostMapping("/logout")
     @Operation(summary = "退出")
     public Result logout() {
-        //退出的实现:
-        //1、前端自己删除token
-        //2、后端不做处理
+        employeeService.logout();
         return Result.success();
     }
     //http://localhost:8085/admin/employee/logout
@@ -77,6 +88,9 @@ public class EmployeeController {
         return Result.success();
     }
     //http://localhost:8085/admin/employee/save
+
+
+    //没有手动注册功能, 由系统实现
 
 
     //! DELETE

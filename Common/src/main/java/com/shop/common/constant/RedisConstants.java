@@ -8,29 +8,61 @@ package com.shop.common.constant;
  */
 public class RedisConstants {
 
-    /**
-     * 验证码Key前缀 login:code:
-     */
-    public static final String LOGIN_CODE_KEY = "login:code:";
+
+    //* Admin
+
 
     /**
-     *
+     * 验证码Key前缀
      */
-    public static final Long LOGIN_CODE_TTL = 172800L; // 2天
+    public static final String LOGIN_CODE_KEY_ADMIN = "admin:login:code:";
 
     /**
-     * 登录接受Key前缀 login:token:
+     * 验证码过期时间
      */
-    public static final String LOGIN_USER_KEY = "login:token:";
+    public static final Long LOGIN_CODE_TTL_ADMIN = 1800L; // 30分钟
 
     /**
-     *
+     * 登录接受Key前缀
      */
-    public static final Long LOGIN_USER_TTL = 36000L; // 10小时
+    public static final String LOGIN_USER_KEY_ADMIN = "admin:login:token:";
+
     /**
-     *
+     * 登录用户过期时间
+     */
+    public static final Long LOGIN_USER_TTL_ADMIN = 36000L; // 10小时
+
+
+    //* Guest
+
+    /**
+     * 验证码Key前缀
+     */
+    public static final String LOGIN_CODE_KEY_GUEST = "guest:login:code:";
+
+    /**
+     * 验证码过期时间
+     */
+    public static final Long LOGIN_CODE_TTL_GUEST = 1800L; // 30分钟
+
+    /**
+     * 登录接受Key前缀
+     */
+    public static final String LOGIN_USER_KEY_GUEST = "guest:login:token:";
+
+    /**
+     * 登录用户过期时间
+     */
+    public static final Long LOGIN_USER_TTL_GUEST = 36000L; // 10小时
+
+
+
+
+    /**
+     * 用户签到Key前缀
      */
     public static final String USER_SIGN_KEY = "sign:";
+
 
     public static final Long CACHE_NULL_TTL = 2L;
 

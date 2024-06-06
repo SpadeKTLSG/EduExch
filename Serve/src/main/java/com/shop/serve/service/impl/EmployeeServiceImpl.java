@@ -1,31 +1,40 @@
 package com.shop.serve.service.impl;
 
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.bean.copier.CopyOptions;
+import cn.hutool.core.lang.UUID;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.shop.common.constant.MessageConstants;
 import com.shop.common.constant.PasswordConstant;
 import com.shop.common.exception.AccountAlivedException;
 import com.shop.common.exception.AccountNotFoundException;
-import com.shop.common.exception.PasswordErrorException;
+import com.shop.common.exception.InvalidInputException;
+import com.shop.common.utils.RegexUtils;
 import com.shop.pojo.dto.EmployeeDTO;
+import com.shop.pojo.dto.EmployeeLocalDTO;
 import com.shop.pojo.dto.EmployeeLoginDTO;
+import com.shop.pojo.dto.UserLocalDTO;
 import com.shop.pojo.entity.Employee;
-import com.shop.pojo.vo.EmployeeLoginVO;
 import com.shop.pojo.vo.EmployeeVO;
 import com.shop.serve.mapper.EmployeeMapper;
 import com.shop.serve.service.EmployeeService;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
-import static com.shop.common.constant.MessageConstants.ACCOUNT_ALIVED;
-import static com.shop.common.constant.MessageConstants.ACCOUNT_NOT_FOUND;
+import static com.shop.common.constant.MessageConstants.*;
+import static com.shop.common.constant.RedisConstants.*;
 import static com.shop.common.utils.NewBeanUtils.getNullPropertyNames;
 
 @Slf4j
@@ -33,25 +42,55 @@ import static com.shop.common.utils.NewBeanUtils.getNullPropertyNames;
 public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> implements EmployeeService {
 
     @Autowired
-    private EmployeeMapper employeeMapper;
+    private StringRedisTemplate stringRedisTemplate;
 
 
     @Override
-    public EmployeeLoginVO login(EmployeeLoginDTO employeeLoginDTO) {
+    public String login(EmployeeLoginDTO employeeLoginDTO, HttpSession session) {
 
-        Employee employee = employeeMapper.selectOne(new LambdaQueryWrapper<Employee>() //用户名查询数据库中的数据
-                .eq(Employee::getAccount, employeeLoginDTO.getAccount()));
-
-        if (employee == null) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
-
-        if (!DigestUtils.md5DigestAsHex(employeeLoginDTO.getPassword().getBytes()).equals(employee.getPassword())) {
-            throw new PasswordErrorException(MessageConstants.PASSWORD_ERROR);//密码错误
+        //删除掉之前的所有登陆令牌
+        Set<String> keys = stringRedisTemplate.keys(LOGIN_USER_KEY_ADMIN + "*");
+        if (keys != null) {
+            stringRedisTemplate.delete(keys);
         }
 
+        String phone = employeeLoginDTO.getPhone();
+        if (RegexUtils.isPhoneInvalid(phone)) throw new InvalidInputException(PHONE_INVALID);
 
-        EmployeeLoginVO employeeLoginVO = new EmployeeLoginVO();
-        BeanUtils.copyProperties(employee, employeeLoginVO);
-        return employeeLoginVO;
+        //从redis获取验证码并校验
+        String cacheCode = stringRedisTemplate.opsForValue().get(LOGIN_CODE_KEY_ADMIN + phone);
+        String code = employeeLoginDTO.getCode();
+        if (cacheCode == null || !cacheCode.equals(code)) throw new InvalidInputException(CODE_INVALID);
+
+        //根据用户名查询用户
+        Employee employee = query().eq("account", employeeLoginDTO.getAccount()).one();
+        if (employee == null) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
+
+
+        // 随机生成token，作为登录令牌
+        String token = UUID.randomUUID().toString(true);
+        EmployeeLocalDTO employeeLocalDTO = BeanUtil.copyProperties(employeeLocalDTO, UserLocalDTO.class);
+        Map<String, Object> userMap = BeanUtil.beanToMap(userDTO, new HashMap<>(),
+                CopyOptions.create()
+                        .setIgnoreNullValue(true)
+                        .setFieldValueEditor((fieldName, fieldValue) -> fieldValue.toString()));
+
+        // 存储
+        String tokenKey = LOGIN_USER_KEY_ADMIN + token;
+        stringRedisTemplate.opsForHash().putAll(tokenKey, userMap);
+        stringRedisTemplate.expire(tokenKey, LOGIN_USER_TTL_ADMIN, TimeUnit.MINUTES);
+
+        return token;
+    }
+
+    @Override
+    public String sendCode(String phone, HttpSession session) {
+        return null;
+    }
+
+    @Override
+    public void logout() {
+
     }
 
 

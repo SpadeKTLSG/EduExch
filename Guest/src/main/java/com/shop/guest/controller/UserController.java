@@ -51,7 +51,7 @@ public class UserController {
 
 
     /**
-     * 发送手机验证码 并保存到redis
+     * 发送验证码
      */
     @PostMapping("code")
     @Operation(summary = "发送手机验证码")
@@ -74,6 +74,7 @@ public class UserController {
     }
     //http://localhost:8086/guest/user/logout
 
+    //*---- 关注 ----
 
     /**
      * 关注功能
@@ -112,6 +113,8 @@ public class UserController {
     }
     //http://localhost:8086/guest/user/follow/share/2
 
+
+    //*---- 签到 ----
 
     /**
      * 签到
