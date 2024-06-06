@@ -9,11 +9,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.shop.common.constant.PasswordConstant;
 import com.shop.common.context.UserHolder;
-import com.shop.common.exception.AccountNotFoundException;
-import com.shop.common.exception.BaseException;
-import com.shop.common.exception.NotLoginException;
+import com.shop.common.exception.*;
 import com.shop.common.utils.RegexUtils;
-import com.shop.pojo.Result;
 import com.shop.pojo.dto.*;
 import com.shop.pojo.entity.User;
 import com.shop.pojo.entity.UserDetail;
@@ -37,10 +34,7 @@ import org.springframework.util.DigestUtils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static com.shop.common.constant.MessageConstants.*;
@@ -63,24 +57,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Transactional
     @Override
-    public Result register(UserLoginDTO userLoginDTO, HttpSession session) {
+    public void register(UserLoginDTO userLoginDTO, HttpSession session) {
+
         String phone = userLoginDTO.getPhone();
-        if (RegexUtils.isPhoneInvalid(phone)) {
-            return Result.error("手机号格式错误！");
-        }
+        if (RegexUtils.isPhoneInvalid(phone)) throw new InvalidInputException(PHONE_INVALID);
 
         //从redis获取验证码并校验
         String cacheCode = stringRedisTemplate.opsForValue().get(LOGIN_CODE_KEY + phone);
         String code = userLoginDTO.getCode();
-        if (cacheCode == null || !cacheCode.equals(code)) {
-            return Result.error("验证码错误!");
-        }
+        if (cacheCode == null || !cacheCode.equals(code)) throw new InvalidInputException(CODE_INVALID);
 
         //校验账户是否已存在
         User userExist = query().eq("account", userLoginDTO.getAccount()).one();
-        if (userExist != null) {
-            return Result.error("账户已存在！");
-        }
+        if (userExist != null) throw new AccountAlivedException(ACCOUNT_ALIVED);
 
         //创建账户 + 账户具体信息 + 账户功能信息, 填充必须字段
         User user = User.builder()
@@ -101,14 +90,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 .credit(114L)
                 .build();
         userFuncService.save(userFunc);
-
-
-        return Result.success();
     }
 
     @Override
     @Transactional
-    @SuppressWarnings("unchecked")
+
     public void updateUserGreatDTO(UserGreatDTO userGreatDTO) throws InstantiationException, IllegalAccessException {
         //? 联表选择性更新字段示例
 
@@ -118,7 +104,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
         // 用Map存储DTO和Service
-        @SuppressWarnings("rawtypes")
         Map<Object, IService> dtoServiceMap = new HashMap<>();
         dtoServiceMap.put(createDTOFromUserGreatDTO(userGreatDTO, UserAllDTO.class), this);
         dtoServiceMap.put(createDTOFromUserGreatDTO(userGreatDTO, UserFuncAllDTO.class), userFuncService);
@@ -139,30 +124,29 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public Result login(UserLoginDTO userLoginDTO, HttpSession session) {
+    public String login(UserLoginDTO userLoginDTO, HttpSession session) {
 
         String phone = userLoginDTO.getPhone();
-        if (RegexUtils.isPhoneInvalid(phone)) {
-            return Result.error("手机号格式错误！");
-        }
+        if (RegexUtils.isPhoneInvalid(phone)) throw new InvalidInputException(PHONE_INVALID);
 
         //从redis获取验证码并校验
         String cacheCode = stringRedisTemplate.opsForValue().get(LOGIN_CODE_KEY + phone);
         String code = userLoginDTO.getCode();
-        if (cacheCode == null || !cacheCode.equals(code)) {
-            return Result.error("验证码错误!");
+        if (cacheCode == null || !cacheCode.equals(code)) throw new InvalidInputException(CODE_INVALID);
+
+        //根据用户名查询用户
+        User user = query().eq("account", userLoginDTO.getAccount()).one();
+        if (user == null) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
+
+        //删除掉之前的所有登陆令牌
+        Set<String> keys = stringRedisTemplate.keys(LOGIN_USER_KEY + "*");
+        if (keys != null) {
+            stringRedisTemplate.delete(keys);
         }
-
-
-        User user = query().eq("account", userLoginDTO.getAccount()).one();      //根据用户名查询用户
-        if (user == null) {
-            return Result.error("用户不存在！");
-        }
-
 
         // 随机生成token，作为登录令牌
         String token = UUID.randomUUID().toString(true);
-        UserLocalDTO userDTO = BeanUtil.copyProperties(user, UserLocalDTO.class); //将User对象转为HashMap存储
+        UserLocalDTO userDTO = BeanUtil.copyProperties(user, UserLocalDTO.class);
         Map<String, Object> userMap = BeanUtil.beanToMap(userDTO, new HashMap<>(),
                 CopyOptions.create()
                         .setIgnoreNullValue(true)
@@ -171,33 +155,32 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 存储
         String tokenKey = LOGIN_USER_KEY + token;
         stringRedisTemplate.opsForHash().putAll(tokenKey, userMap);
+        stringRedisTemplate.expire(tokenKey, LOGIN_USER_TTL, TimeUnit.MINUTES);
 
-        stringRedisTemplate.expire(tokenKey, LOGIN_USER_TTL, TimeUnit.MINUTES);      // 设置token有效期
-
-        return Result.success(token);
+        return token;
     }
 
 
     @Override
-    public Result sendCode(String phone, HttpSession session) {
+    public String sendCode(String phone, HttpSession session) {
 
-        if (RegexUtils.isPhoneInvalid(phone)) {
-            return Result.error("手机号格式错误！");
+        if (RegexUtils.isPhoneInvalid(phone)) throw new InvalidInputException(PHONE_INVALID);
+
+        Set<String> keys = stringRedisTemplate.keys(LOGIN_USER_KEY + phone + "*"); //删除之前的验证码
+        if (keys != null) {
+            stringRedisTemplate.delete(keys);
         }
 
-        String code = RandomUtil.randomNumbers(6); //生成验证码
+        String code = RandomUtil.randomNumbers(6); //生成
 
-        //保存验证码到 session
         stringRedisTemplate.opsForValue().set(LOGIN_CODE_KEY + phone, code, LOGIN_CODE_TTL, TimeUnit.MINUTES);
 
-        log.info("模拟发送短信验证码成功，验证码：{}", code);
-
-        return Result.success();
+        return code; //调试环境: 返回验证码; 未来引入邮箱发送验证码
     }
 
 
     @Override
-    public Result sign() {
+    public void sign() {
 
 //        Long userId = UserHolder.getUser().getId();
         //调试选项:
@@ -208,12 +191,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         String key = USER_SIGN_KEY + userId + keySuffix;
         int dayOfMonth = now.getDayOfMonth();
         stringRedisTemplate.opsForValue().setBit(key, dayOfMonth - 1, true);
-        return Result.success();
+
     }
 
 
     @Override
-    public Result signCount() {
+    public int signCount() {
 
 //        Long userId = UserHolder.getUser().getId();
         //调试选项:
@@ -233,13 +216,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         );
 
         if (result == null || result.isEmpty()) { // 没有任何签到结果
-            return Result.success(0);
+            return 0;
         }
 
         Long num = result.get(0); // 获取签到结果
 
         if (num == null || num == 0) {
-            return Result.success(0);
+            return 0;
         }
 
         int count = 0;
@@ -249,7 +232,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             count++;
             num >>>= 1;// 把数字右移一位，抛弃最后一个bit位，继续下一个bit位
         }
-        return Result.success(count);
+        return count;
     }
 
 

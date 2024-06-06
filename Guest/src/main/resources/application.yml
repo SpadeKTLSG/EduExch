@@ -55,7 +55,8 @@ spring:
           max-idle: 10
           min-idle: 1
           time-between-eviction-runs: 10s
-      timeout: 5000            # 超时时间
+      timeout: 20000            # 超时时间: 20s
+
 
   #文件上传
   servlet:

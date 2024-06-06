@@ -25,6 +25,8 @@ public class MessageConstants {
     public static final String TRASH_ERROR = "已使用或过期";
     public static final String BLOCK_ACTION = "达咩达呐, 哒咩哟";
     public static final String UPLOAD_FAILED = "文件上传失败";
+    public static final String PHONE_INVALID = "手机号不合法";
+    public static final String CODE_INVALID = "手机号不合法";
 
 
     public static final String ACCOUNT_LOCKED = "账号被锁定";
