@@ -48,12 +48,10 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
         Employee employee = employeeMapper.selectOne(new LambdaQueryWrapper<Employee>() //用户名查询数据库中的数据
                 .eq(Employee::getAccount, employeeLoginDTO.getAccount()));
 
-        if (employee == null) {//账号不存在
-            throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
+        if (employee == null) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
 
-        }
-        if (!DigestUtils.md5DigestAsHex(employeeLoginDTO.getPassword().getBytes()).equals(employee.getPassword())) {//密码错误
-            throw new PasswordErrorException(MessageConstants.PASSWORD_ERROR);
+        if (!DigestUtils.md5DigestAsHex(employeeLoginDTO.getPassword().getBytes()).equals(employee.getPassword())) {
+            throw new PasswordErrorException(MessageConstants.PASSWORD_ERROR);//密码错误
         }
 
         //管理端使用JWT令牌简单实现登录
