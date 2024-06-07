@@ -27,7 +27,7 @@ public interface ProdService extends IService<Prod> {
 
     void updateStatus(ProdLocateDTO prodLocateDTO, Integer func);
 
-    ProdGreatVO GetByNameSingle(String name);
+    ProdGreatVO GetByNameSingle(ProdLocateDTO prodLocateDTO);
 
     Page<Prod> getPageByCate(String cate, Integer current);
 

@@ -24,6 +24,7 @@ import com.shop.serve.tool.NewDTOUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +32,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static com.shop.common.constant.MessageConstants.*;
+import static com.shop.common.constant.RedisConstants.USER_VO_KEY;
 import static com.shop.common.utils.NewBeanUtils.dtoMapService;
 
 @Slf4j
@@ -43,6 +45,8 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
     private ProdCateService prodCateService;
     @Autowired
     private NewDTOUtils dtoUtils;
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
 
 
     @Override
@@ -226,16 +230,29 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
     }
 
     @Override
-    public ProdGreatVO GetByNameSingle(String name) {
+    @Transactional
+    public ProdGreatVO GetByNameSingle(ProdLocateDTO prodLocateDTO) {
 
         Prod prod = this.getOne(Wrappers.<Prod>lambdaQuery()
-                .eq(Prod::getName, name)
-                .eq(Prod::getUserId, UserHolder.getUser().getId()));
+                .eq(Prod::getName, prodLocateDTO.getName())
+                .eq(Prod::getUserId, prodLocateDTO.getUserId()));
 
 
         if (prod == null) throw new SthNotFoundException(OBJECT_NOT_ALIVE);
 
-        //TODO 添加浏览量处理
+        //视为一次对具体商品的浏览, 记录浏览量到Redis
+        String productKey = USER_VO_KEY + prod.getId();
+
+        // 使用HyperLogLog记录用户id -> 浏览商品记录
+        stringRedisTemplate.opsForHyperLogLog().add(productKey, UserHolder.getUser().getId().toString());
+
+        // 统计该商品浏览量
+        Long count = stringRedisTemplate.opsForHyperLogLog().size(productKey);
+
+        // 更新商品浏览量
+        ProdFunc prodFunc = prodFuncService.getOne(Wrappers.<ProdFunc>lambdaQuery().eq(ProdFunc::getId, prod.getId()));
+        prodFunc.setVisit(prodFunc.getVisit() + count);
+        prodFuncService.updateById(prodFunc);
 
         ProdGreatVO prodGreatVO;
 

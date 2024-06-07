@@ -96,7 +96,11 @@ public class ProdController {
      * 优惠券触发商品状态修改
      */
     @PutMapping("/update/status/{func}")
-
+    @Operation(summary = "优惠券触发商品状态修改")
+    @Parameters({
+            @Parameter(name = "prodLocateDTO", description = "商品定位DTO", required = true),
+            @Parameter(name = "func", description = "功能", required = true)
+    })
     public Result updateStatus(@RequestBody ProdLocateDTO prodLocateDTO, @PathVariable("func") Integer func) {
         prodService.updateStatus(prodLocateDTO, func);
 
@@ -138,13 +142,13 @@ public class ProdController {
      * name查询自己单个商品详细信息
      * <p>联表查询VO</p>
      */
-    @GetMapping("/{name}")
+    @GetMapping("/get")
     @Operation(summary = "查询单个商品详细信息")
-    @Parameters(@Parameter(name = "name", description = "商品名", required = true))
-    public Result getByNameSingle(@PathVariable("name") String name) {
-        return Result.success(prodService.GetByNameSingle(name));
+    @Parameters(@Parameter(name = "prodLocateDTO", description = "商品定位DTO"))
+    public Result getProd(@RequestBody ProdLocateDTO prodLocateDTO) {
+        return Result.success(prodService.GetByNameSingle(prodLocateDTO));
     }
-    //http://localhost:8086/guest/prod/
+    //http://localhost:8086/guest/prod/get
 
 
     /**

@@ -64,6 +64,12 @@ public class RedisConstants {
     public static final String USER_SIGN_KEY = "sign:";
 
 
+    /**
+     * 用户VO浏览Key前缀
+     */
+    public static final String USER_VO_KEY = "vo:";
+
+
     public static final Long CACHE_NULL_TTL = 2L;
 
     public static final Long CACHE_SHOP_TTL = 30L;
