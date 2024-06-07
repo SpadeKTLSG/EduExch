@@ -1,8 +1,10 @@
-package com.shop.common.config;
+package com.shop.guest.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -12,15 +14,26 @@ import org.springframework.context.annotation.Configuration;
  * @author SK
  * @date 2024/06/05
  */
+@Slf4j
 @Configuration
 public class RedissonConfig {
 
+
+    @Value("${eduexch.redis.host}")
+    private String host;
+
+    @Value("${eduexch.redis.port}")
+    private String port;
+
+    @Value("${eduexch.redis.password}")
+    private String password;
+
+
     @Bean
     public RedissonClient redissonClient() {
-        // 配置
+        log.info("Redis配置");
         Config config = new Config();
-        config.useSingleServer().setAddress("redis://20.239.61.109:6379").setPassword("2333");
-        // 创建RedissonClient对象
+        config.useSingleServer().setAddress("redis://" + host + ":" + port).setPassword(password);
         return Redisson.create(config);
     }
 }

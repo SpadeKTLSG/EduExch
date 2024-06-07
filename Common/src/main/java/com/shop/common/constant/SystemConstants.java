@@ -8,11 +8,23 @@ package com.shop.common.constant;
  */
 public class SystemConstants {
 
-    public static final String IMAGE_UPLOAD_DIR = "D:\\lesson\\nginx-1.18.0\\html\\hmdp\\imgs\\"; //TODO
+    /**
+     * 图片上传路径
+     */
+    public static final String IMAGE_UPLOAD_DIR = "D:\\CODE\\JA\\EduExch\\res\\img";
 
-    public static final String USER_NICK_NAME_PREFIX = "user_";
+    /**
+     * 用户昵称前缀
+     */
+    public static final String USER_NICK_NAME_PREFIX = "";
 
+    /**
+     * 默认分页大小
+     */
     public static final int DEFAULT_PAGE_SIZE = 5;
 
+    /**
+     * 最大分页大小
+     */
     public static final int MAX_PAGE_SIZE = 10;
 }

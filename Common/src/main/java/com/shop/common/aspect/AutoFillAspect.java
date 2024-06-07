@@ -3,7 +3,6 @@ package com.shop.common.aspect;
 
 import com.shop.common.annotation.AutoFill;
 import com.shop.common.constant.AutoFillConstant;
-import com.shop.common.context.UserHolder;
 import com.shop.common.enumeration.OperationType;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
@@ -28,16 +27,18 @@ public class AutoFillAspect {
     /**
      * 切入点
      */
-    @Pointcut("execution(* com.shop.serve.mapper.*.*(..)) && @annotation(com.shop.common.annotation.AutoFill)")
+    @Pointcut("execution(* com.shop.serve.service.*.*(..)) && @annotation(com.shop.common.annotation.AutoFill)")
     public void autoFillPointCut() {
     }
 
+
     /**
-     * 前置通知，在通知中进行公共字段的赋值
+     * 前置通知中进行公共字段赋值
      */
     @Before("autoFillPointCut()")
     public void autoFill(JoinPoint joinPoint) {
-        log.info("开始进行公共字段自动填充...");
+
+        log.info("进行公共字段自动填充");
 
         //获取到当前被拦截的方法上的数据库操作类型
         //反射处理
@@ -47,45 +48,35 @@ public class AutoFillAspect {
 
         //获取到当前被拦截的方法的参数--实体对象
         Object[] args = joinPoint.getArgs();
+
         if (args == null || args.length == 0) {
             return;
         }
 
         Object entity = args[0];
 
-        //准备赋值的数据
-        LocalDateTime now = LocalDateTime.now();
-        Long currentId = UserHolder.getUser().getId();
+        LocalDateTime now = LocalDateTime.now();//准备赋值的数据
 
         //根据当前不同的操作类型，为对应的属性通过反射来赋值
         if (operationType == OperationType.INSERT) {
-            //为4个公共字段赋值
             try {
-                Method setCreateTime = entity.getClass().getDeclaredMethod(AutoFillConstant.SET_CREATE_TIME, LocalDateTime.class);
-                Method setCreateUser = entity.getClass().getDeclaredMethod(AutoFillConstant.SET_CREATE_USER, Long.class);
-                Method setUpdateTime = entity.getClass().getDeclaredMethod(AutoFillConstant.SET_UPDATE_TIME, LocalDateTime.class);
-                Method setUpdateUser = entity.getClass().getDeclaredMethod(AutoFillConstant.SET_UPDATE_USER, Long.class);
-
-                //通过反射为对象属性赋值
+                //? 这里强绑定了实体类Notice的更新方法, 仅为演示, 因为没有设置日志模块, 并不存在许多要更新的字段.
+                Method setCreateTime = entity.getClass().getDeclaredMethod(AutoFillConstant.NOTICE_SET_PUBLISH_TIME, LocalDateTime.class);
+                Method setUpdateTime = entity.getClass().getDeclaredMethod(AutoFillConstant.NOTICE_SET_UPDATE_TIME, LocalDateTime.class);
                 setCreateTime.invoke(entity, now);
-                setCreateUser.invoke(entity, currentId);
                 setUpdateTime.invoke(entity, now);
-                setUpdateUser.invoke(entity, currentId);
+
             } catch (Exception e) {
-                log.info(e.getMessage());
+                log.error(e.getMessage());
             }
 
         } else if (operationType == OperationType.UPDATE) {
-            //为2个公共字段赋值
             try {
-                Method setUpdateTime = entity.getClass().getDeclaredMethod(AutoFillConstant.SET_UPDATE_TIME, LocalDateTime.class);
-                Method setUpdateUser = entity.getClass().getDeclaredMethod(AutoFillConstant.SET_UPDATE_USER, Long.class);
-
-                //通过反射为对象属性赋值
+                Method setUpdateTime = entity.getClass().getDeclaredMethod(AutoFillConstant.NOTICE_SET_UPDATE_TIME, LocalDateTime.class);
                 setUpdateTime.invoke(entity, now);
-                setUpdateUser.invoke(entity, currentId);
+
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error(e.getMessage());
             }
         }
     }

@@ -1,5 +1,6 @@
-package com.shop.common.config;
+package com.shop.admin.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -14,11 +15,13 @@ import org.springframework.data.redis.serializer.RedisSerializer;
  * @author SK
  * @date 2024/06/05
  */
+@Slf4j
 @Configuration
 public class RedisConfig {
 
     @Bean
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
+        log.info("Redis配置");
         // 创建RedisTemplate对象
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         // 设置连接工厂
@@ -32,7 +35,6 @@ public class RedisConfig {
         // 设置Value的序列化
         template.setValueSerializer(jsonRedisSerializer);
         template.setHashValueSerializer(jsonRedisSerializer);
-        // 返回
         return template;
     }
 }
