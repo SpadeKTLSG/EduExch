@@ -56,8 +56,6 @@ public class RedisConstants {
     public static final Long LOGIN_USER_TTL_GUEST = 36000L; // 10小时
 
 
-
-
     /**
      * 用户签到Key前缀
      */
@@ -69,6 +67,10 @@ public class RedisConstants {
      */
     public static final String USER_VO_KEY = "vo:";
 
+    /**
+     * 用户收藏Key前缀
+     */
+    public static final String PROD_COLLECT_KEY = "guest:prod:collect:";
 
     public static final Long CACHE_NULL_TTL = 2L;
 
@@ -79,8 +81,6 @@ public class RedisConstants {
     public static final Long LOCK_SHOP_TTL = 10L;
 
     public static final String SECKILL_STOCK_KEY = "seckill:stock:";
-    public static final String BLOG_LIKED_KEY = "blog:liked:";
-    public static final String FEED_KEY = "feed:";
-    public static final String SHOP_GEO_KEY = "shop:geo:";
+
 
 }
