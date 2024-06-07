@@ -8,10 +8,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.shop.common.constant.SystemConstants;
 import com.shop.common.context.UserHolder;
 import com.shop.common.exception.*;
-import com.shop.pojo.dto.ProdAllDTO;
-import com.shop.pojo.dto.ProdFuncAllDTO;
-import com.shop.pojo.dto.ProdGreatDTO;
-import com.shop.pojo.dto.ProdLocateDTO;
+import com.shop.pojo.dto.*;
 import com.shop.pojo.entity.Prod;
 import com.shop.pojo.entity.ProdCate;
 import com.shop.pojo.entity.ProdFunc;
@@ -20,6 +17,7 @@ import com.shop.serve.mapper.ProdMapper;
 import com.shop.serve.service.ProdCateService;
 import com.shop.serve.service.ProdFuncService;
 import com.shop.serve.service.ProdService;
+import com.shop.serve.service.UpshowService;
 import com.shop.serve.tool.NewDTOUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -43,6 +41,8 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
     private ProdFuncService prodFuncService;
     @Autowired
     private ProdCateService prodCateService;
+    @Autowired
+    private UpshowService upshowService;
     @Autowired
     private NewDTOUtils dtoUtils;
     @Autowired
@@ -183,7 +183,7 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
     public void deleteGood(String name) {
         Prod prod = this.getOne(Wrappers.<Prod>lambdaQuery().eq(Prod::getName, name));
         if (prod == null) throw new SthNotFoundException(OBJECT_NOT_ALIVE);
-        //TODO: 需要判断有无开启交易
+        //TODO: 删除商品需要判断有无开启交易
         this.removeById(prod.getId());
         prodFuncService.removeById(prod.getId());
     }
@@ -211,7 +211,7 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
 
         if (func == 0) {
 
-            prodFunc.setShowoffStatus(0);  //基础功能类型: 无展示提升
+            prodFunc.setShowoffStatus(1);  //基础功能类型: 无展示提升
             prodFunc.setShowoffEndtime(LocalDateTime.now().plusDays(1)); // 1天
 
         } else if (func == 1) {
@@ -225,7 +225,11 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
             prodFunc.setShowoffEndtime(LocalDateTime.now().plusDays(7)); // 7天
         }
 
-        //TODO 调用提升表的服务方法
+        UpshowDTO upshowDTO = UpshowDTO.builder()
+                .prodId(prod.getId())
+                .name(prod.getName())
+                .build();
+        upshowService.add2Upshow(upshowDTO);
 
         prodFuncService.updateById(prodFunc);
 
@@ -295,6 +299,33 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
         return this.page(
                 new Page<>(current, SystemConstants.MAX_PAGE_SIZE),
                 Wrappers.<Prod>lambdaQuery().eq(Prod::getCategoryId, id));
+    }
+
+    @Override
+    public List<ProdFunc> getOutdateOnes(LocalDateTime time) {
+        List<ProdFunc> prodList2Check = prodFuncService.query() //需要保证其ShowoffEndtime存在!
+                .isNotNull("showoff_endtime")
+                .list();
+
+        //需要手动取出来判断是否过期
+        prodList2Check.removeIf(prodFunc -> prodFunc.getShowoffEndtime().isAfter(time));
+
+        return prodList2Check;
+    }
+
+
+    @Override
+    public void coolDownProd(ProdFunc prodFunc) {
+        prodFunc.setShowoffStatus(0);
+        prodFunc.setShowoffEndtime(LocalDateTime.now()); //只能设置为现在而不是null否则报错
+
+        UpshowDTO upshowDTO = UpshowDTO.builder()
+                .prodId(prodFunc.getId())
+                .name(this.query().eq("id", prodFunc.getId()).one().getName())
+                .build();
+
+        prodFuncService.updateById(prodFunc);
+        upshowService.remove4Upshow(upshowDTO);
     }
 
 

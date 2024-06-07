@@ -5,7 +5,11 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.shop.pojo.dto.ProdGreatDTO;
 import com.shop.pojo.dto.ProdLocateDTO;
 import com.shop.pojo.entity.Prod;
+import com.shop.pojo.entity.ProdFunc;
 import com.shop.pojo.vo.ProdGreatVO;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 public interface ProdService extends IService<Prod> {
 
@@ -32,4 +36,8 @@ public interface ProdService extends IService<Prod> {
     Page<Prod> getPageByCate(String cate, Integer current);
 
     Page<Prod> pageCateAllProd(String cate, Integer current);
+
+    List<ProdFunc> getOutdateOnes(LocalDateTime time);
+
+    void coolDownProd(ProdFunc prodFunc);
 }

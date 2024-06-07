@@ -103,9 +103,9 @@ public class ProdController {
     })
     public Result updateStatus(@RequestBody ProdLocateDTO prodLocateDTO, @PathVariable("func") Integer func) {
         prodService.updateStatus(prodLocateDTO, func);
-
         return Result.success();
     }
+    //http://localhost:8086/guest/prod/update/status/0
 
     //! QUERY
 
