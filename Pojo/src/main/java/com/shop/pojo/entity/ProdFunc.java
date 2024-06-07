@@ -39,6 +39,9 @@ public class ProdFunc {
      * 状态 (0正常 / 1审核中 / 2冻结)
      */
     private Integer status;
+    public static final Integer NORMAL = 0;
+    public static final Integer CHECKING = 1;
+    public static final Integer FROZEN = 3;
 
 
     /**
@@ -58,9 +61,13 @@ public class ProdFunc {
     private LocalDateTime updateTime;
 
     /**
-     * 展现权重 (0 一般, 仅搜索 / 1 **首页提升榜单 /**  2 **首页提升榜单 +**  首页轮播图)
+     * 展现权重 (0 一般, 仅搜索 / 1 高级:  首页提升榜单 /  2  超级: 首页提升榜单 +  首页轮播图)
      */
     private Integer showoffStatus;
+    public static final Integer BASIC = 0;
+    public static final Integer SENIOR = 1;
+    public static final Integer SUPER = 2;
+
 
     /**
      * 展现结束时间

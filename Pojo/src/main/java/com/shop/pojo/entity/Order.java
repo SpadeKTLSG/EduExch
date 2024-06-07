@@ -47,5 +47,11 @@ public class Order {
      * 0 买家开启, 1 等待卖家确认, 2 交涉中, 3 正在交易, 4 交易完成, 5 终止
      */
     private Integer status;
+    public static final Integer OPEN = 0;
+    public static final Integer WAITCHECK = 1;
+    public static final Integer TALKING = 2;
+    public static final Integer EXCHANGING = 3;
+    public static final Integer OVER = 4;
+    public static final Integer STOP = 5;
 
 }

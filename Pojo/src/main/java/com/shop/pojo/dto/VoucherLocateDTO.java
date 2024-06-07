@@ -22,4 +22,5 @@ public class VoucherLocateDTO {
      */
     private String name;
 
+
 }

@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static com.shop.common.constant.MessageConstants.*;
 import static com.shop.common.constant.TestsConstants.*;
@@ -99,7 +100,7 @@ public class VoucherServiceImpl extends ServiceImpl<VoucherMapper, Voucher> impl
         } else if (voucher.getFunc() == 2) { //超级功能类型
             voucher.setEndTime(LocalDateTime.now().plusDays(7)); // 7天
         }
-
+        this.updateById(voucher);
 
         UserFunc userFunc = userFuncService.getById(UserHolder.getUser().getId());
 
@@ -126,7 +127,7 @@ public class VoucherServiceImpl extends ServiceImpl<VoucherMapper, Voucher> impl
 
         if (voucher.getStatus() == 1 || voucher.getStatus() == 2 || voucher.getStock() == 0) throw new TrashException(TRASH_ERROR);
 
-        if (voucher.getUser() == 1) throw new BadArgsException(BAD_ARGS);
+        if (voucher.getUser() == 0) throw new BadArgsException(BAD_ARGS);
 
 
         //执行功能
@@ -141,7 +142,7 @@ public class VoucherServiceImpl extends ServiceImpl<VoucherMapper, Voucher> impl
         } else if (voucher.getFunc() == 2) { //超级功能类型
             voucher.setEndTime(LocalDateTime.now().plusDays(7)); // 7天
         }
-
+        this.updateById(voucher);
 
         UserFunc userFunc = userFuncService.getById(UserHolder.getUser().getId());
 
@@ -162,6 +163,16 @@ public class VoucherServiceImpl extends ServiceImpl<VoucherMapper, Voucher> impl
         userFuncService.updateById(userFunc2);
 
         return true;
+    }
+
+    @Override
+    public List<Voucher> getOutdateOnes(Integer status, LocalDateTime time) {
+        //"select * from voucher where status = #{status} and end_time < #{time}"
+        //找到任何status是使用中, 并且其失效实现已经超过了传入的时间的VoucherList
+        return this.list(new LambdaQueryWrapper<Voucher>()
+                .eq(Voucher::getStatus, status)
+                .lt(Voucher::getEndTime, time));
+
     }
 
 

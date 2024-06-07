@@ -43,6 +43,8 @@ public class OrderDetail {
      * 交易类型 (0 平台外, 1 本平台(未实现))
      */
     private Integer type;
+    public static final Integer OUT = 0;
+    public static final Integer IN = 1;
 
     /**
      * 交易金额 (本平台才会生效)

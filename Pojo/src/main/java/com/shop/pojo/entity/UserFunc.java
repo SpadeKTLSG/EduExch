@@ -31,6 +31,8 @@ public class UserFunc {
      * 状态 (0正常, 1封禁)
      */
     private Integer status;
+    public static final Integer NORMAL = 0;
+    public static final Integer BLOCK = 1;
 
     /**
      * 收款码pic

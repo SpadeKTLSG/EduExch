@@ -40,25 +40,40 @@ public class Voucher {
      */
     private String subname;
 
+
     /**
      * 状态(0 未使用, 1 已使用, 2 已过期)
      */
     private Integer status;
+    public static final Integer UNUSE = 0;
+    public static final Integer USED = 1;
+    public static final Integer OUTDATE = 2;
+
 
     /**
      * 类型(一般 0 / 秒杀 1)
      */
     private Integer type;
+    public static final Integer NORMAL = 0;
+    public static final Integer SECKILL = 1;
+
 
     /**
      * 可使用对象(卖方 0 / 买方 1)
      */
     private Integer user;
+    public static final Integer SELLER = 0;
+    public static final Integer BUYER = 1;
+
 
     /**
      * 功能字段(基础 0 / 高级 1 / 超级 2)
      */
     private Integer func;
+    public static final Integer BASIC = 0;
+    public static final Integer SENIOR = 1;
+    public static final Integer SUPER = 2;
+
 
     /**
      * 积分价值
