@@ -225,6 +225,8 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
             prodFunc.setShowoffEndtime(LocalDateTime.now().plusDays(7)); // 7天
         }
 
+        //TODO 调用提升表的服务方法
+
         prodFuncService.updateById(prodFunc);
 
     }

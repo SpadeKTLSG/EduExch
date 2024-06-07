@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.shop.common.context.UserHolder;
 import com.shop.pojo.Result;
 import com.shop.pojo.dto.VoucherLocateDTO;
-import com.shop.pojo.dto.VoucherStoreDTO;
 import com.shop.pojo.entity.Voucher;
 import com.shop.pojo.vo.VoucherStoreVO;
 import com.shop.serve.service.VoucherService;
@@ -21,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import static com.shop.common.constant.SystemConstants.MAX_PAGE_SIZE;
-import static com.shop.common.constant.TestsConstants.BUYER_USERID;
 import static com.shop.common.constant.TestsConstants.STORE_USERID;
 
 /**
@@ -59,8 +57,8 @@ public class VoucherController {
     @DeleteMapping("/use/seller")
     @Operation(summary = "使用自己的卖方优惠券")
     @Parameters(@Parameter(name = "voucherStoreDTO", description = "优惠券存储DTO", required = true))
-    public Result useVoucher4Seller(@RequestBody VoucherStoreDTO voucherStoreDTO) {
-        return Result.success(voucherService.useVoucher4Seller(voucherStoreDTO));
+    public Result useVoucher4Seller(@RequestBody VoucherLocateDTO voucherLocateDTO) {
+        return Result.success(voucherService.useVoucher4Seller(voucherLocateDTO));
     }
     //http://localhost:8086/guest/voucher/use/seller
 
@@ -74,8 +72,8 @@ public class VoucherController {
     @DeleteMapping("/use/buyer")
     @Operation(summary = "使用自己的买方优惠券")
     @Parameters(@Parameter(name = "voucherStoreDTO", description = "优惠券存储DTO", required = true))
-    public Result useVoucher4Buyer(@RequestBody VoucherStoreDTO voucherStoreDTO) {
-        return voucherService.useVoucher4Buyer(voucherStoreDTO) ? Result.success(true) : Result.success(false);  //是否能成功获得Bonus
+    public Result useVoucher4Buyer(@RequestBody VoucherLocateDTO voucherLocateDTO) {
+        return voucherService.useVoucher4Buyer(voucherLocateDTO) ? Result.success(true) : Result.success(false);  //是否能成功获得Bonus
     }
     //http://localhost:8086/guest/voucher/use/buyer
 

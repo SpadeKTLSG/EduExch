@@ -8,7 +8,6 @@ import com.shop.common.exception.SthNotFoundException;
 import com.shop.common.exception.TrashException;
 import com.shop.pojo.dto.VoucherAllDTO;
 import com.shop.pojo.dto.VoucherLocateDTO;
-import com.shop.pojo.dto.VoucherStoreDTO;
 import com.shop.pojo.entity.Order;
 import com.shop.pojo.entity.UserFunc;
 import com.shop.pojo.entity.Voucher;
@@ -89,10 +88,10 @@ public class VoucherServiceImpl extends ServiceImpl<VoucherMapper, Voucher> impl
 
     @Override
     @Transactional
-    public Integer useVoucher4Seller(VoucherStoreDTO voucherStoreDTO) {
+    public Integer useVoucher4Seller(VoucherLocateDTO voucherLocateDTO) {
 
         Voucher voucher = this.getOne(new LambdaQueryWrapper<Voucher>()
-                .eq(Voucher::getName, voucherStoreDTO.getName())
+                .eq(Voucher::getName, voucherLocateDTO.getName())
                 .eq(Voucher::getUserId, UserHolder.getUser().getId()));
 
         if (voucher == null) throw new SthNotFoundException(OBJECT_NOT_ALIVE);
@@ -134,10 +133,10 @@ public class VoucherServiceImpl extends ServiceImpl<VoucherMapper, Voucher> impl
 
     @Override
     @Transactional
-    public boolean useVoucher4Buyer(VoucherStoreDTO voucherStoreDTO) {
+    public boolean useVoucher4Buyer(VoucherLocateDTO voucherLocateDTO) {
 
         Voucher voucher = this.getOne(new LambdaQueryWrapper<Voucher>()
-                .eq(Voucher::getName, voucherStoreDTO.getName())
+                .eq(Voucher::getName, voucherLocateDTO.getName())
                 .eq(Voucher::getUserId, UserHolder.getUser().getId()));
 
         if (voucher == null) throw new SthNotFoundException(OBJECT_NOT_ALIVE);
