@@ -24,8 +24,7 @@ public class VoucherTask {
     /**
      * 处理到达失效时间的卷对象, 每天1点触发一次
      */
-//    @Scheduled(cron = "0 0 1 * * ?")
-    @Scheduled(cron = "0 * * * * ? ") //每分钟触发一次
+    @Scheduled(cron = "0 0 1 * * ?")
     public void processUsingVoucher() {
         log.debug("定时判断所有当前使用中的卷对象是否到达失效时间：{}", LocalDateTime.now());
 
@@ -35,8 +34,7 @@ public class VoucherTask {
 
         if (voucherList != null && !voucherList.isEmpty()) {
             for (Voucher voucher : voucherList) {
-                voucher.setStatus(Voucher.OUTDATE);
-                voucherService.updateById(voucher);
+                voucherService.ruinVoucher(voucher);
             }
         }
     }

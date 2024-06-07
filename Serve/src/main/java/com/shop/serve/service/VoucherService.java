@@ -22,4 +22,6 @@ public interface VoucherService extends IService<Voucher> {
     boolean useVoucher4Buyer(VoucherStoreDTO voucherStoreDTO);
 
     List<Voucher> getOutdateOnes(Integer status, LocalDateTime time);
+
+    void ruinVoucher(Voucher voucher);
 }
