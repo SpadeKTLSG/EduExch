@@ -1,14 +1,21 @@
 package com.shop.serve.mq;
 
 import com.alibaba.fastjson.JSON;
-
+import com.shop.common.exception.TrashException;
+import com.shop.pojo.entity.Order;
+import com.shop.pojo.entity.OrderDetail;
+import com.shop.pojo.entity.Prod;
+import com.shop.serve.service.OrderDetailService;
 import com.shop.serve.service.OrderService;
-import jakarta.annotation.Resource;
+import com.shop.serve.service.ProdFuncService;
+import com.shop.serve.service.ProdService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 import static com.shop.common.constant.RabbitMQConstant.QUEUE;
 
@@ -20,16 +27,14 @@ import static com.shop.common.constant.RabbitMQConstant.QUEUE;
 @Service
 public class MQReceiver {
 
-
+    @Autowired
+    private ProdFuncService prodFuncService;
+    @Autowired
+    private ProdService prodService;
     @Autowired
     private OrderService orderService;
-
-
-    @Resource
-    IVoucherOrderService voucherOrderService;
-
-    @Resource
-    ISeckillVoucherService seckillVoucherService;
+    @Autowired
+    private OrderDetailService orderDetailService;
 
     /**
      * 接收秒杀信息并执行后续下单流程
@@ -39,36 +44,51 @@ public class MQReceiver {
     public void receiveSeckillMessage(String msg) {
         log.info("MQ接收到消息: " + msg);
 
-        //TODO
+        //取出消息并转换为订单对象
+        Order order = JSON.parseObject(msg, Order.class);
 
-        VoucherOrder voucherOrder = JSON.parseObject(msg, VoucherOrder.class);
+        //定位订单内元素
+        Long buyer_id = order.getBuyerId();
+        Long seller_id = order.getSellerId();
+        Long prod_id = order.getProdId();
 
-        Long voucherId = voucherOrder.getVoucherId();
-        //5.一人一单
-        Long userId = voucherOrder.getUserId();
-        //5.1查询订单
-        int count = voucherOrderService.query().eq("user_id", userId).eq("voucher_id", voucherId).count();
-        //5.2判断是否存在
+        //查询可能存在的脏订单对象
+        Long count = orderService.query()
+                .eq("buyer_id", buyer_id)
+                .eq("seller_id", seller_id)
+                .eq("prod_id", prod_id)
+                .count();
+
+        //重复购买判定
         if (count > 0) {
-            //用户已经购买过了
-            log.error("该用户已购买过");
+            log.error("{}已购买过, 但是重复购买", buyer_id);
             return;
         }
 
-        log.info("扣减库存");
-        //6.扣减库存
-        boolean success = seckillVoucherService
-                .update()
-                .setSql("stock = stock-1")
-                .eq("voucher_id", voucherId)
-                .gt("stock", 0)//cas乐观锁
-                .update();
-        if (!success) {
-            log.error("库存不足");
-            return;
+        //执行扣减库存和更改订单详情等具体业务
+
+        //创建参数对象
+        Prod prod = prodService.getById(prod_id);
+        prod.setStock(prod.getStock() - 1); //库存减一
+
+        OrderDetail orderDetail = OrderDetail.builder()
+                .openTime(LocalDateTime.now())
+                .build();
+
+
+        try { //数据库操作: 插入订单和订单详情(联合对象), 更新商品库存
+            orderService.save(order);
+            orderDetailService.save(orderDetail);
+            prodService.updateById(prod);
+            //cas乐观锁: 查询prod是否库存足够, 不够则抛出异常, 事务回滚无事发生
+            if (prodService.getById(prod_id).getStock() < 0) {
+                throw new TrashException();
+            }
+        } catch (Exception e) {
+            log.error("库存不足 {}", e.getMessage());
         }
-        //直接保存订单
-        voucherOrderService.save(voucherOrder);
+
+        log.info("恭喜, 一个秒杀逻辑订单创建成功!");
     }
 
 }

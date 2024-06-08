@@ -1,11 +1,13 @@
 package com.shop.serve.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.util.concurrent.RateLimiter;
 import com.shop.common.context.UserHolder;
 import com.shop.common.exception.BadArgsException;
 import com.shop.common.exception.NetWorkException;
+import com.shop.common.exception.SthHasCreatedException;
 import com.shop.common.exception.SthNotFoundException;
 import com.shop.pojo.dto.OrderAllDTO;
 import com.shop.pojo.dto.ProdLocateDTO;
@@ -111,9 +113,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         //创建订单流程
         prod.setStock(prod.getStock() - 1); //库存减一
 
-        Long prod_id = prod.getId();
         Long buyer_id = UserHolder.getUser().getId();
         Long seller_id = prod.getUserId();
+        Long prod_id = prod.getId();
 
         Order order = Order.builder()
                 .buyerId(buyer_id)
@@ -138,20 +140,64 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Override
     public void seckillStartOrder(ProdLocateDTO prodLocateDTO) {
 
-        //令牌桶算法进行限流
+        // 令牌桶算法进行限流
         if (!rateLimiter.tryAcquire(1000, TimeUnit.MILLISECONDS)) throw new NetWorkException(NETWORK_ERROR);
 
         // 执行流程
-        // 构造输入参数
-        Long userId = UserHolder.getUser().getId();
 
+        // 找到对应Prod
+        String name = prodLocateDTO.getName();
+        Long userId = prodLocateDTO.getUserId();
+
+        if (name == null || userId == null) throw new BadArgsException(BAD_ARGS);
+
+
+        Prod prod = prodService.getOne(new LambdaQueryWrapper<Prod>()
+                .eq(Prod::getName, name)
+                .eq(Prod::getUserId, userId)
+        );
+        if (prod == null) throw new SthNotFoundException(OBJECT_NOT_ALIVE);
+        ProdFunc prodFunc = prodFuncService.getOne(new LambdaQueryWrapper<ProdFunc>()
+                .eq(ProdFunc::getId, prod.getId())
+        );
+        if (!Objects.equals(prodFunc.getStatus(), ProdFunc.NORMAL)) throw new BadArgsException(BAD_ARGS);//审核未通过的商品不可交易
+
+
+        // 构造输入参数
+        Long meId = UserHolder.getUser().getId();
+
+
+        //利用Lua脚本进行 判断库存是否充足 + 判断用户是否下单 以及业务逻辑
         Long r = stringRedisTemplate.execute(
                 SECKILL_SCRIPT,
                 Collections.emptyList(),
-                voucherId.toString(),
-                userId.toString()
+                prod.getId().toString(),
+                meId.toString()
         );
 
+        //判断结果
+        int result = 0;
+        if (r != null) {
+            result = r.intValue();
+        }
+
+        if (result == 1) throw new SthNotFoundException(OBJECT_NOT_ALIVE);
+        if (result == 2) throw new SthHasCreatedException(ORDER_STATUS_ERROR);
+
+        //构造订单对象(后续还要补充其详细字段)
+        Long buyer_id = UserHolder.getUser().getId();
+        Long seller_id = prod.getUserId();
+        Long prod_id = prod.getId();
+
+        Order order = Order.builder()
+                .buyerId(buyer_id)
+                .sellerId(seller_id)
+                .prodId(prod_id)
+                .status(Order.WAITCHECK) //模拟: 买家开启交易后忽略传递时间, 直接进入等待卖家确认状态
+                .build();
+
+        //保存订单入MQ
+        mqSender.sendSeckillMessage(JSON.toJSONString(order));
     }
 
 

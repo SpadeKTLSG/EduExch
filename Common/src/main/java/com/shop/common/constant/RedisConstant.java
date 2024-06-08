@@ -74,10 +74,22 @@ public class RedisConstant {
     public static final String PROD_COLLECT_KEY = "guest:prod:collect:";
 
 
-    //* ZEN
+    //* ZEN - 秒杀逻辑 -
+
+    /**
+     * 商品秒杀逻辑库存Key前缀
+     */
+    public static final String SECKILL_STOCK_KEY = "seckill:stock:";
+
+
+    /**
+     * 商品秒杀逻辑订单Key前缀
+     */
+    public static final String SECKILL_ORDER_KEY = "seckill:order:";
 
 
     public static final Long CACHE_NULL_TTL = 2L;
+
     public static final String LOCK_SHOP_KEY = "lock:shop:";
 
 
@@ -86,8 +98,6 @@ public class RedisConstant {
     public static final String CACHE_SHOP_KEY = "cache:shop:";
 
     public static final Long LOCK_SHOP_TTL = 10L;
-
-    public static final String SECKILL_STOCK_KEY = "seckill:stock:";
 
 
 }
