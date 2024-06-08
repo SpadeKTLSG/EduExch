@@ -7,12 +7,18 @@ import org.springframework.amqp.core.TopicExchange;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import static com.shop.common.constant.RabbitMQConstant.*;
 
+
+/**
+ * RabbitMQ配置
+ *
+ * @author SK
+ * @date 2024/06/08
+ */
 @Configuration
 public class RabbitMQTopicConfig {
-    public static final String QUEUE = "seckillQueue";
-    public static final String EXCHANGE = "seckillExchange";
-    public static final String ROUTINGKEY = "seckill.#";
+
 
     @Bean
     public Queue queue() {
@@ -28,6 +34,8 @@ public class RabbitMQTopicConfig {
     public Binding binding() {
         return BindingBuilder.bind(queue()).to(topicExchange()).with(ROUTINGKEY);
     }
+
+
 //    private static final String QUEUE01="queue_topic01";
 //    private static final String QUEUE02="queue_topic02";
 //    private static final String EXCHANGE = "topicExchange";

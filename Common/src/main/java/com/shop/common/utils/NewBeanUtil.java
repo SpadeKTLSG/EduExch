@@ -12,12 +12,12 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
- * 自制BeanUtils工具类
+ * 自制BeanUtil工具类
  *
  * @author SK
  * @date 2024/06/01
  */
-public class NewBeanUtils {
+public class NewBeanUtil {
 
     /**
      * 获取所有的属性值为空属性名数组

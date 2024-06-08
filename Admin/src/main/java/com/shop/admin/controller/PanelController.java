@@ -2,7 +2,7 @@ package com.shop.admin.controller;
 
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.shop.common.constant.SystemConstants;
+import com.shop.common.constant.SystemConstant;
 import com.shop.pojo.Result;
 import com.shop.pojo.dto.NoticeAllDTO;
 import com.shop.pojo.dto.ProdLocateDTO;
@@ -100,7 +100,7 @@ public class PanelController {
     @Operation(summary = "分页查询公告")
     @Parameters(@Parameter(name = "current", description = "当前页", required = true))
     public Result queryNoticePage(@RequestParam(value = "current", defaultValue = "1") Integer current) {
-        return Result.success(noticeService.page(new Page<>(current, SystemConstants.DEFAULT_PAGE_SIZE)));
+        return Result.success(noticeService.page(new Page<>(current, SystemConstant.DEFAULT_PAGE_SIZE)));
     }
 
 
@@ -164,7 +164,7 @@ public class PanelController {
     @Operation(summary = "分页查询热搜")
     @Parameters(@Parameter(name = "current", description = "当前页", required = true))
     public Result queryHotsearchPage(@RequestParam(value = "current", defaultValue = "1") Integer current) {
-        return Result.success(hotsearchService.page(new Page<>(current, SystemConstants.DEFAULT_PAGE_SIZE)));
+        return Result.success(hotsearchService.page(new Page<>(current, SystemConstant.DEFAULT_PAGE_SIZE)));
     }
     //http://localhost:8085/admin/panel/hotsearch/query/page
 
@@ -215,7 +215,7 @@ public class PanelController {
      */
     @GetMapping("/rotation/query/page")
     public Result queryRotationPage(@RequestParam(value = "current", defaultValue = "1") Integer current) {
-        return Result.success(rotationService.page(new Page<>(current, SystemConstants.DEFAULT_PAGE_SIZE)));
+        return Result.success(rotationService.page(new Page<>(current, SystemConstant.DEFAULT_PAGE_SIZE)));
     }
     //http://localhost:8085/admin/panel/rotation/query/page
 
@@ -264,7 +264,7 @@ public class PanelController {
     @Operation(summary = "分页查询提升")
     @Parameters(@Parameter(name = "current", description = "当前页", required = true))
     public Result queryUpshowPage(@RequestParam(value = "current", defaultValue = "1") Integer current) {
-        return Result.success(upshowService.page(new Page<>(current, SystemConstants.DEFAULT_PAGE_SIZE)));
+        return Result.success(upshowService.page(new Page<>(current, SystemConstant.DEFAULT_PAGE_SIZE)));
     }
 
 

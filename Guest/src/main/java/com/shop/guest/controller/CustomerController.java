@@ -4,7 +4,7 @@ package com.shop.guest.controller;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import com.alibaba.fastjson.JSON;
-import com.shop.common.websocket.WebSocketServer;
+import com.shop.serve.websocket.WebSocketServer;
 import com.shop.pojo.Result;
 import com.shop.pojo.dto.OrderAllDTO;
 import io.swagger.v3.oas.annotations.Operation;

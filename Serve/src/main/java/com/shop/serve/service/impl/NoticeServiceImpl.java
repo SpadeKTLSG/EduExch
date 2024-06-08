@@ -14,8 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
-import static com.shop.common.constant.MessageConstants.OBJECT_HAS_ALIVE;
-import static com.shop.common.constant.MessageConstants.OBJECT_NOT_ALIVE;
+import static com.shop.common.constant.MessageConstant.OBJECT_HAS_ALIVE;
+import static com.shop.common.constant.MessageConstant.OBJECT_NOT_ALIVE;
 
 
 @Slf4j

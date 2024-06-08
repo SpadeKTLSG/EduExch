@@ -2,6 +2,7 @@ package com.shop.serve.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.common.util.concurrent.RateLimiter;
 import com.shop.common.context.UserHolder;
 import com.shop.common.exception.BadArgsException;
 import com.shop.common.exception.SthNotFoundException;
@@ -10,18 +11,22 @@ import com.shop.pojo.dto.ProdLocateDTO;
 import com.shop.pojo.entity.*;
 import com.shop.pojo.vo.OrderGreatVO;
 import com.shop.serve.mapper.OrderMapper;
+import com.shop.serve.mq.MQSender;
 import com.shop.serve.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-import static com.shop.common.constant.MessageConstants.BAD_ARGS;
-import static com.shop.common.constant.MessageConstants.OBJECT_NOT_ALIVE;
+import static com.shop.common.constant.MessageConstant.BAD_ARGS;
+import static com.shop.common.constant.MessageConstant.OBJECT_NOT_ALIVE;
 
 @Slf4j
 @Service
@@ -35,6 +40,30 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     private ProdFuncService prodFuncService;
     @Autowired
     private UserFuncService userFuncService;
+
+    @Autowired
+    private MQSender mqSender;
+
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+
+
+    /**
+     * 令牌桶算法 限流
+     */
+    private RateLimiter rateLimiter = RateLimiter.create(10);
+
+
+    /**
+     * lua脚本对象
+     */
+    private static final DefaultRedisScript<Long> SECKILL_SCRIPT;
+
+    static {
+        SECKILL_SCRIPT = new DefaultRedisScript<>();
+        SECKILL_SCRIPT.setLocation(new ClassPathResource("seckill.lua"));
+        SECKILL_SCRIPT.setResultType(Long.class);
+    }
 
 
     @Override

@@ -2,7 +2,7 @@ package com.shop.admin.controller;
 
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.shop.common.constant.SystemConstants;
+import com.shop.common.constant.SystemConstant;
 import com.shop.pojo.Result;
 import com.shop.pojo.dto.VoucherAllDTO;
 import com.shop.serve.service.VoucherService;
@@ -78,7 +78,7 @@ public class VoucherController {
     @Operation(summary = "分页查询软件的优惠券列表")
     @Parameters(@Parameter(name = "current", description = "当前页", required = true))
     public Result pageVoucher(@RequestParam(value = "current", defaultValue = "1") Integer current) {
-        return Result.success(voucherService.page(new Page<>(current, SystemConstants.MAX_PAGE_SIZE)));
+        return Result.success(voucherService.page(new Page<>(current, SystemConstant.MAX_PAGE_SIZE)));
     }
     //http://localhost:8085/admin/voucher/page
 

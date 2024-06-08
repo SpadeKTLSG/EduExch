@@ -1,4 +1,4 @@
-package com.shop.common.websocket;
+package com.shop.serve.websocket;
 
 import com.alibaba.fastjson.JSON;
 import jakarta.websocket.OnClose;

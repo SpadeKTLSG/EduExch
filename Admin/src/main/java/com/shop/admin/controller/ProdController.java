@@ -1,7 +1,7 @@
 package com.shop.admin.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.shop.common.constant.SystemConstants;
+import com.shop.common.constant.SystemConstant;
 import com.shop.pojo.Result;
 import com.shop.pojo.dto.ProdCateDTO;
 import com.shop.pojo.dto.ProdLocateDTO;
@@ -133,7 +133,7 @@ public class ProdController {
     @Operation(summary = "分页查询所有商品分类")
     @Parameters(@Parameter(name = "current", description = "当前页", required = true))
     public Result pageCate(@RequestParam(value = "current", defaultValue = "1") Integer current) {
-        return Result.success(prodService.page(new Page<>(current, SystemConstants.MAX_PAGE_SIZE)));
+        return Result.success(prodService.page(new Page<>(current, SystemConstant.MAX_PAGE_SIZE)));
     }
     //http://localhost:8085/admin/prod/cate/page
 

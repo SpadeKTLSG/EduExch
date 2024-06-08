@@ -17,7 +17,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import static com.shop.common.constant.SystemConstants.MAX_PAGE_SIZE;
+import static com.shop.common.constant.SystemConstant.MAX_PAGE_SIZE;
 
 
 /**

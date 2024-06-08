@@ -11,7 +11,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.shop.common.constant.PasswordConstant;
 import com.shop.common.context.UserHolder;
 import com.shop.common.exception.*;
-import com.shop.common.utils.RegexUtils;
+import com.shop.common.utils.RegexUtil;
 import com.shop.pojo.dto.*;
 import com.shop.pojo.entity.Prod;
 import com.shop.pojo.entity.User;
@@ -40,10 +40,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-import static com.shop.common.constant.MessageConstants.*;
-import static com.shop.common.constant.RedisConstants.*;
-import static com.shop.common.constant.SystemConstants.MAX_PAGE_SIZE;
-import static com.shop.common.utils.NewBeanUtils.dtoMapService;
+import static com.shop.common.constant.MessageConstant.*;
+import static com.shop.common.constant.RedisConstant.*;
+import static com.shop.common.constant.SystemConstant.MAX_PAGE_SIZE;
+import static com.shop.common.utils.NewBeanUtil.dtoMapService;
 
 @Slf4j
 @Service
@@ -66,7 +66,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public void register(UserLoginDTO userLoginDTO, HttpSession session) {
 
         String phone = userLoginDTO.getPhone();
-        if (RegexUtils.isPhoneInvalid(phone)) throw new InvalidInputException(PHONE_INVALID);
+        if (RegexUtil.isPhoneInvalid(phone)) throw new InvalidInputException(PHONE_INVALID);
 
         //从redis获取验证码并校验
         String cacheCode = stringRedisTemplate.opsForValue().get(LOGIN_CODE_KEY_GUEST + phone);
@@ -109,7 +109,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
         String phone = userLoginDTO.getPhone();
-        if (RegexUtils.isPhoneInvalid(phone)) throw new InvalidInputException(PHONE_INVALID);
+        if (RegexUtil.isPhoneInvalid(phone)) throw new InvalidInputException(PHONE_INVALID);
 
         //从redis获取验证码并校验
         String cacheCode = stringRedisTemplate.opsForValue().get(LOGIN_CODE_KEY_GUEST + phone);
@@ -283,7 +283,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public String sendCode(String phone, HttpSession session) {
 
-        if (RegexUtils.isPhoneInvalid(phone)) throw new InvalidInputException(PHONE_INVALID);
+        if (RegexUtil.isPhoneInvalid(phone)) throw new InvalidInputException(PHONE_INVALID);
 
         Set<String> keys = stringRedisTemplate.keys(LOGIN_USER_KEY_GUEST + phone + "*"); //删除之前的验证码
         if (keys != null) {

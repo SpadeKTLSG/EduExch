@@ -5,7 +5,7 @@ package com.shop.common.constant;
  * @author SK
  * @date 2024/06/04
  */
-public class TestsConstants {
+public class TestsConstant {
 
     /**
      * 仓库管理虚拟用户ID 1

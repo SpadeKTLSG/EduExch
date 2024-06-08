@@ -6,7 +6,7 @@ package com.shop.common.constant;
  * @author SK
  * @date 2024/06/05
  */
-public class RedisConstants {
+public class RedisConstant {
 
 
     //* Admin

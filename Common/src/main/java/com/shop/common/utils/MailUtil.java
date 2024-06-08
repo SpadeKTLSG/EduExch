@@ -10,11 +10,12 @@ import java.util.List;
 import java.util.Properties;
 
 /**
- * @author haopengmai
+ * 邮件工具类
+ * @author haopengmai / SpadeK
  * @date 2023/11
  * @reference haopengmai/dianping
  */
-public class MailUtils {
+public class MailUtil {
 
     public static void testMail() throws MessagingException {
         sendtoMail("2429355985@qq.com", achieveCode());

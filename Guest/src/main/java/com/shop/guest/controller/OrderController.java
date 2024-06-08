@@ -4,7 +4,7 @@ package com.shop.guest.controller;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.shop.common.constant.SystemConstants;
+import com.shop.common.constant.SystemConstant;
 import com.shop.common.context.UserHolder;
 import com.shop.pojo.Result;
 import com.shop.pojo.dto.OrderAllDTO;
@@ -145,7 +145,7 @@ public class OrderController {
         Long userId = UserHolder.getUser().getId();
 
 
-        return Result.success(orderService.page(new Page<>(current, SystemConstants.MAX_PAGE_SIZE),
+        return Result.success(orderService.page(new Page<>(current, SystemConstant.MAX_PAGE_SIZE),
                 Wrappers.<Order>lambdaQuery()
                         .eq(Order::getBuyerId, userId)
                         .or()

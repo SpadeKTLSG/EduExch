@@ -1,7 +1,7 @@
-package com.shop.guest.mq;
+package com.shop.serve.mq;
 
 import com.alibaba.fastjson.JSON;
-import com.shop.guest.config.RabbitMQTopicConfig;
+
 import com.shop.serve.service.OrderService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.shop.common.constant.RabbitMQConstant.QUEUE;
+
 
 /**
  * 消息消费者
@@ -17,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 public class MQReceiver {
+
 
     @Autowired
     private OrderService orderService;
@@ -32,7 +35,7 @@ public class MQReceiver {
      * 接收秒杀信息并执行后续下单流程
      */
     @Transactional
-    @RabbitListener(queues = RabbitMQTopicConfig.QUEUE)
+    @RabbitListener(queues = QUEUE)
     public void receiveSeckillMessage(String msg) {
         log.info("MQ接收到消息: " + msg);
 

@@ -15,10 +15,10 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static com.shop.common.constant.MessageConstants.ACCOUNT_NOT_FOUND;
-import static com.shop.common.constant.MessageConstants.USER_NOT_LOGIN;
-import static com.shop.common.constant.RedisConstants.LOGIN_USER_KEY_GUEST;
-import static com.shop.common.constant.RedisConstants.LOGIN_USER_TTL_GUEST;
+import static com.shop.common.constant.MessageConstant.ACCOUNT_NOT_FOUND;
+import static com.shop.common.constant.MessageConstant.USER_NOT_LOGIN;
+import static com.shop.common.constant.RedisConstant.LOGIN_USER_KEY_GUEST;
+import static com.shop.common.constant.RedisConstant.LOGIN_USER_TTL_GUEST;
 
 
 /**

@@ -1,4 +1,4 @@
-package com.shop.common.websocket;
+package com.shop.serve.websocket;
 
 
 import lombok.extern.slf4j.Slf4j;

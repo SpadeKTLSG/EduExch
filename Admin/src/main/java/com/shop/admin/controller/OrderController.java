@@ -2,7 +2,7 @@ package com.shop.admin.controller;
 
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.shop.common.constant.SystemConstants;
+import com.shop.common.constant.SystemConstant;
 import com.shop.pojo.Result;
 import com.shop.pojo.dto.OrderAllDTO;
 import com.shop.serve.service.OrderService;
@@ -51,7 +51,7 @@ public class OrderController {
     @Operation(summary = "查看所有订单列表")
     @Parameters(@Parameter(name = "current", description = "当前页", required = true))
     public Result orderPage(@RequestParam(value = "current", defaultValue = "1") Integer current) {
-        return Result.success(orderService.page(new Page<>(current, SystemConstants.MAX_PAGE_SIZE)));
+        return Result.success(orderService.page(new Page<>(current, SystemConstant.MAX_PAGE_SIZE)));
     }
     //http://localhost:8085/admin/order/listall
 

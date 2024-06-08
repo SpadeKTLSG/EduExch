@@ -6,10 +6,10 @@ package com.shop.common.constant;
  * @author SK
  * @date 2024/06/04
  */
-public class MessageConstants {
+public class MessageConstant {
 
 
-
+    //TODO fix here
     public static final String PASSWORD_EDIT_FAILED = "密码修改失败";
     public static final String ORDER_STATUS_ERROR = "订单状态错误";
 
@@ -32,6 +32,5 @@ public class MessageConstants {
     public static final String ACCOUNT_LOCKED = "账号被锁定";
     public static final String LOGIN_FAILED = "登录失败";
 
-    public static final String DISH_ON_SALE = "起售中的菜品不能删除";
 
 }

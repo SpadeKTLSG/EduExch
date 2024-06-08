@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.shop.common.constant.SystemConstants;
+import com.shop.common.constant.SystemConstant;
 import com.shop.common.context.UserHolder;
 import com.shop.common.exception.*;
 import com.shop.pojo.dto.*;
@@ -27,10 +27,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static com.shop.common.constant.MessageConstants.*;
-import static com.shop.common.constant.RedisConstants.USER_VO_KEY;
-import static com.shop.common.constant.SystemConstants.DEFAULT_WEIGHT;
-import static com.shop.common.utils.NewBeanUtils.dtoMapService;
+import static com.shop.common.constant.MessageConstant.*;
+import static com.shop.common.constant.RedisConstant.USER_VO_KEY;
+import static com.shop.common.constant.SystemConstant.DEFAULT_WEIGHT;
+import static com.shop.common.utils.NewBeanUtil.dtoMapService;
 
 @Slf4j
 @Service
@@ -129,7 +129,7 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
 
     @Override
     public Page<ProdGreatDTO> page2Check(Integer current) {
-        Page<ProdFunc> prodFuncPage = prodFuncService.page(new Page<>(current, SystemConstants.MAX_PAGE_SIZE),
+        Page<ProdFunc> prodFuncPage = prodFuncService.page(new Page<>(current, SystemConstant.MAX_PAGE_SIZE),
                 new LambdaQueryWrapper<ProdFunc>().eq(ProdFunc::getStatus, 0));
 
         List<ProdGreatDTO> mergedList = new ArrayList<>();
@@ -144,7 +144,7 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
             }
         }
 
-        Page<ProdGreatDTO> mergedPage = new Page<>(current, SystemConstants.MAX_PAGE_SIZE);
+        Page<ProdGreatDTO> mergedPage = new Page<>(current, SystemConstant.MAX_PAGE_SIZE);
         mergedPage.setRecords(mergedList);
         mergedPage.setTotal(mergedList.size());
 
@@ -181,8 +181,8 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
     @Override
     public Page<ProdGreatDTO> pageProd(Integer current) {
 
-        Page<Prod> prodPage = this.page(new Page<>(current, SystemConstants.MAX_PAGE_SIZE));
-        Page<ProdFunc> prodFuncPage = prodFuncService.page(new Page<>(current, SystemConstants.MAX_PAGE_SIZE));
+        Page<Prod> prodPage = this.page(new Page<>(current, SystemConstant.MAX_PAGE_SIZE));
+        Page<ProdFunc> prodFuncPage = prodFuncService.page(new Page<>(current, SystemConstant.MAX_PAGE_SIZE));
         List<ProdGreatDTO> mergedList = new ArrayList<>(); // 存储合并后的结果
 
         for (int i = 0; i < prodPage.getRecords().size(); i++) {
@@ -195,7 +195,7 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
             mergedList.add(prodGreatDTO);
         }
 
-        Page<ProdGreatDTO> mergedPage = new Page<>(current, SystemConstants.MAX_PAGE_SIZE);
+        Page<ProdGreatDTO> mergedPage = new Page<>(current, SystemConstant.MAX_PAGE_SIZE);
         mergedPage.setRecords(mergedList);
         mergedPage.setTotal(prodPage.getTotal() + prodFuncPage.getTotal());
         return mergedPage;
@@ -350,7 +350,7 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
         Long id = prodCate.getId();
 
         return this.page(
-                new Page<>(current, SystemConstants.MAX_PAGE_SIZE),
+                new Page<>(current, SystemConstant.MAX_PAGE_SIZE),
                 Wrappers.<Prod>lambdaQuery().eq(Prod::getCategoryId, id));
     }
 
@@ -366,7 +366,7 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
         Long id = prodCate.getId();
 
         return this.page(
-                new Page<>(current, SystemConstants.MAX_PAGE_SIZE),
+                new Page<>(current, SystemConstant.MAX_PAGE_SIZE),
                 Wrappers.<Prod>lambdaQuery().eq(Prod::getCategoryId, id));
     }
 
@@ -420,7 +420,7 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
         List<ProdFunc> prodList2Check = prodFuncService
                 .query()
                 .orderByDesc("visit")
-                .last("limit " + SystemConstants.MAX_PAGE_SIZE)
+                .last("limit " + SystemConstant.MAX_PAGE_SIZE)
                 .list();
 
         return prodList2Check;

@@ -2,7 +2,7 @@ package com.shop.admin.controller;
 
 
 import com.alibaba.fastjson.JSON;
-import com.shop.common.websocket.WebSocketServer;
+import com.shop.serve.websocket.WebSocketServer;
 import com.shop.pojo.Result;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

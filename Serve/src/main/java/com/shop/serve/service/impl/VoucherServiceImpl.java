@@ -25,9 +25,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
-import static com.shop.common.constant.MessageConstants.*;
-import static com.shop.common.constant.TestsConstants.BUYER_USERID;
-import static com.shop.common.constant.TestsConstants.STORE_USERID;
+import static com.shop.common.constant.MessageConstant.*;
+import static com.shop.common.constant.TestsConstant.BUYER_USERID;
+import static com.shop.common.constant.TestsConstant.STORE_USERID;
 
 @Slf4j
 @Service

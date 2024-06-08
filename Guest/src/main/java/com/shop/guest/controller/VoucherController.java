@@ -19,8 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import static com.shop.common.constant.SystemConstants.MAX_PAGE_SIZE;
-import static com.shop.common.constant.TestsConstants.STORE_USERID;
+import static com.shop.common.constant.SystemConstant.MAX_PAGE_SIZE;
+import static com.shop.common.constant.TestsConstant.STORE_USERID;
 
 /**
  * 优惠券控制

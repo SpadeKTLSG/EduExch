@@ -11,7 +11,7 @@ import com.shop.common.constant.PasswordConstant;
 import com.shop.common.exception.AccountAlivedException;
 import com.shop.common.exception.AccountNotFoundException;
 import com.shop.common.exception.InvalidInputException;
-import com.shop.common.utils.RegexUtils;
+import com.shop.common.utils.RegexUtil;
 import com.shop.pojo.dto.EmployeeDTO;
 import com.shop.pojo.dto.EmployeeLocalDTO;
 import com.shop.pojo.dto.EmployeeLoginDTO;
@@ -34,9 +34,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import static com.shop.common.constant.MessageConstants.*;
-import static com.shop.common.constant.RedisConstants.*;
-import static com.shop.common.utils.NewBeanUtils.getNullPropertyNames;
+import static com.shop.common.constant.MessageConstant.*;
+import static com.shop.common.constant.RedisConstant.*;
+import static com.shop.common.utils.NewBeanUtil.getNullPropertyNames;
 
 @Slf4j
 @Service
@@ -56,7 +56,7 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
         }
 
         String phone = employeeLoginDTO.getPhone();
-        if (RegexUtils.isPhoneInvalid(phone)) throw new InvalidInputException(PHONE_INVALID);
+        if (RegexUtil.isPhoneInvalid(phone)) throw new InvalidInputException(PHONE_INVALID);
 
         //从redis获取验证码并校验
         String cacheCode = stringRedisTemplate.opsForValue().get(LOGIN_CODE_KEY_ADMIN + phone);
@@ -88,7 +88,7 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
     @Override
     public String sendCode(String phone, HttpSession session) {
 
-        if (RegexUtils.isPhoneInvalid(phone)) throw new InvalidInputException(PHONE_INVALID);
+        if (RegexUtil.isPhoneInvalid(phone)) throw new InvalidInputException(PHONE_INVALID);
 
         Set<String> keys = stringRedisTemplate.keys(LOGIN_USER_KEY_ADMIN + phone + "*"); //删除之前的验证码
         if (keys != null) {

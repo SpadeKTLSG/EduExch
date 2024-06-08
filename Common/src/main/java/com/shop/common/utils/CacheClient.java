@@ -1,10 +1,11 @@
-package com.shop.common.plus;
+package com.shop.common.utils;
 
 
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.shop.pojo.RedisData;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -16,10 +17,16 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
-import static com.shop.common.constant.RedisConstants.CACHE_NULL_TTL;
-import static com.shop.common.constant.RedisConstants.LOCK_SHOP_KEY;
+import static com.shop.common.constant.RedisConstant.CACHE_NULL_TTL;
+import static com.shop.common.constant.RedisConstant.LOCK_SHOP_KEY;
 
 
+/**
+ * 缓存客户端工具类
+ *
+ * @author SK
+ * @date 2024/06/08
+ */
 @Slf4j
 @Component
 public class CacheClient {

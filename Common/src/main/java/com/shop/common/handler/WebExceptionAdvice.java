@@ -7,8 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import static com.shop.common.constant.MessageConstants.OBJECT_HAS_ALIVE;
-import static com.shop.common.constant.MessageConstants.UNKNOWN_ERROR;
+import static com.shop.common.constant.MessageConstant.OBJECT_HAS_ALIVE;
+import static com.shop.common.constant.MessageConstant.UNKNOWN_ERROR;
 
 /**
  * 全局自定义异常处理

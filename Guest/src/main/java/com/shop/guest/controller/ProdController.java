@@ -2,7 +2,7 @@ package com.shop.guest.controller;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.shop.common.constant.SystemConstants;
+import com.shop.common.constant.SystemConstant;
 import com.shop.common.context.UserHolder;
 import com.shop.pojo.Result;
 import com.shop.pojo.dto.ProdGreatDTO;
@@ -117,7 +117,7 @@ public class ProdController {
     @Operation(summary = "分页查询商品分类列表")
     @Parameters(@Parameter(name = "current", description = "当前页", required = true))
     public Result pageCateQuery(@RequestParam(value = "current", defaultValue = "1") Integer current) {
-        return Result.success(prodCateService.page(new Page<>(current, SystemConstants.MAX_PAGE_SIZE)));
+        return Result.success(prodCateService.page(new Page<>(current, SystemConstant.MAX_PAGE_SIZE)));
     }
     //http://localhost:8086/guest/prod/category/page
 
@@ -130,7 +130,7 @@ public class ProdController {
     @Operation(summary = "分页查询自己的商品列表")
     @Parameters(@Parameter(name = "current", description = "当前页", required = true))
     public Result pageProdQuery(@RequestParam(value = "current", defaultValue = "1") Integer current) {
-        return Result.success(prodService.page(new Page<>(current, SystemConstants.MAX_PAGE_SIZE),
+        return Result.success(prodService.page(new Page<>(current, SystemConstant.MAX_PAGE_SIZE),
                 Wrappers.<Prod>lambdaQuery()
                         .eq(Prod::getUserId, UserHolder.getUser().getId()))
         );
@@ -170,7 +170,7 @@ public class ProdController {
     @Operation(summary = "分页查询所有商品列表")
     @Parameters(@Parameter(name = "current", description = "当前页", required = true))
     public Result pageAllProd(@RequestParam(value = "current", defaultValue = "1") Integer current) {
-        return Result.success(prodService.page(new Page<>(current, SystemConstants.MAX_PAGE_SIZE)));
+        return Result.success(prodService.page(new Page<>(current, SystemConstant.MAX_PAGE_SIZE)));
     }
     //http://localhost:8086/guest/prod/all/page
 
