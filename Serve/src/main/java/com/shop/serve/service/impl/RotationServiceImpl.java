@@ -25,9 +25,7 @@ public class RotationServiceImpl extends ServiceImpl<RotationMapper, Rotation> i
 
     @Override
     public void remove4Rotation(RotationDTO rotationDTO) {
-
         Rotation rotation = this.getOne(new LambdaQueryWrapper<Rotation>()
-                .eq(Rotation::getName, rotationDTO.getName())
                 .eq(Rotation::getProdId, rotationDTO.getProdId()));
         this.removeById(rotation);
     }

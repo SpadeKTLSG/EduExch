@@ -1,8 +1,11 @@
 package com.shop.admin.controller;
 
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.shop.common.constant.SystemConstants;
 import com.shop.pojo.Result;
 import com.shop.pojo.dto.NoticeAllDTO;
+import com.shop.pojo.dto.RotationDTO;
 import com.shop.serve.service.HotsearchService;
 import com.shop.serve.service.NoticeService;
 import com.shop.serve.service.RotationService;
@@ -68,6 +71,14 @@ public class PanelController {
     /**
      * 删除公告
      */
+    @DeleteMapping("/notice/delete")
+    @Operation(summary = "删除公告")
+    @Parameters(@Parameter(name = "noticeAllDTO", description = "公告删除DTO", required = true))
+    public Result removeNotice(@RequestBody NoticeAllDTO noticeAllDTO) {
+        noticeService.removeNotice(noticeAllDTO);
+        return Result.success();
+    }
+    //http://localhost:8085/admin/panel/notice/delete
 
 
     //! UPDATE
@@ -98,15 +109,36 @@ public class PanelController {
 
     /**
      * 添加轮播
+     * <p></p>
      */
+    @PostMapping("/rotation/add")
+    @Operation(summary = "添加轮播")
+    @Parameters(@Parameter(name = "rotationDTO", description = "轮播添加DTO", required = true))
+    public Result add2Rotation(@RequestBody RotationDTO rotationDTO) {
+        rotationService.add2Rotation(rotationDTO);
+        return Result.success();
+    }
+    //http://localhost:8085/admin/panel/rotation/add
+
 
     //! DELETE
 
     /**
      * 删除轮播
      */
+    @DeleteMapping("/rotation/delete")
+    @Operation(summary = "删除轮播")
+    @Parameters(@Parameter(name = "rotationDTO", description = "轮播删除DTO", required = true))
+    public Result remove4Rotation(@RequestBody RotationDTO rotationDTO) {
+        rotationService.remove4Rotation(rotationDTO);
+        return Result.success();
+    }
+    //http://localhost:8085/admin/panel/rotation/delete
+
 
     //! UPDATE
+
+    // 禁止
 
 
     //! QUERY
@@ -114,6 +146,11 @@ public class PanelController {
     /**
      * 分页查询轮播
      */
+    @GetMapping("/rotation/query/page")
+    public Result queryRotationPage(@RequestParam(value = "current", defaultValue = "1") Integer current) {
+        return Result.success(rotationService.page(new Page<>(current, SystemConstants.DEFAULT_PAGE_SIZE)));
+    }
+    //http://localhost:8085/admin/panel/rotation/query/page
 
 
     //* -- upshow提升 --

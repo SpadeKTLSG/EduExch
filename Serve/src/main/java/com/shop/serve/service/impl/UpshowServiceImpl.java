@@ -26,7 +26,6 @@ public class UpshowServiceImpl extends ServiceImpl<UpshowMapper, Upshow> impleme
     @Override
     public void remove4Upshow(UpshowDTO upshowDTO) {
         Upshow upshow = this.getOne(new LambdaQueryWrapper<Upshow>()
-                .eq(Upshow::getName, upshowDTO.getName())
                 .eq(Upshow::getProdId, upshowDTO.getProdId()));
 
         this.removeById(upshow);

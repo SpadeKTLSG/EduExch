@@ -46,4 +46,16 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, Notice> impleme
         BeanUtils.copyProperties(noticeAllDTO, notice);
         this.updateById(notice);
     }
+
+    @Override
+    public void removeNotice(NoticeAllDTO noticeAllDTO) {
+
+        Notice notice = this.getOne(Wrappers.<Notice>lambdaQuery()
+                .eq(Notice::getTitle, noticeAllDTO.getTitle()));
+        if (notice == null) throw new SthNotFoundException(OBJECT_NOT_ALIVE);
+
+        this.removeById(notice.getId());
+    }
+
+
 }

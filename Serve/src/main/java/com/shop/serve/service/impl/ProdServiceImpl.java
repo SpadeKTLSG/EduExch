@@ -48,6 +48,7 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
     private HotsearchService hotsearchService;
     @Autowired
     private OrderService orderService;
+
     @Autowired
     private NewDTOUtils dtoUtils;
     @Autowired
@@ -368,7 +369,7 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
 
 
     @Override
-    public void coolDownProd(ProdFunc prodFunc) {
+    public void cooldownUpshowProd(ProdFunc prodFunc) {
         prodFunc.setShowoffStatus(0);
         prodFunc.setShowoffEndtime(LocalDateTime.now()); //只能设置为现在而不是null否则报错
 
@@ -379,6 +380,20 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
 
         prodFuncService.updateById(prodFunc);
         upshowService.remove4Upshow(upshowDTO);
+    }
+
+    @Override
+    public void cooldownRotationProd(ProdFunc prodFunc) {
+        prodFunc.setShowoffStatus(0);
+        prodFunc.setShowoffEndtime(LocalDateTime.now()); //只能设置为现在而不是null否则报错
+
+        RotationDTO rotationDTO = RotationDTO.builder()
+                .prodId(prodFunc.getId())
+                .name(this.query().eq("id", prodFunc.getId()).one().getName())
+                .build();
+
+        prodFuncService.updateById(prodFunc);
+        rotationService.remove4Rotation(rotationDTO);
     }
 
     @Override

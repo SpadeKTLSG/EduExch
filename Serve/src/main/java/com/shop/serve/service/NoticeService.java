@@ -11,4 +11,6 @@ public interface NoticeService extends IService<Notice> {
     void publishNotice(NoticeAllDTO noticeAllDTO);
 
     void updateNotice(NoticeAllDTO noticeAllDTO);
+
+    void removeNotice(NoticeAllDTO noticeAllDTO);
 }

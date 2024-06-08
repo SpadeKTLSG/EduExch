@@ -41,7 +41,9 @@ public interface ProdService extends IService<Prod> {
 
     List<ProdFunc> getOutdateOnes(LocalDateTime time);
 
-    void coolDownProd(ProdFunc prodFunc);
+    void cooldownUpshowProd(ProdFunc prodFunc);
+
+    void cooldownRotationProd(ProdFunc prodFunc);
 
     List<ProdFunc> extractList4HotProd();
 
