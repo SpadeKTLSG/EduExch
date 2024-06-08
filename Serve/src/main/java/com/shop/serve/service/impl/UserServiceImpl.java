@@ -5,6 +5,7 @@ import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.shop.common.constant.PasswordConstant;
@@ -12,12 +13,14 @@ import com.shop.common.context.UserHolder;
 import com.shop.common.exception.*;
 import com.shop.common.utils.RegexUtils;
 import com.shop.pojo.dto.*;
+import com.shop.pojo.entity.Prod;
 import com.shop.pojo.entity.User;
 import com.shop.pojo.entity.UserDetail;
 import com.shop.pojo.entity.UserFunc;
 import com.shop.pojo.vo.UserGreatVO;
 import com.shop.pojo.vo.UserVO;
 import com.shop.serve.mapper.UserMapper;
+import com.shop.serve.service.ProdService;
 import com.shop.serve.service.UserDetailService;
 import com.shop.serve.service.UserFuncService;
 import com.shop.serve.service.UserService;
@@ -39,6 +42,7 @@ import java.util.concurrent.TimeUnit;
 
 import static com.shop.common.constant.MessageConstants.*;
 import static com.shop.common.constant.RedisConstants.*;
+import static com.shop.common.constant.SystemConstants.MAX_PAGE_SIZE;
 import static com.shop.common.utils.NewBeanUtils.dtoMapService;
 
 @Slf4j
@@ -51,6 +55,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private UserFuncService userFuncService;
     @Autowired
     private UserDetailService userDetailService;
+    @Autowired
+    private ProdService prodService;
     @Autowired
     private NewDTOUtils dtoUtils;
 
@@ -185,6 +191,100 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         this.update(user, Wrappers.<User>lambdaUpdate().eq(User::getAccount, userLoginDTO.getAccount()));
     }
 
+    @Override
+    public void doCollect(ProdLocateDTO prodLocateDTO) {
+        Long userId = UserHolder.getUser().getId();
+
+        //判断是否已经收藏
+        String key = PROD_COLLECT_KEY + prodLocateDTO.getUserId() + ":" + prodLocateDTO.getName(); //拼接key = prod:collect:1:天选5PRO
+        Prod prod = prodService.getOne(Wrappers.<Prod>lambdaQuery()
+                .eq(Prod::getUserId, prodLocateDTO.getUserId())
+                .eq(Prod::getName, prodLocateDTO.getName()));
+
+        Double score = stringRedisTemplate.opsForZSet().score(key, userId.toString());
+        UserFunc userFunc = userFuncService.getById(userId);
+        String collections = userFunc.getCollections();
+        String prodNameInCollection = prodLocateDTO.getUserId() + ":" + prodLocateDTO.getName() + ",";
+
+        if (score == null) { //未收藏
+
+            // 更新用户收藏collections字段, 将该商品的唯一定位ProdLocateDTO按照prodLocateDTO.getUserId() + ":" + prodLocateDTO.getName()
+            // 拼接到collections字段中, 以逗号分隔.
+
+            if (collections == null) {
+                collections = prodNameInCollection;
+            } else {
+                collections += prodNameInCollection;
+            }
+
+            userFunc.setCollections(collections);
+
+            boolean isSuccess = userFuncService.updateById(userFunc);
+
+            // 保存用户到set集合  zadd key value score
+            if (isSuccess) {
+                stringRedisTemplate.opsForZSet().add(key, userId.toString(), System.currentTimeMillis());
+            }
+
+        } else { //已收藏
+
+            // 更新用户收藏collections字段, 将该商品的id从collections字段中移除
+
+            if (collections != null) {
+                collections = collections.replace(prodNameInCollection, "");
+            }
+
+            userFunc.setCollections(collections);
+
+            boolean isSuccess = userFuncService.updateById(userFunc);
+
+            // 用户从Redis的set集合移除
+            if (isSuccess) {
+                stringRedisTemplate.opsForZSet().remove(key, userId.toString());
+            }
+        }
+    }
+
+    @Override
+    public int collectCount() {
+        Long userId = UserHolder.getUser().getId();
+        UserFunc userFunc = userFuncService.getById(userId);
+        String collections = userFunc.getCollections();
+
+        return collections == null ? 0 : collections.split(",").length;
+    }
+
+    @Override
+    public Page<Prod> collectPage(Integer current) {
+
+        Long userId = UserHolder.getUser().getId();
+        UserFunc userFunc = userFuncService.getById(userId);
+        String collections = userFunc.getCollections();
+        if (collections == null) {
+            return new Page<>();
+        }
+
+        String[] prodLocateDTOs = collections.split(",");
+        List<Prod> prods = new ArrayList<>(); //收藏的商品列表
+
+        for (String prodLocateDTO : prodLocateDTOs) {
+            String[] split = prodLocateDTO.split(":"); //分割
+            Long prodUserId = Long.parseLong(split[0]);
+            String prodName = split[1];
+            Prod prod = prodService.getOne(Wrappers.<Prod>lambdaQuery()
+                    .eq(Prod::getUserId, prodUserId)
+                    .eq(Prod::getName, prodName));
+            prods.add(prod);
+        }
+
+        Page<Prod> page = new Page<>(); //手动分页
+        page.setRecords(prods);
+        page.setCurrent(current);
+        page.setSize(MAX_PAGE_SIZE);
+        page.setTotal(prods.size());
+        return page;
+    }
+
 
     @Override
     public String sendCode(String phone, HttpSession session) {
@@ -200,7 +300,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         stringRedisTemplate.opsForValue().set(LOGIN_CODE_KEY_GUEST + phone, code, LOGIN_CODE_TTL_GUEST, TimeUnit.MINUTES);
 
-        return code; //调试环境: 返回验证码; 未来引入邮箱发送验证码
+        return code; //调试环境: 返回验证码; 未来使用邮箱工具类发送验证码
     }
 
 

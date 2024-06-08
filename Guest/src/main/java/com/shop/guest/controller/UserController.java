@@ -2,6 +2,7 @@ package com.shop.guest.controller;
 
 import com.shop.common.context.UserHolder;
 import com.shop.pojo.Result;
+import com.shop.pojo.dto.ProdLocateDTO;
 import com.shop.pojo.dto.UserGreatDTO;
 import com.shop.pojo.dto.UserLocalDTO;
 import com.shop.pojo.dto.UserLoginDTO;
@@ -74,6 +75,7 @@ public class UserController {
     }
     //http://localhost:8086/guest/user/logout
 
+
     //*---- 关注 ----
 
     /**
@@ -129,7 +131,7 @@ public class UserController {
 
 
     /**
-     * 签到次数
+     * 签到次数统计
      */
     @GetMapping("/sign/count")
     @Operation(summary = "签到次数")
@@ -137,6 +139,47 @@ public class UserController {
         return Result.success(userService.signCount());
     }
     //http://localhost:8086/guest/user/sign/count
+
+
+    //*---- 收藏 ----
+
+
+    /**
+     * 收藏   (Add/Delete)
+     * <p>Redis区分收藏还是取消收藏</p>
+     */
+    @PutMapping("/collect")
+    @Operation(summary = "收藏/取消收藏")
+    @Parameters(@Parameter(name = "prodLocateDTO", description = "商品定位DTO", required = true))
+    public Result collect(@RequestBody ProdLocateDTO prodLocateDTO) {
+        userService.doCollect(prodLocateDTO);
+        return Result.success();
+    }
+    //http://localhost:8086/guest/user/collect
+
+
+    /**
+     * 收藏数量统计
+     */
+    @GetMapping("/collect/count")
+    @Operation(summary = "收藏次数")
+    public Result collectCount() {
+        return Result.success(userService.collectCount());
+    }
+    //http://localhost:8086/guest/user/collect/count
+
+
+    /**
+     * 分页收藏列表
+     * <(Prod)>
+     */
+    @GetMapping("/collect/page")
+    @Operation(summary = "收藏列表")
+    @Parameters(@Parameter(name = "current", description = "当前页", required = true))
+    public Result collectPage(@RequestParam(value = "current", defaultValue = "1") Integer current) {
+        return Result.success(userService.collectPage(current));
+    }
+    //http://localhost:8086/guest/user/collect/page
 
 
     //! ADD

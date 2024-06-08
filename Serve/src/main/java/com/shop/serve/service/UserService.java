@@ -1,8 +1,11 @@
 package com.shop.serve.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.shop.pojo.dto.ProdLocateDTO;
 import com.shop.pojo.dto.UserGreatDTO;
 import com.shop.pojo.dto.UserLoginDTO;
+import com.shop.pojo.entity.Prod;
 import com.shop.pojo.entity.User;
 import com.shop.pojo.vo.UserGreatVO;
 import com.shop.pojo.vo.UserVO;
@@ -33,6 +36,11 @@ public interface UserService extends IService<User> {
 
     void killMyAccount();
 
-
     void updateUserCode(UserLoginDTO userLoginDTO);
+
+    void doCollect(ProdLocateDTO prodLocateDTO);
+
+    int collectCount();
+
+    Page<Prod> collectPage(Integer current);
 }
