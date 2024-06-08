@@ -120,6 +120,7 @@ public class OrderController {
 
     /**
      * 分页查看自己的订单列表, 简要信息
+     * <p>模拟购物车效果</p>
      */
     @GetMapping("/list")
     @Operation(summary = "分页查看自己的订单列表")
