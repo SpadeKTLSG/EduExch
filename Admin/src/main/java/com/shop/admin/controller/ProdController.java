@@ -52,6 +52,19 @@ public class ProdController {
 
 
     /**
+     * 管理员冻结单件商品 -> name + userId 确定唯一商品
+     */
+    @PutMapping("/freeze")
+    @Operation(summary = "管理员冻结单件商品")
+    @Parameters(@Parameter(name = "prodLocateDTO", description = "商品定位DTO", required = true))
+    public Result freeze(@RequestBody ProdLocateDTO prodLocateDTO) {
+        prodService.freeze(prodLocateDTO);
+        return Result.success();
+    }
+    //http://localhost:8085/admin/prod/freeze
+
+
+    /**
      * 管理员分页查看需要审核商品
      * <p>联表分页</p>
      */

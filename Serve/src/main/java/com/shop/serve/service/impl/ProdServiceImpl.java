@@ -9,6 +9,7 @@ import com.shop.common.constant.SystemConstants;
 import com.shop.common.context.UserHolder;
 import com.shop.common.exception.*;
 import com.shop.pojo.dto.*;
+import com.shop.pojo.entity.Order;
 import com.shop.pojo.entity.Prod;
 import com.shop.pojo.entity.ProdCate;
 import com.shop.pojo.entity.ProdFunc;
@@ -45,6 +46,8 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
     private RotationService rotationService;
     @Autowired
     private HotsearchService hotsearchService;
+    @Autowired
+    private OrderService orderService;
     @Autowired
     private NewDTOUtils dtoUtils;
     @Autowired
@@ -84,8 +87,31 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
                 .eq(ProdFunc::getId, prod.getId())
         );
 
-        prodFunc.setStatus(1);
+        prodFunc.setStatus(ProdFunc.NORMAL);
         prodFuncService.updateById(prodFunc);
+    }
+
+
+    @Override
+    public void freeze(ProdLocateDTO prodLocateDTO) {
+
+        if (this.query().eq("name", prodLocateDTO.getName()).count() == 0) throw new SthNotFoundException(OBJECT_NOT_ALIVE);
+
+        if (this.query().eq("user_id", prodLocateDTO.getUserId()).count() == 0) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
+
+
+        Prod prod = this.getOne(new LambdaQueryWrapper<Prod>()// 找到对应商品id, 通过id找到另一张表UserFunc, 修改状态字段
+                .eq(Prod::getName, prodLocateDTO.getName())
+                .eq(Prod::getUserId, prodLocateDTO.getUserId())
+        );
+
+        ProdFunc prodFunc = prodFuncService.getOne(new LambdaQueryWrapper<ProdFunc>()
+                .eq(ProdFunc::getId, prod.getId())
+        );
+
+        prodFunc.setStatus(ProdFunc.FROZEN);
+        prodFuncService.updateById(prodFunc);
+
     }
 
 
@@ -185,7 +211,16 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
     public void deleteGood(String name) {
         Prod prod = this.getOne(Wrappers.<Prod>lambdaQuery().eq(Prod::getName, name));
         if (prod == null) throw new SthNotFoundException(OBJECT_NOT_ALIVE);
-        //TODO: 删除商品需要判断有无开启交易
+
+        //需要判断是否有已经开启的交易
+        Order order = orderService.getOne(Wrappers.<Order>lambdaQuery()
+                .eq(Order::getProdId, prod.getId())
+                .ne(Order::getStatus, Order.OVER) //已经完成的交易不算
+                .ne(Order::getStatus, Order.STOP) //已经撤销的交易不算
+        );
+
+        if (order != null) throw new SthHasCreatedException(OBJECT_HAS_ALIVE);
+
         this.removeById(prod.getId());
         prodFuncService.removeById(prod.getId());
     }

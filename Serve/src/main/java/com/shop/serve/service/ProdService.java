@@ -17,6 +17,8 @@ public interface ProdService extends IService<Prod> {
 
     void check(ProdLocateDTO prodLocateDTO);
 
+    void freeze(ProdLocateDTO prodLocateDTO);
+
     Page<ProdGreatDTO> page2Check(Integer current);
 
     void deleteByNameUser(ProdLocateDTO prodLocateDTO);
@@ -44,4 +46,6 @@ public interface ProdService extends IService<Prod> {
     List<ProdFunc> extractList4HotProd();
 
     void add2HotSearch(ProdFunc prodFunc);
+
+
 }

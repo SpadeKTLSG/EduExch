@@ -7,14 +7,10 @@ import com.shop.common.exception.BadArgsException;
 import com.shop.common.exception.SthNotFoundException;
 import com.shop.pojo.dto.OrderAllDTO;
 import com.shop.pojo.dto.ProdLocateDTO;
-import com.shop.pojo.entity.Order;
-import com.shop.pojo.entity.OrderDetail;
-import com.shop.pojo.entity.Prod;
+import com.shop.pojo.entity.*;
 import com.shop.pojo.vo.OrderGreatVO;
 import com.shop.serve.mapper.OrderMapper;
-import com.shop.serve.service.OrderDetailService;
-import com.shop.serve.service.OrderService;
-import com.shop.serve.service.ProdService;
+import com.shop.serve.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 import static com.shop.common.constant.MessageConstants.BAD_ARGS;
 import static com.shop.common.constant.MessageConstants.OBJECT_NOT_ALIVE;
@@ -34,6 +31,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     private OrderDetailService orderDetailService;
     @Autowired
     private ProdService prodService;
+    @Autowired
+    private ProdFuncService prodFuncService;
+    @Autowired
+    private UserFuncService userFuncService;
 
     @Override
     public OrderGreatVO orderDetail(OrderAllDTO orderAllDTO) {
@@ -65,8 +66,20 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 .eq(Prod::getName, name)
                 .eq(Prod::getUserId, userId)
         );
-        Long prod_id = prod.getId();
 
+        if (prod == null || prod.getStock() <= 0) throw new SthNotFoundException(OBJECT_NOT_ALIVE);
+
+
+        ProdFunc prodFunc = prodFuncService.getOne(new LambdaQueryWrapper<ProdFunc>()
+                .eq(ProdFunc::getId, prod.getId())
+        );
+        if (!Objects.equals(prodFunc.getStatus(), ProdFunc.NORMAL)) throw new BadArgsException(BAD_ARGS);      //审核未通过的商品不可交易
+
+
+        //创建订单流程
+        prod.setStock(prod.getStock() - 1); //库存减一
+
+        Long prod_id = prod.getId();
         Long buyer_id = UserHolder.getUser().getId();
         Long seller_id = prod.getUserId();
 
@@ -74,7 +87,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 .buyerId(buyer_id)
                 .sellerId(seller_id)
                 .prodId(prod_id)
-                .status(1) //买家开启交易后忽略传递时间, 直接进入等待卖家确认状态
+                .status(1) //模拟: 买家开启交易后忽略传递时间, 直接进入等待卖家确认状态
                 .build();
         this.save(order);
 
@@ -83,6 +96,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 .build();
         orderDetailService.save(orderDetail);
 
+        prodService.updateById(prod);
     }
 
 
@@ -131,10 +145,17 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 .eq(OrderDetail::getId, order1.getId())
         );
 
-        //订单详情的checkoutTime置为当前时间
-        orderDetail.setCheckoutTime(LocalDateTime.now());
+        orderDetail.setCheckoutTime(LocalDateTime.now());//订单详情的checkoutTime置为当前时间
         orderDetailService.updateById(orderDetail);
-        //TODO 其他完成交易后的操作
+
+        //修改三方字段: 买家和卖家的对应交易次数+1
+        UserFunc buyerFunc = userFuncService.getById(order1.getBuyerId());
+        UserFunc sellerFunc = userFuncService.getById(order1.getSellerId());
+        buyerFunc.setGains(buyerFunc.getGains() + 1);
+        sellerFunc.setSolds(buyerFunc.getSolds() + 1);
+
+        userFuncService.updateById(buyerFunc);
+        userFuncService.updateById(sellerFunc);
     }
 
 

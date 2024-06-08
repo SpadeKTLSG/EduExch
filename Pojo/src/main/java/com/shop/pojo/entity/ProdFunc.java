@@ -41,7 +41,7 @@ public class ProdFunc {
     private Integer status;
     public static final Integer NORMAL = 0;
     public static final Integer CHECKING = 1;
-    public static final Integer FROZEN = 3;
+    public static final Integer FROZEN = 2;
 
 
     /**
