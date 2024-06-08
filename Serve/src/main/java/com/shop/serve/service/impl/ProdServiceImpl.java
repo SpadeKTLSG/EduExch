@@ -113,6 +113,16 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
         prodFunc.setStatus(ProdFunc.FROZEN);
         prodFuncService.updateById(prodFunc);
 
+        //同时需要将商品从首页提升榜单和首页轮播图中移除
+        if (!Objects.equals(prodFunc.getShowoffStatus(), ProdFunc.BASIC)) {
+            if (Objects.equals(prodFunc.getShowoffStatus(), ProdFunc.SENIOR)) {
+                upshowService.remove4Upshow(prodLocateDTO);
+            } else {
+                upshowService.remove4Upshow(prodLocateDTO);
+                rotationService.remove4Rotation(prodLocateDTO);
+            }
+        }
+
     }
 
 
@@ -402,7 +412,7 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
         List<ProdFunc> prodList2Check = prodFuncService
                 .query()
                 .orderByDesc("visit")
-                .last("limit " + SystemConstants.DEFAULT_HOTSEARCH_PAGE_SIZE)
+                .last("limit " + SystemConstants.MAX_PAGE_SIZE)
                 .list();
 
         return prodList2Check;
@@ -416,7 +426,7 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
                 .name(this.query().eq("id", prodFunc.getId()).one().getName())
                 .build();
 
-        hotsearchService.add2HotSearch(hotsearchDTO);
+        hotsearchService.add2Hotsearch(hotsearchDTO);
     }
 
 

@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.shop.common.constant.SystemConstants;
 import com.shop.pojo.Result;
 import com.shop.pojo.dto.NoticeAllDTO;
-import com.shop.pojo.dto.RotationDTO;
+import com.shop.pojo.dto.ProdLocateDTO;
 import com.shop.serve.service.HotsearchService;
 import com.shop.serve.service.NoticeService;
 import com.shop.serve.service.RotationService;
@@ -40,14 +40,9 @@ public class PanelController {
     @Autowired
     private UpshowService upshowService;
 
-    //* -- hotsearch热搜 --
-
-    //! ADD
-    //! DELETE
-    //! UPDATE
-    //! QUERY
 
     //* -- notice公告 --
+
 
     //! ADD
 
@@ -101,9 +96,81 @@ public class PanelController {
     /**
      * 分页查询公告
      */
+    @GetMapping("/notice/query/page")
+    @Operation(summary = "分页查询公告")
+    @Parameters(@Parameter(name = "current", description = "当前页", required = true))
+    public Result queryNoticePage(@RequestParam(value = "current", defaultValue = "1") Integer current) {
+        return Result.success(noticeService.page(new Page<>(current, SystemConstants.DEFAULT_PAGE_SIZE)));
+    }
+
+
+    //* -- hotsearch热搜 --
+
+
+    //! ADD
+
+    /**
+     * 添加热搜
+     */
+    @PostMapping("/hotsearch/add")
+    @Operation(summary = "添加热搜")
+    @Parameters(@Parameter(name = "prodLocateDTO", description = "商品定位DTO", required = true))
+    public Result add2Hotsearch(@RequestBody ProdLocateDTO prodLocateDTO) {
+        hotsearchService.add2Hotsearch(prodLocateDTO);
+        return Result.success();
+    }
+    //http://localhost:8085/admin/panel/hotsearch/add
+
+
+    //! DELETE
+
+    /**
+     * 删除热搜
+     */
+    @DeleteMapping("/hotsearch/delete")
+    @Operation(summary = "删除热搜")
+    @Parameters(@Parameter(name = "prodLocateDTO", description = "商品定位DTO", required = true))
+    public Result remove4Hotsearch(@RequestBody ProdLocateDTO prodLocateDTO) {
+        hotsearchService.remove4Hotsearch(prodLocateDTO);
+        return Result.success();
+    }
+    //http://localhost:8085/admin/panel/hotsearch/delete
+
+
+    /**
+     * 清空热搜
+     */
+    @DeleteMapping("/hotsearch/clear")
+
+    @Operation(summary = "清空热搜")
+    public Result clearAllHotsearch() {
+        hotsearchService.clearAllHotsearch();
+        return Result.success();
+    }
+    //http://localhost:8085/admin/panel/hotsearch/clear
+
+
+    //! UPDATE
+
+    // 禁止
+
+
+    //! QUERY
+
+    /**
+     *
+     */
+    @GetMapping("/hotsearch/query/page")
+    @Operation(summary = "分页查询热搜")
+    @Parameters(@Parameter(name = "current", description = "当前页", required = true))
+    public Result queryHotsearchPage(@RequestParam(value = "current", defaultValue = "1") Integer current) {
+        return Result.success(hotsearchService.page(new Page<>(current, SystemConstants.DEFAULT_PAGE_SIZE)));
+    }
+    //http://localhost:8085/admin/panel/hotsearch/query/page
 
 
     //* -- rotation轮播 --
+
 
     //! ADD
 
@@ -113,9 +180,9 @@ public class PanelController {
      */
     @PostMapping("/rotation/add")
     @Operation(summary = "添加轮播")
-    @Parameters(@Parameter(name = "rotationDTO", description = "轮播添加DTO", required = true))
-    public Result add2Rotation(@RequestBody RotationDTO rotationDTO) {
-        rotationService.add2Rotation(rotationDTO);
+    @Parameters(@Parameter(name = "prodLocateDTO", description = "商品定位DTO", required = true))
+    public Result add2Rotation(@RequestBody ProdLocateDTO prodLocateDTO) {
+        rotationService.add2Rotation(prodLocateDTO);
         return Result.success();
     }
     //http://localhost:8085/admin/panel/rotation/add
@@ -128,9 +195,9 @@ public class PanelController {
      */
     @DeleteMapping("/rotation/delete")
     @Operation(summary = "删除轮播")
-    @Parameters(@Parameter(name = "rotationDTO", description = "轮播删除DTO", required = true))
-    public Result remove4Rotation(@RequestBody RotationDTO rotationDTO) {
-        rotationService.remove4Rotation(rotationDTO);
+    @Parameters(@Parameter(name = "prodLocateDTO", description = "商品定位DTO", required = true))
+    public Result remove4Rotation(@RequestBody ProdLocateDTO prodLocateDTO) {
+        rotationService.remove4Rotation(prodLocateDTO);
         return Result.success();
     }
     //http://localhost:8085/admin/panel/rotation/delete
@@ -156,9 +223,49 @@ public class PanelController {
     //* -- upshow提升 --
 
     //! ADD
+
+    /**
+     * 添加提升
+     */
+    @PostMapping("/upshow/add")
+    @Operation(summary = "添加提升")
+    @Parameters(@Parameter(name = "prodLocateDTO", description = "商品定位DTO", required = true))
+    public Result add2Upshow(@RequestBody ProdLocateDTO prodLocateDTO) {
+        upshowService.add2Upshow(prodLocateDTO);
+        return Result.success();
+    }
+    //http://localhost:8085/admin/panel/upshow/add
+
     //! DELETE
+
+    /**
+     * 删除提升
+     */
+    @DeleteMapping("/upshow/delete")
+    @Operation(summary = "删除提升")
+    @Parameters(@Parameter(name = "prodLocateDTO", description = "商品定位DTO", required = true))
+    public Result remove4Upshow(@RequestBody ProdLocateDTO prodLocateDTO) {
+        upshowService.remove4Upshow(prodLocateDTO);
+        return Result.success();
+    }
+    //http://localhost:8085/admin/panel/upshow/delete
+
     //! UPDATE
+
+    // 禁止
+
+
     //! QUERY
+
+    /**
+     * 分页查询提升
+     */
+    @GetMapping("/upshow/query/page")
+    @Operation(summary = "分页查询提升")
+    @Parameters(@Parameter(name = "current", description = "当前页", required = true))
+    public Result queryUpshowPage(@RequestParam(value = "current", defaultValue = "1") Integer current) {
+        return Result.success(upshowService.page(new Page<>(current, SystemConstants.DEFAULT_PAGE_SIZE)));
+    }
 
 
 }

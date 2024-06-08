@@ -33,8 +33,5 @@ public class SystemConstants {
      */
     public static final int DEFAULT_WEIGHT = 5;
 
-    /**
-     * 默认热度表对象数量
-     */
-    public static final int DEFAULT_HOTSEARCH_PAGE_SIZE = 10;
+
 }

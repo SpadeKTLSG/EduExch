@@ -50,7 +50,7 @@ public class ProdTask {
     @Scheduled(cron = "0 0 1 * * ?")
     public void processHotSearch() {
 
-        hotsearchService.clearAllHotSearch(); //清空热搜表
+        hotsearchService.clearAllHotsearch(); //清空热搜表
 
         log.debug("定时提取热搜表：{}", LocalDateTime.now());
 
