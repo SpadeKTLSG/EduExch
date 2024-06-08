@@ -18,7 +18,7 @@ public class OssConfiguration {
     @Bean
     @ConditionalOnMissingBean //保证只有一个AliOssUtil对象
     public AliOssUtil aliOssUtil(AliOssProperties aliOssProperties) {
-        log.info("创建阿里云文件上传工具类对象：{}", aliOssProperties);
+        log.debug("创建完成阿里云文件上传工具类对象");
         return new AliOssUtil(aliOssProperties.getEndpoint(),
                 aliOssProperties.getAccessKeyId(),
                 aliOssProperties.getAccessKeySecret(),

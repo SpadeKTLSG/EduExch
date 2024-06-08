@@ -21,7 +21,7 @@ public class RedisConfig {
 
     @Bean
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
-        log.info("Redis配置");
+        log.debug("RedisConfig配置完成");
         // 创建RedisTemplate对象
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         // 设置连接工厂

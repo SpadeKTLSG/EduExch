@@ -118,11 +118,11 @@ mybatis-plus:
 
 # 日志配置
 logging:
+
   level:
-    com.eduexch:
-      mapper: info #mybatis日志
-      service: info   #service日志
-      controller: info  #controller日志
+    com.shop:
+      DEBUG
+
   pattern:
     dateformat: mm:ss.SSS
 

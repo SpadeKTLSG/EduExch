@@ -40,7 +40,7 @@ public class AdminWebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
 
-        log.info("自定义管理员端拦截器启动");
+        log.debug("自定义管理员端拦截器启动");
 
         //登录拦截器
         registry.addInterceptor(new AdminLoginInterceptor())

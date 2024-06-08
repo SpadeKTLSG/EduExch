@@ -31,7 +31,7 @@ public class RedissonConfig {
 
     @Bean
     public RedissonClient redissonClient() {
-        log.debug("Redis配置");
+        log.debug("redissonClient配置完成");
         Config config = new Config();
         //单机模式
         config.useSingleServer().setAddress("redis://" + host + ":" + port).setPassword(password);

@@ -20,7 +20,7 @@ public class RabbitMQTopicConfig {
 
 
     /**
-     * 队列  seckillQueue
+     * 队列
      */
     @Bean
     public Queue myQueue() {
@@ -28,7 +28,7 @@ public class RabbitMQTopicConfig {
     }
 
     /**
-     * 交换机  seckillExchange
+     * 交换机
      */
     @Bean
     public FanoutExchange easyExchange() {
@@ -36,7 +36,7 @@ public class RabbitMQTopicConfig {
     }
 
     /**
-     * 绑定  seckillQueue  seckillExchange
+     * 绑定
      */
     @Bean
     public Binding binding() {

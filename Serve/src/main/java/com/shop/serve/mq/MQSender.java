@@ -22,7 +22,7 @@ public class MQSender {
      * 发送秒杀信息
      */
     public void sendSeckillMessage(String msg) {
-        log.info("MQ发送消息" + msg);
+        log.debug("MQ发送消息" + msg);
         rabbitTemplate.convertAndSend(EXCHANGE, msg);
     }
 

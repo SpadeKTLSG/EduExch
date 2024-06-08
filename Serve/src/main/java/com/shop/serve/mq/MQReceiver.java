@@ -41,7 +41,7 @@ public class MQReceiver {
     @Transactional
     @RabbitListener(queues = QUEUE)
     public void receiveSeckillMessage(String msg) {
-        log.info("准备处理秒杀订单消息: " + msg);
+        log.debug("MQ准备处理秒杀订单消息: " + msg);
 
         //取出消息并转换为订单对象
         Order order = JSON.parseObject(msg, Order.class);
@@ -87,7 +87,7 @@ public class MQReceiver {
             log.error("库存不足 {}", e.getMessage());
         }
 
-        log.info("恭喜, 一个秒杀逻辑订单创建成功!");
+        log.debug("恭喜, 一个秒杀逻辑订单创建成功!");
     }
 
 
