@@ -28,6 +28,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static com.shop.common.constant.MessageConstant.*;
+import static com.shop.common.constant.RedisConstant.SECKILL_STOCK_KEY;
 import static com.shop.common.constant.RedisConstant.USER_VO_KEY;
 import static com.shop.common.constant.SystemConstant.DEFAULT_WEIGHT;
 import static com.shop.common.utils.NewBeanUtil.dtoMapService;
@@ -217,6 +218,9 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
 
         this.save(prod);
         prodFuncService.save(prodFunc);
+
+        //还需要添加Redis Key
+        stringRedisTemplate.opsForValue().set(SECKILL_STOCK_KEY + prod.getId(), prod.getStock().toString());
     }
 
 
@@ -235,8 +239,11 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
 
         if (order != null) throw new SthHasCreatedException(OBJECT_HAS_ALIVE);
 
-        this.removeById(prod.getId());
         prodFuncService.removeById(prod.getId());
+        this.removeById(prod.getId());
+
+        //还需要删除Redis Key
+        stringRedisTemplate.delete(SECKILL_STOCK_KEY + prod.getId());
     }
 
 
