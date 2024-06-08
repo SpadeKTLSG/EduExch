@@ -40,6 +40,6 @@ public class Hotsearch {
     /**
      * 对应商品浏览量
      */
-    private Integer visit;
+    private Long visit;
 
 }

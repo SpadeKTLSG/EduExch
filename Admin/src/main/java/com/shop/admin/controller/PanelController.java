@@ -65,10 +65,13 @@ public class PanelController {
 
     //! DELETE
 
-    //TODO
+
 
     //! UPDATE
 
+    /**
+     * 更新公告
+     */
     @PutMapping("/notice/update")
     @Operation(summary = "更新公告")
     @Parameters(@Parameter(name = "noticeAllDTO", description = "公告更新DTO", required = true))
@@ -80,8 +83,6 @@ public class PanelController {
 
 
     //! QUERY
-
-    //TODO
 
 
     //* -- rotation轮播 --

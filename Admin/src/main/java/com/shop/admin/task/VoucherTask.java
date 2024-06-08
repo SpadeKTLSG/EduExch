@@ -2,6 +2,7 @@ package com.shop.admin.task;
 
 import com.shop.pojo.entity.ProdFunc;
 import com.shop.pojo.entity.Voucher;
+import com.shop.serve.service.HotsearchService;
 import com.shop.serve.service.ProdService;
 import com.shop.serve.service.VoucherService;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +24,8 @@ public class VoucherTask {
     private VoucherService voucherService;
     @Autowired
     private ProdService prodService;
-
+    @Autowired
+    private HotsearchService hotsearchService;
 
     /**
      * 处理到达失效时间的卷对象, 每天1点触发一次
@@ -61,4 +63,25 @@ public class VoucherTask {
             }
         }
     }
+
+    /**
+     * 提取热搜表, 每天1点触发一次
+     */
+    @Scheduled(cron = "0 0 1 * * ?")
+    public void processHotSearch() {
+
+        hotsearchService.clearAllHotSearch(); //清空热搜表
+
+        log.debug("定时提取热搜表：{}", LocalDateTime.now());
+
+        List<ProdFunc> prodFuncList = prodService.extractList4HotProd();
+
+        if (prodFuncList != null && !prodFuncList.isEmpty()) {
+            for (ProdFunc prodFunc : prodFuncList) {
+                prodService.add2HotSearch(prodFunc); //添加到热搜表
+            }
+        }
+    }
+
 }
+

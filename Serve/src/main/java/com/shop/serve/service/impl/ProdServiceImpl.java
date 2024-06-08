@@ -14,10 +14,7 @@ import com.shop.pojo.entity.ProdCate;
 import com.shop.pojo.entity.ProdFunc;
 import com.shop.pojo.vo.ProdGreatVO;
 import com.shop.serve.mapper.ProdMapper;
-import com.shop.serve.service.ProdCateService;
-import com.shop.serve.service.ProdFuncService;
-import com.shop.serve.service.ProdService;
-import com.shop.serve.service.UpshowService;
+import com.shop.serve.service.*;
 import com.shop.serve.tool.NewDTOUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -31,6 +28,7 @@ import java.util.*;
 
 import static com.shop.common.constant.MessageConstants.*;
 import static com.shop.common.constant.RedisConstants.USER_VO_KEY;
+import static com.shop.common.constant.SystemConstants.DEFAULT_WEIGHT;
 import static com.shop.common.utils.NewBeanUtils.dtoMapService;
 
 @Slf4j
@@ -43,6 +41,10 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
     private ProdCateService prodCateService;
     @Autowired
     private UpshowService upshowService;
+    @Autowired
+    private RotationService rotationService;
+    @Autowired
+    private HotsearchService hotsearchService;
     @Autowired
     private NewDTOUtils dtoUtils;
     @Autowired
@@ -219,17 +221,32 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
             prodFunc.setShowoffStatus(1); //高级功能类型: 3days展示提升 : 首页提升榜单
             prodFunc.setShowoffEndtime(LocalDateTime.now().plusDays(3)); // 3天
 
+            UpshowDTO upshowDTO = UpshowDTO.builder()
+                    .prodId(prod.getId())
+                    .name(prod.getName())
+                    .build();
+            upshowService.add2Upshow(upshowDTO);
+
         } else {
 
             prodFunc.setShowoffStatus(2); //超级功能类型: 7days展示提升 : 首页提升榜单 + 首页轮播图
             prodFunc.setShowoffEndtime(LocalDateTime.now().plusDays(7)); // 7天
+
+            UpshowDTO upshowDTO = UpshowDTO.builder()
+                    .prodId(prod.getId())
+                    .name(prod.getName())
+                    .build();
+            upshowService.add2Upshow(upshowDTO);
+
+            RotationDTO rotationDTO = RotationDTO.builder()
+                    .prodId(prod.getId())
+                    .name(prod.getName())
+                    .picture(prod.getImages())
+                    .weight(prodFunc.getWeight())
+                    .build();
+            rotationService.add2Rotation(rotationDTO);
         }
 
-        UpshowDTO upshowDTO = UpshowDTO.builder()
-                .prodId(prod.getId())
-                .name(prod.getName())
-                .build();
-        upshowService.add2Upshow(upshowDTO);
 
         prodFuncService.updateById(prodFunc);
 
@@ -255,9 +272,10 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
         // 统计该商品浏览量
         Long count = stringRedisTemplate.opsForHyperLogLog().size(productKey);
 
-        // 更新商品浏览量
+        // 更新商品浏览量, 同时提升权重
         ProdFunc prodFunc = prodFuncService.getOne(Wrappers.<ProdFunc>lambdaQuery().eq(ProdFunc::getId, prod.getId()));
         prodFunc.setVisit(prodFunc.getVisit() + count);
+        prodFunc.setWeight(prodFunc.getWeight() + count * DEFAULT_WEIGHT);
         prodFuncService.updateById(prodFunc);
 
         ProdGreatVO prodGreatVO;
@@ -326,6 +344,29 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
 
         prodFuncService.updateById(prodFunc);
         upshowService.remove4Upshow(upshowDTO);
+    }
+
+    @Override
+    public List<ProdFunc> extractList4HotProd() {
+
+        List<ProdFunc> prodList2Check = prodFuncService
+                .query()
+                .orderByDesc("visit")
+                .last("limit " + SystemConstants.DEFAULT_HOTSEARCH_PAGE_SIZE)
+                .list();
+
+        return prodList2Check;
+    }
+
+    @Override
+    public void add2HotSearch(ProdFunc prodFunc) {
+        HotsearchDTO hotsearchDTO = HotsearchDTO.builder()
+                .visit(prodFunc.getVisit())
+                .prodId(prodFunc.getId())
+                .name(this.query().eq("id", prodFunc.getId()).one().getName())
+                .build();
+
+        hotsearchService.add2HotSearch(hotsearchDTO);
     }
 
 

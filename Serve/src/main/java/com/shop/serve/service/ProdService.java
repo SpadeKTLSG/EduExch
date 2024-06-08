@@ -40,4 +40,8 @@ public interface ProdService extends IService<Prod> {
     List<ProdFunc> getOutdateOnes(LocalDateTime time);
 
     void coolDownProd(ProdFunc prodFunc);
+
+    List<ProdFunc> extractList4HotProd();
+
+    void add2HotSearch(ProdFunc prodFunc);
 }
