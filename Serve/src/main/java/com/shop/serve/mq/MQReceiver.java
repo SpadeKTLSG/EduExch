@@ -7,12 +7,12 @@ import com.shop.pojo.entity.OrderDetail;
 import com.shop.pojo.entity.Prod;
 import com.shop.serve.service.OrderDetailService;
 import com.shop.serve.service.OrderService;
-import com.shop.serve.service.ProdFuncService;
 import com.shop.serve.service.ProdService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -24,11 +24,10 @@ import static com.shop.common.constant.RabbitMQConstant.QUEUE;
  * 消息消费者
  */
 @Slf4j
-@Service
+@Component
+@Lazy(false) //解决懒加载问题
 public class MQReceiver {
 
-    @Autowired
-    private ProdFuncService prodFuncService;
     @Autowired
     private ProdService prodService;
     @Autowired
@@ -42,7 +41,7 @@ public class MQReceiver {
     @Transactional
     @RabbitListener(queues = QUEUE)
     public void receiveSeckillMessage(String msg) {
-        log.info("MQ接收到消息: " + msg);
+        log.info("准备处理秒杀订单消息: " + msg);
 
         //取出消息并转换为订单对象
         Order order = JSON.parseObject(msg, Order.class);
@@ -90,5 +89,6 @@ public class MQReceiver {
 
         log.info("恭喜, 一个秒杀逻辑订单创建成功!");
     }
+
 
 }

@@ -12,7 +12,7 @@ spring:
 
     allow-circular-references: true # 允许循环引用
     allow-bean-definition-overriding: true # 允许覆盖bean定义
-    lazy-initialization: true # 开启懒加载
+    lazy-initialization: false # 关闭懒加载, 防止组件失效
 
   # MySQL
   datasource:

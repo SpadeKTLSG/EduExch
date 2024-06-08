@@ -1,20 +1,18 @@
 package com.shop.serve.mq;
 
 
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import static com.shop.common.constant.RabbitMQConstant.EXCHANGE;
-import static com.shop.common.constant.RabbitMQConstant.SENDER_ROUTINGKEY;
 
 /**
  * 消息发送者
  */
 @Slf4j
-@Service
+@Component
 public class MQSender {
 
     @Autowired
@@ -25,7 +23,7 @@ public class MQSender {
      */
     public void sendSeckillMessage(String msg) {
         log.info("MQ发送消息" + msg);
-        rabbitTemplate.convertAndSend(EXCHANGE, SENDER_ROUTINGKEY, msg);
+        rabbitTemplate.convertAndSend(EXCHANGE, msg);
     }
 
 }

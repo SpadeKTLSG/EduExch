@@ -11,20 +11,11 @@ public class RabbitMQConstant {
     /**
      * 队列名称
      */
-    public static final String QUEUE = "seckillQueue";
+    public static final String QUEUE = "seckill";
 
     /**
      * 交换机名称
      */
-    public static final String EXCHANGE = "seckillExchange";
+    public static final String EXCHANGE = "seckill";
 
-    /**
-     * 路由键
-     */
-    public static final String ROUTINGKEY = "seckill.#";
-
-    /**
-     * 发送者路由键
-     */
-    public static final String SENDER_ROUTINGKEY = "seckill.message";
 }
