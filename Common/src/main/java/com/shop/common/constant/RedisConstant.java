@@ -88,11 +88,33 @@ public class RedisConstant {
     public static final String SECKILL_ORDER_KEY = "seckill:order:";
 
 
+    /**
+     * 缓存空数据时间
+     */
     public static final Long CACHE_NULL_TTL = 2L;
 
+    /**
+     * 缓存卖家Key前缀
+     */
     public static final String LOCK_SHOP_KEY = "lock:shop:";
 
 
+    //* Ultra - 限流逻辑 -
+
+    /**
+     * 发送验证码时间Key前缀
+     */
+    public static final String SENDCODE_SENDTIME_KEY = "sms:sendtime:";
+
+    /**
+     * 一级限流Key前缀
+     */
+    public static final String ONE_LEVERLIMIT_KEY = "limit:onelevel:";
+
+    /**
+     * 二级限流Key前缀
+     */
+    public static final String TWO_LEVERLIMIT_KEY = "limit:twolevel:";
 
     public static final Long CACHE_SHOP_TTL = 30L;
     public static final String CACHE_SHOP_KEY = "cache:shop:";

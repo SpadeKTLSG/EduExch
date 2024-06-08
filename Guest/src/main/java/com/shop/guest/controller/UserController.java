@@ -58,7 +58,10 @@ public class UserController {
     @Operation(summary = "发送手机验证码")
     @Parameters(@Parameter(name = "phone", description = "手机号", required = true))
     public Result sendCode(@RequestParam("phone") String phone, HttpSession session) {
-        return Result.success(userService.sendCode(phone, session));
+        String mes = userService.sendCode(phone, session);
+        //如果是!开头的字符串，说明发送失败, 去除!后返回
+        if (mes.startsWith("!")) return Result.error(mes.substring(1));
+        return Result.success(mes);
     }
     //http://localhost:8086/guest/user/code?phone=15985785169
 

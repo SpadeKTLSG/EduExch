@@ -3,7 +3,6 @@ package com.shop.serve.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.lang.UUID;
-import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -11,6 +10,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.shop.common.constant.PasswordConstant;
 import com.shop.common.context.UserHolder;
 import com.shop.common.exception.*;
+import com.shop.common.utils.MailUtil;
 import com.shop.common.utils.RegexUtil;
 import com.shop.pojo.dto.*;
 import com.shop.pojo.entity.Prod;
@@ -168,8 +168,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
 
-
-
     @Override
     public void updateUserCode(UserLoginDTO userLoginDTO) {
 
@@ -283,6 +281,44 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public String sendCode(String phone, HttpSession session) {
 
+        // 1. 判断是否在一级限制条件内
+        Boolean oneLevelLimit = stringRedisTemplate.opsForSet().isMember(ONE_LEVERLIMIT_KEY + phone, "1");
+        if (oneLevelLimit != null && oneLevelLimit) {
+            // 在一级限制条件内，不能发送验证码
+            return "!您需要等5分钟后再请求";
+        }
+
+        // 2. 判断是否在二级限制条件内
+        Boolean twoLevelLimit = stringRedisTemplate.opsForSet().isMember(TWO_LEVERLIMIT_KEY + phone, "1");
+        if (twoLevelLimit != null && twoLevelLimit) {
+            // 在二级限制条件内，不能发送验证码
+            return "!您需要等20分钟后再请求";
+        }
+
+        // 3. 检查过去1分钟内发送验证码的次数
+        long oneMinuteAgo = System.currentTimeMillis() - 60 * 1000;
+        long count_oneminute = stringRedisTemplate.opsForZSet().count(SENDCODE_SENDTIME_KEY + phone, oneMinuteAgo, System.currentTimeMillis());
+        if (count_oneminute >= 1) {
+            // 过去1分钟内已经发送了1次，不能再发送验证码
+            return "!距离上次发送时间不足1分钟, 请1分钟后重试";
+        }
+
+        // 4. 检查发送验证码的次数
+        long fiveMinutesAgo = System.currentTimeMillis() - 5 * 60 * 1000;
+        long count_fiveminute = stringRedisTemplate.opsForZSet().count(SENDCODE_SENDTIME_KEY + phone, fiveMinutesAgo, System.currentTimeMillis());
+        if (count_fiveminute % 3 == 2 && count_fiveminute > 5) {
+            // 发送了8, 11, 14, ...次，进入二级限制
+            stringRedisTemplate.opsForSet().add(TWO_LEVERLIMIT_KEY + phone, "1");
+            stringRedisTemplate.expire(TWO_LEVERLIMIT_KEY + phone, 20, TimeUnit.MINUTES);
+            return "!请求过于频繁, 请20分钟后再请求";
+        } else if (count_fiveminute == 5) {
+            // 过去5分钟内已经发送了5次，进入一级限制
+            stringRedisTemplate.opsForSet().add(ONE_LEVERLIMIT_KEY + phone, "1");
+            stringRedisTemplate.expire(ONE_LEVERLIMIT_KEY + phone, 5, TimeUnit.MINUTES);
+            return "!5分钟内您已经发送了5次, 请等待5分钟后重试";
+        }
+
+
         if (RegexUtil.isPhoneInvalid(phone)) throw new InvalidInputException(PHONE_INVALID);
 
         Set<String> keys = stringRedisTemplate.keys(LOGIN_USER_KEY_GUEST + phone + "*"); //删除之前的验证码
@@ -290,9 +326,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             stringRedisTemplate.delete(keys);
         }
 
-        String code = RandomUtil.randomNumbers(6); //生成
+
+        String code = MailUtil.achieveCode();//生成验证码: 自定义工具类生成验证码
 
         stringRedisTemplate.opsForValue().set(LOGIN_CODE_KEY_GUEST + phone, code, LOGIN_CODE_TTL_GUEST, TimeUnit.MINUTES);
+        // 更新发送时间和次数
+        stringRedisTemplate.opsForZSet().add(SENDCODE_SENDTIME_KEY + phone, System.currentTimeMillis() + "", System.currentTimeMillis());
 
         return code; //调试环境: 返回验证码; 未来使用邮箱工具类发送验证码
     }
