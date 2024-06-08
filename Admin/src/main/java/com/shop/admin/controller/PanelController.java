@@ -65,6 +65,9 @@ public class PanelController {
 
     //! DELETE
 
+    /**
+     * 删除公告
+     */
 
 
     //! UPDATE
@@ -84,13 +87,33 @@ public class PanelController {
 
     //! QUERY
 
+    /**
+     * 分页查询公告
+     */
+
 
     //* -- rotation轮播 --
 
     //! ADD
+
+    /**
+     * 添加轮播
+     */
+
     //! DELETE
+
+    /**
+     * 删除轮播
+     */
+
     //! UPDATE
+
+
     //! QUERY
+
+    /**
+     * 分页查询轮播
+     */
 
 
     //* -- upshow提升 --

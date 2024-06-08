@@ -7,9 +7,7 @@ import com.shop.pojo.entity.Notice;
 
 public interface NoticeService extends IService<Notice> {
 
-    /**
-     * @param noticeAllDTO
-     */
+
     void publishNotice(NoticeAllDTO noticeAllDTO);
 
     void updateNotice(NoticeAllDTO noticeAllDTO);
