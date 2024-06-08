@@ -61,8 +61,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private NewDTOUtils dtoUtils;
 
 
-    @Transactional
     @Override
+    @Transactional
     public void register(UserLoginDTO userLoginDTO, HttpSession session) {
 
         String phone = userLoginDTO.getPhone();
@@ -98,37 +98,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         userFuncService.save(userFunc);
     }
 
-
-    @Override
-    @Transactional
-    public void updateUserGreatDTO(UserGreatDTO userGreatDTO) throws InstantiationException, IllegalAccessException {
-        //? 联表选择性更新字段示例
-        userGreatDTO.setPassword(DigestUtils.md5DigestAsHex(userGreatDTO.getPassword().getBytes())); //预先处理密码
-
-        Optional<User> optionalUser = Optional.ofNullable(this.getOne(Wrappers.<User>lambdaQuery().eq(User::getAccount, userGreatDTO.getAccount())));
-        if (optionalUser.isEmpty()) {
-            throw new RuntimeException("用户不存在");
-        }
-
-        // 用Map存储DTO和Service
-        Map<Object, IService> dtoServiceMap = new HashMap<>();
-        dtoServiceMap.put(createDTOFromUserGreatDTO(userGreatDTO, UserAllDTO.class), this);
-        dtoServiceMap.put(createDTOFromUserGreatDTO(userGreatDTO, UserFuncAllDTO.class), userFuncService);
-        dtoServiceMap.put(createDTOFromUserGreatDTO(userGreatDTO, UserDetailAllDTO.class), userDetailService);
-
-        dtoMapService(dtoServiceMap, optionalUser.get().getId(), optionalUser);
-    }
-
-
-    /**
-     * 从UserGreatDTO创建DTO
-     */
-    @SuppressWarnings("deprecation")
-    private <T> T createDTOFromUserGreatDTO(UserGreatDTO userGreatDTO, Class<T> clazz) throws InstantiationException, IllegalAccessException {
-        T dto = clazz.newInstance();
-        BeanUtils.copyProperties(userGreatDTO, dto);
-        return dto;
-    }
 
     @Override
     public String login(UserLoginDTO userLoginDTO, HttpSession session) {
@@ -171,12 +140,35 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public void logout() {
-        //删除掉之前的所有登陆令牌
-        Set<String> keys = stringRedisTemplate.keys(LOGIN_USER_KEY_GUEST + "*");
+        Set<String> keys = stringRedisTemplate.keys(LOGIN_USER_KEY_GUEST + "*");        //删除掉之前本地的所有登陆令牌
         if (keys != null) {
             stringRedisTemplate.delete(keys);
         }
     }
+
+
+    @Override
+    @Transactional
+    public void updateUserGreatDTO(UserGreatDTO userGreatDTO) throws InstantiationException, IllegalAccessException {
+        //联表选择性更新
+        userGreatDTO.setPassword(DigestUtils.md5DigestAsHex(userGreatDTO.getPassword().getBytes())); //预先处理密码
+
+        Optional<User> optionalUser = Optional.ofNullable(this.getOne(Wrappers.<User>lambdaQuery().eq(User::getAccount, userGreatDTO.getAccount())));
+        if (optionalUser.isEmpty()) {
+            throw new RuntimeException("用户不存在");
+        }
+
+        // 用Map存储DTO和Service
+        Map<Object, IService> dtoServiceMap = new HashMap<>();
+        dtoServiceMap.put(createDTOFromUserGreatDTO(userGreatDTO, UserAllDTO.class), this);
+        dtoServiceMap.put(createDTOFromUserGreatDTO(userGreatDTO, UserFuncAllDTO.class), userFuncService);
+        dtoServiceMap.put(createDTOFromUserGreatDTO(userGreatDTO, UserDetailAllDTO.class), userDetailService);
+
+        dtoMapService(dtoServiceMap, optionalUser.get().getId(), optionalUser);
+    }
+
+
+
 
     @Override
     public void updateUserCode(UserLoginDTO userLoginDTO) {
@@ -191,7 +183,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         this.update(user, Wrappers.<User>lambdaUpdate().eq(User::getAccount, userLoginDTO.getAccount()));
     }
 
+
     @Override
+    @Transactional
     public void doCollect(ProdLocateDTO prodLocateDTO) {
         Long userId = UserHolder.getUser().getId();
 
@@ -204,13 +198,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         Double score = stringRedisTemplate.opsForZSet().score(key, userId.toString());
         UserFunc userFunc = userFuncService.getById(userId);
         String collections = userFunc.getCollections();
-        String prodNameInCollection = prodLocateDTO.getUserId() + ":" + prodLocateDTO.getName() + ",";
+        String prodNameInCollection = prodLocateDTO.getUserId() + ":" + prodLocateDTO.getName() + ","; // 拼接到collections字段中, 以逗号分隔.
 
         if (score == null) { //未收藏
 
             // 更新用户收藏collections字段, 将该商品的唯一定位ProdLocateDTO按照prodLocateDTO.getUserId() + ":" + prodLocateDTO.getName()
-            // 拼接到collections字段中, 以逗号分隔.
-
             if (collections == null) {
                 collections = prodNameInCollection;
             } else {
@@ -245,6 +237,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
     }
 
+
     @Override
     public int collectCount() {
         Long userId = UserHolder.getUser().getId();
@@ -253,6 +246,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         return collections == null ? 0 : collections.split(",").length;
     }
+
 
     @Override
     public Page<Prod> collectPage(Integer current) {
@@ -366,6 +360,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return userVO;
     }
 
+
     @Override
     public UserVO getByUserId(Long id) {
         User user = this.getById(id);
@@ -376,12 +371,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return userVO;
     }
 
+
     @Override
     public UserGreatVO info() {
 
-//        UserLocalDTO userLocalDTO = UserHolder.getUser(); //从ThreadLocal中获取用户信息id
-        //测试时使用id = 1测试账号
-        UserLocalDTO userLocalDTO = new UserLocalDTO();
+        UserLocalDTO userLocalDTO = UserHolder.getUser();
         BeanUtils.copyProperties(this.getById(1L), userLocalDTO);
 
         if (userLocalDTO == null) throw new NotLoginException(USER_NOT_LOGIN);
@@ -396,18 +390,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new BaseException(UNKNOWN_ERROR);
         }
 
-       /* //查联表基础实现
-               UserAllDTO userAllDTO = new UserAllDTO();
-        UserDetailAllDTO userDetailDTO = new UserDetailAllDTO();
-        UserFuncAllDTO userFuncDTO = new UserFuncAllDTO();
-
-        BeanUtils.copyProperties(userService.getById(userLocalDTO.getId()), userAllDTO);
-        BeanUtils.copyProperties(userDetailService.getById(userLocalDTO.getId()), userDetailDTO);
-        BeanUtils.copyProperties(userFuncService.getById(userLocalDTO.getId()), userFuncDTO);
-        //整合到GreatDTO
-        BeanUtils.copyProperties(userAllDTO, userGreatVO);
-        BeanUtils.copyProperties(userDetailDTO, userGreatVO);
-        BeanUtils.copyProperties(userFuncDTO, userGreatVO);*/
         return userGreatVO;
     }
 
@@ -420,5 +402,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         userFuncService.removeById(userLocalDTO.getId());
     }
 
+
+    /**
+     * 从UserGreatDTO创建DTO
+     */
+    private <T> T createDTOFromUserGreatDTO(UserGreatDTO userGreatDTO, Class<T> clazz) throws InstantiationException, IllegalAccessException {
+        T dto = clazz.newInstance();
+        BeanUtils.copyProperties(userGreatDTO, dto);
+        return dto;
+    }
 
 }

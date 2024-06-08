@@ -47,13 +47,12 @@ public class CustomerController {
     public Result serviceAskHelp(@RequestBody OrderAllDTO orderAllDTO, Session session) {
 
         //将订单信息转换为Map, 直接发送给客服端请求接入
-        //注意, 使用Postman测试时无法发送WebSocket请求, 需要使用前端页面模式建立连接
+        //注意, 使用Postman时无法发送WebSocket请求, 需要使用前端页面模式建立连接
         Map<String, Object> orderMap = BeanUtil.beanToMap(orderAllDTO, new HashMap<>(),
                 CopyOptions.create()
                         .setIgnoreNullValue(true)
                         .setFieldValueEditor((fieldName, fieldValue) -> fieldValue.toString()));
 
-        //webSocketServer.onOpen(session, "guest/service"); //仅为测试使用
         webSocketServer.sendToAllClient(JSON.toJSONString(orderMap));
         return Result.success();
     }

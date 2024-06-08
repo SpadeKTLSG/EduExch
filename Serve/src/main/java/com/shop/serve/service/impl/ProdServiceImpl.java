@@ -41,13 +41,14 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
     @Autowired
     private ProdCateService prodCateService;
     @Autowired
+    private OrderService orderService;
+
+    @Autowired
     private UpshowService upshowService;
     @Autowired
     private RotationService rotationService;
     @Autowired
     private HotsearchService hotsearchService;
-    @Autowired
-    private OrderService orderService;
 
     @Autowired
     private NewDTOUtils dtoUtils;
@@ -58,7 +59,7 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
     @Override
     @Transactional
     public void update4User(ProdGreatDTO prodGreatDTO) throws InstantiationException, IllegalAccessException {
-        //? 联表选择性更新字段
+        // 联表选择性更新
         Optional<Prod> optionalProd = Optional.ofNullable(this.getOne(Wrappers.<Prod>lambdaQuery().eq(Prod::getName, prodGreatDTO.getName())));
         if (optionalProd.isEmpty()) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
 
@@ -202,6 +203,7 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
 
 
     @Override
+    @Transactional
     public void publishGood(ProdGreatDTO prodGreatDTO) {
         if (this.query().eq("name", prodGreatDTO.getName()).count() > 0) throw new SthHasCreatedException(OBJECT_HAS_ALIVE);
 
@@ -219,6 +221,7 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
 
 
     @Override
+    @Transactional
     public void deleteGood(String name) {
         Prod prod = this.getOne(Wrappers.<Prod>lambdaQuery().eq(Prod::getName, name));
         if (prod == null) throw new SthNotFoundException(OBJECT_NOT_ALIVE);
@@ -335,6 +338,7 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
         return prodGreatVO;
     }
 
+
     @Override
     public Page<Prod> getPageByCate(String cate, Integer current) {
 
@@ -350,6 +354,7 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
                 Wrappers.<Prod>lambdaQuery().eq(Prod::getCategoryId, id));
     }
 
+
     @Override
     public Page<Prod> pageCateAllProd(String cate, Integer current) {
 
@@ -364,6 +369,7 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
                 new Page<>(current, SystemConstants.MAX_PAGE_SIZE),
                 Wrappers.<Prod>lambdaQuery().eq(Prod::getCategoryId, id));
     }
+
 
     @Override
     public List<ProdFunc> getOutdateOnes(LocalDateTime time) {
@@ -392,6 +398,7 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
         upshowService.remove4Upshow(upshowDTO);
     }
 
+
     @Override
     public void cooldownRotationProd(ProdFunc prodFunc) {
         prodFunc.setShowoffStatus(0);
@@ -406,6 +413,7 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
         rotationService.remove4Rotation(rotationDTO);
     }
 
+
     @Override
     public List<ProdFunc> extractList4HotProd() {
 
@@ -417,6 +425,7 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
 
         return prodList2Check;
     }
+
 
     @Override
     public void add2HotSearch(ProdFunc prodFunc) {

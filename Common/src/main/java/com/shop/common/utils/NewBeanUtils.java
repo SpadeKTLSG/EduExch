@@ -23,25 +23,13 @@ public class NewBeanUtils {
      * 获取所有的属性值为空属性名数组
      */
     public static String[] getNullPropertyNames(Object source) {
-        // use basic Java
-       /*
 
-       final BeanWrapper src = new BeanWrapperImpl(source);
-        java.beans.PropertyDescriptor[] pds = src.getPropertyDescriptors();
-
-        return Stream.of(pds).map(pd -> {
-            Object srcValue = src.getPropertyValue(pd.getName());
-            return srcValue == null ? pd.getName() : "";
-        }).filter(name -> !name.isEmpty()).toArray(String[]::new);
-*/
-        //now use Apache Commons BeanUtils
-
-        PropertyDescriptor[] pds = PropertyUtils.getPropertyDescriptors(source);
+        PropertyDescriptor[] pds = PropertyUtils.getPropertyDescriptors(source); // Apache Commons BeanUtils
 
         return Stream.of(pds)
-                .filter(pd -> {
+                .filter(pd -> { // 过滤出值为空的属性
                     try {
-                        return pd.getReadMethod().invoke(source) == null;
+                        return pd.getReadMethod().invoke(source) == null; // 通过反射获取属性值
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -51,13 +39,18 @@ public class NewBeanUtils {
     }
 
     /**
-     * DTO映射服务
+     * 自制DTO - Service映射服务
      */
     public static <T> void dtoMapService(Map<Object, IService> dtoServiceMap, Long id, Optional<T> optionalProd) {
         for (Map.Entry<Object, IService> entry : dtoServiceMap.entrySet()) {
+            // 从Map中取出DTO和Service
             Object dto = entry.getKey();
             IService service = entry.getValue();
-            String[] nullPN = getNullPropertyNames(dto);// 判断nullPN
+
+            // 判断nullPN
+            String[] nullPN = getNullPropertyNames(dto);
+
+            //取出对象, 根据nullPN进行选择性更新
             Object target = service.getOne(Wrappers.<User>lambdaQuery().eq(User::getId, id));
             BeanUtils.copyProperties(dto, target, nullPN);
             service.updateById(target);

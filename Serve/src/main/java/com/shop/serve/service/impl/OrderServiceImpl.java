@@ -36,6 +36,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Autowired
     private UserFuncService userFuncService;
 
+
     @Override
     public OrderGreatVO orderDetail(OrderAllDTO orderAllDTO) {
 
@@ -87,7 +88,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 .buyerId(buyer_id)
                 .sellerId(seller_id)
                 .prodId(prod_id)
-                .status(1) //模拟: 买家开启交易后忽略传递时间, 直接进入等待卖家确认状态
+                .status(Order.WAITCHECK) //模拟: 买家开启交易后忽略传递时间, 直接进入等待卖家确认状态
                 .build();
         this.save(order);
 
@@ -101,11 +102,12 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
 
     @Override
+    @Transactional
     public void closeOrder(OrderAllDTO orderAllDTO) {
         Order order1 = dtoFindEntity(orderAllDTO);
 
         //保留式删除, 将订单状态置为5, 同时将订单详情的checkoutTime置为当前时间
-        order1.setStatus(5);
+        order1.setStatus(Order.STOP);
         this.updateById(order1);
 
         OrderDetail orderDetail = orderDetailService.getOne(new LambdaQueryWrapper<OrderDetail>()
@@ -119,25 +121,34 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
 
     @Override
+    @Transactional
     public void sellerKnowAnswer(OrderAllDTO orderAllDTO) {
         Order order1 = dtoFindEntity(orderAllDTO);
-        order1.setStatus(2);
+        //限制上一个状态为等待卖家确认
+        if (!Objects.equals(order1.getStatus(), Order.WAITCHECK)) throw new BadArgsException(BAD_ARGS);
+        order1.setStatus(Order.TALKING);
         this.updateById(order1);
     }
 
 
     @Override
+    @Transactional
     public void buyerKnowAnswer(OrderAllDTO orderAllDTO) {
         Order order1 = dtoFindEntity(orderAllDTO);
-        order1.setStatus(3);
+        //限制上一个状态为交涉中
+        if (!Objects.equals(order1.getStatus(), Order.TALKING)) throw new BadArgsException(BAD_ARGS);
+        order1.setStatus(Order.EXCHANGING);
         this.updateById(order1);
     }
 
 
     @Override
+    @Transactional
     public void sellerKnowClose(OrderAllDTO orderAllDTO) {
         Order order1 = dtoFindEntity(orderAllDTO);
-        order1.setStatus(4);
+        //限制上一个状态为正在交易
+        if (!Objects.equals(order1.getStatus(), Order.EXCHANGING)) throw new BadArgsException(BAD_ARGS);
+        order1.setStatus(Order.OVER);
         this.updateById(order1);
 
         //完成交易

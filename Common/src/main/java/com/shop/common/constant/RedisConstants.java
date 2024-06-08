@@ -46,7 +46,8 @@ public class RedisConstants {
     public static final Long LOGIN_CODE_TTL_GUEST = 1800L; // 30分钟
 
     /**
-     * 登录接受Key前缀
+     * 登录TOKEN Key前缀
+     * <p>单机状态下默认清理掉所有的登陆TOKEN</p>
      */
     public static final String LOGIN_USER_KEY_GUEST = "guest:login:token:";
 

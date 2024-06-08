@@ -35,8 +35,8 @@ public class CustomerController {
     @PostMapping("/service")
     @Operation(summary = "服务端向客户端推送消息")
     public Result serviceSendMes(@RequestBody String mes, Session session) {
-        //测试使用简单推送模式
-        webSocketServer.sendToAllClient(JSON.toJSONString(mes));
+
+        webSocketServer.sendToAllClient(JSON.toJSONString(mes));        //使用简单推送模式
         return Result.success();
     }
     //http://localhost:8085/customer/admin/service

@@ -25,6 +25,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.DigestUtils;
 
 import java.util.HashMap;
@@ -83,6 +84,7 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
         return token;
     }
 
+
     @Override
     public String sendCode(String phone, HttpSession session) {
 
@@ -99,6 +101,7 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
 
         return code; //调试环境: 返回验证码; 未来引入邮箱发送验证码
     }
+
 
     @Override
     public void logout() {
@@ -125,8 +128,9 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
 
 
     @Override
+    @Transactional
     public void updateOne(Employee employee) {
-        //? 选择性更新字段示例
+        // 选择性更新
 
         Optional<Employee> optionalEmployee = Optional.ofNullable(this.getOne(Wrappers.<Employee>lambdaQuery().eq(Employee::getAccount, employee.getAccount())));
         if (optionalEmployee.isEmpty()) {
@@ -150,6 +154,7 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
         if (employee == null) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
         this.removeById(employee.getId());
     }
+
 
     @Override
     public EmployeeVO getByAccount(String account) {

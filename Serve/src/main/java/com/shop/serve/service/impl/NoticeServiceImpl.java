@@ -22,6 +22,7 @@ import static com.shop.common.constant.MessageConstants.OBJECT_NOT_ALIVE;
 @Service
 public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, Notice> implements NoticeService {
 
+
     @AutoFill(OperationType.INSERT)
     @Override
     public void publishNotice(NoticeAllDTO noticeAllDTO) {
@@ -35,6 +36,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, Notice> impleme
         this.save(notice);
     }
 
+
     @AutoFill(OperationType.UPDATE)
     @Override
     public void updateNotice(NoticeAllDTO noticeAllDTO) {
@@ -46,6 +48,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, Notice> impleme
         BeanUtils.copyProperties(noticeAllDTO, notice);
         this.updateById(notice);
     }
+
 
     @Override
     public void removeNotice(NoticeAllDTO noticeAllDTO) {

@@ -33,6 +33,7 @@ public class HotsearchServiceImpl extends ServiceImpl<HotsearchMapper, Hotsearch
         this.save(hotsearch);
     }
 
+
     @Override
     public void add2Hotsearch(ProdLocateDTO prodLocateDTO) {
         Prod prod2Get = prodService.getOne(new LambdaQueryWrapper<Prod>()
@@ -48,6 +49,7 @@ public class HotsearchServiceImpl extends ServiceImpl<HotsearchMapper, Hotsearch
         this.add2Hotsearch(hotsearchDTO);
     }
 
+
     @Override
     public void remove4Hotsearch(HotsearchDTO hotsearchDTO) {
 
@@ -56,6 +58,7 @@ public class HotsearchServiceImpl extends ServiceImpl<HotsearchMapper, Hotsearch
                 .eq(Hotsearch::getProdId, hotsearchDTO.getProdId()));
         this.removeById(hotsearch);
     }
+
 
     @Override
     public void remove4Hotsearch(ProdLocateDTO prodLocateDTO) {
@@ -71,6 +74,7 @@ public class HotsearchServiceImpl extends ServiceImpl<HotsearchMapper, Hotsearch
                 .build();
         this.add2Hotsearch(hotsearchDTO);
     }
+
 
     @Override
     public void clearAllHotsearch() {

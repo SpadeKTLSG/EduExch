@@ -38,8 +38,10 @@ public class UserController {
     //! ADD
     //管理员手动添加用户: 禁止
 
+
     //! DELETE
     //管理员手动删除用户: 禁止
+
 
     //! UPDATE
 
@@ -58,50 +60,6 @@ public class UserController {
         }
     }
     //http://localhost:8085/admin/user/update
-
-    //旧实现: 选择性更新用户信息
-     /*@PutMapping("/update")
-    @Operation(summary = "选择性更新用户信息")
-    @Parameters(@Parameter(name = "userGreatDTO", description = "用户更新DTO", required = true))
-    public Result update(@RequestBody UserGreatDTO userGreatDTO) {
-
-        Optional<User> optionalUser = Optional.ofNullable(userService.getOne(Wrappers.<User>lambdaQuery().eq(User::getAccount, userGreatDTO.getAccount())));
-        if (optionalUser.isEmpty()) {
-            return Result.error("用户不存在");
-        }
-
-        //在这里将userGreatDTO切为三个对象来使用BeanUtils.copyProperties
-        // 1找到目标对象
-        User u_target = optionalUser.get();
-        UserFunc uf_target = userFuncService.getOne(Wrappers.<UserFunc>lambdaQuery().eq(UserFunc::getId, u_target.getId()));
-        UserDetail ud_target = userDetailService.getOne(Wrappers.<UserDetail>lambdaQuery().eq(UserDetail::getId, u_target.getId()));
-
-        // 2修改传递DTO
-        UserAllDTO userDTO = new UserAllDTO();
-        UserFuncAllDTO userFuncDTO = new UserFuncAllDTO();
-        UserDetailAllDTO userDetailDTO = new UserDetailAllDTO();
-        BeanUtils.copyProperties(userGreatDTO, userDTO);
-        BeanUtils.copyProperties(userGreatDTO, userFuncDTO);
-        BeanUtils.copyProperties(userGreatDTO, userDetailDTO);
-
-        //3分别判断每个对象的nullPN
-        String[] nullPN4User = getNullPropertyNames(userDTO);
-        String[] nullPN4UserFunc = getNullPropertyNames(userFuncDTO);
-        String[] nullPN4UserDetail = getNullPropertyNames(userDetailDTO);
-
-
-        //4分别更新目标对象
-        BeanUtils.copyProperties(userDTO, u_target, nullPN4User);
-        BeanUtils.copyProperties(userFuncDTO, uf_target, nullPN4UserFunc);
-        BeanUtils.copyProperties(userDetailDTO, ud_target, nullPN4UserDetail);
-
-        //5 update
-        userService.updateById(u_target);
-        userFuncService.updateById(uf_target);
-        userDetailService.updateById(ud_target);
-
-        return Result.success();
-    }*/
 
 
     //! QUERY

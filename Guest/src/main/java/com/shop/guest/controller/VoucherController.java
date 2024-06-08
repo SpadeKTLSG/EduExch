@@ -80,8 +80,6 @@ public class VoucherController {
 
     //! UPDATE
 
-    //后续引入秒杀流程, 管理员发布后执行
-
 
     /**
      * 宣称(领取)优惠券

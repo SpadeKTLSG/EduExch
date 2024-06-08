@@ -60,7 +60,6 @@ public class AutoFillAspect {
         //根据当前不同的操作类型，为对应的属性通过反射来赋值
         if (operationType == OperationType.INSERT) {
             try {
-                //? 这里强绑定了实体类Notice的更新方法, 仅为演示, 因为没有设置日志模块, 并不存在许多要更新的字段.
                 Method setCreateTime = entity.getClass().getDeclaredMethod(AutoFillConstant.NOTICE_SET_PUBLISH_TIME, LocalDateTime.class);
                 Method setUpdateTime = entity.getClass().getDeclaredMethod(AutoFillConstant.NOTICE_SET_UPDATE_TIME, LocalDateTime.class);
                 setCreateTime.invoke(entity, now);

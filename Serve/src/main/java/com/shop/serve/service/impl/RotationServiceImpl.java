@@ -44,12 +44,14 @@ public class RotationServiceImpl extends ServiceImpl<RotationMapper, Rotation> i
         this.add2Rotation(rotationDTO);
     }
 
+
     @Override
     public void remove4Rotation(RotationDTO rotationDTO) {
         Rotation rotation = this.getOne(new LambdaQueryWrapper<Rotation>()
                 .eq(Rotation::getProdId, rotationDTO.getProdId()));
         this.removeById(rotation);
     }
+
 
     @Override
     public void remove4Rotation(ProdLocateDTO prodLocateDTO) {

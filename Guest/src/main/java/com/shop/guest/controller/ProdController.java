@@ -80,8 +80,7 @@ public class ProdController {
     @PutMapping("/update")
     @Operation(summary = "用户更新商品")
     @Parameters(@Parameter(name = "prodGreatDTO", description = "商品更新DTO", required = true))
-    public Result update4User(@RequestBody ProdGreatDTO prodGreatDTO) throws InstantiationException, IllegalAccessException {
-
+    public Result update4User(@RequestBody ProdGreatDTO prodGreatDTO) {
         try {
             prodService.update4User(prodGreatDTO);
             return Result.success();

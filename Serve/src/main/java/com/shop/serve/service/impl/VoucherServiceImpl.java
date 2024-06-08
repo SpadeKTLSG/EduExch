@@ -38,6 +38,7 @@ public class VoucherServiceImpl extends ServiceImpl<VoucherMapper, Voucher> impl
     @Autowired
     private OrderService orderService;
 
+
     @Override
     public void addSeckillVoucher(VoucherAllDTO voucherAllDTO) {
         Voucher voucher = new Voucher();
@@ -85,6 +86,7 @@ public class VoucherServiceImpl extends ServiceImpl<VoucherMapper, Voucher> impl
         this.updateById(voucher);
         this.save(newVoucher);
     }
+
 
     @Override
     @Transactional

@@ -66,4 +66,5 @@ public class CommonController {
 
         return Result.error(UPLOAD_FAILED);
     }
+
 }
