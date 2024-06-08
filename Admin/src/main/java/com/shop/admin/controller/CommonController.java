@@ -1,4 +1,4 @@
-package com.shop.guest.controller;
+package com.shop.admin.controller;
 
 
 import com.shop.common.utils.AliOssUtil;
@@ -25,7 +25,7 @@ import static com.shop.common.constant.MessageConstants.UPLOAD_FAILED;
  */
 @Slf4j
 @Tag(name = "Common", description = "通用")
-@RequestMapping("/guest/common")
+@RequestMapping("/admin/common")
 @RestController
 public class CommonController {
 
