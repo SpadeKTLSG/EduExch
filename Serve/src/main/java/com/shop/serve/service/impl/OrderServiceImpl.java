@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.util.concurrent.RateLimiter;
 import com.shop.common.context.UserHolder;
 import com.shop.common.exception.BadArgsException;
+import com.shop.common.exception.NetWorkException;
 import com.shop.common.exception.SthNotFoundException;
 import com.shop.pojo.dto.OrderAllDTO;
 import com.shop.pojo.dto.ProdLocateDTO;
@@ -23,10 +24,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
-import static com.shop.common.constant.MessageConstant.BAD_ARGS;
-import static com.shop.common.constant.MessageConstant.OBJECT_NOT_ALIVE;
+import static com.shop.common.constant.MessageConstant.*;
 
 @Slf4j
 @Service
@@ -135,6 +137,20 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      */
     @Override
     public void seckillStartOrder(ProdLocateDTO prodLocateDTO) {
+
+        //令牌桶算法进行限流
+        if (!rateLimiter.tryAcquire(1000, TimeUnit.MILLISECONDS)) throw new NetWorkException(NETWORK_ERROR);
+
+        // 执行流程
+        // 构造输入参数
+        Long userId = UserHolder.getUser().getId();
+
+        Long r = stringRedisTemplate.execute(
+                SECKILL_SCRIPT,
+                Collections.emptyList(),
+                voucherId.toString(),
+                userId.toString()
+        );
 
     }
 

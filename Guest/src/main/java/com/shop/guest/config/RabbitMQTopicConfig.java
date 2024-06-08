@@ -20,45 +20,28 @@ import static com.shop.common.constant.RabbitMQConstant.*;
 public class RabbitMQTopicConfig {
 
 
+    /**
+     * 队列  seckillQueue
+     */
     @Bean
     public Queue queue() {
         return new Queue(QUEUE);
     }
 
+    /**
+     * 交换机  seckillExchange
+     */
     @Bean
     public TopicExchange topicExchange() {
         return new TopicExchange(EXCHANGE);
     }
 
+    /**
+     * 绑定  seckillQueue  seckillExchange  seckill.#
+     */
     @Bean
     public Binding binding() {
         return BindingBuilder.bind(queue()).to(topicExchange()).with(ROUTINGKEY);
     }
 
-
-//    private static final String QUEUE01="queue_topic01";
-//    private static final String QUEUE02="queue_topic02";
-//    private static final String EXCHANGE = "topicExchange";
-//    private static final String ROUTINGKEY01 = "#.queue.#";
-//    private static final String ROUTINGKEY02 = "*.queue.#";
-//    @Bean
-//    public Queue topicqueue01(){
-//        return new Queue(QUEUE01);
-//    }
-//    @Bean
-//    public Queue topicqueue02(){
-//        return new Queue(QUEUE02);
-//    }
-//    @Bean
-//    public TopicExchange topicExchange(){
-//        return new TopicExchange(EXCHANGE);
-//    }
-//    @Bean
-//    public Binding topicbinding01(){
-//        return BindingBuilder.bind(topicqueue01()).to(topicExchange()).with(ROUTINGKEY01);
-//    }
-//    @Bean
-//    public Binding topicbinding02(){
-//        return BindingBuilder.bind(topicqueue02()).to(topicExchange()).with(ROUTINGKEY02);
-//    }
 }
