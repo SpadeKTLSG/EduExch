@@ -12,6 +12,8 @@ public interface OrderService extends IService<Order> {
 
     void startOrder(ProdLocateDTO prodLocateDTO);
 
+    void seckillStartOrder(ProdLocateDTO prodLocateDTO);
+
     void closeOrder(OrderAllDTO orderAllDTO);
 
     void sellerKnowAnswer(OrderAllDTO orderAllDTO);
@@ -21,4 +23,6 @@ public interface OrderService extends IService<Order> {
     void sellerKnowClose(OrderAllDTO orderAllDTO);
 
     OrderGreatVO orderDetails(OrderAllDTO orderAllDTO);
+
+
 }

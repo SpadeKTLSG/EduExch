@@ -24,6 +24,7 @@ spring:
     username: ${eduexch.datasource.username}
     password: ${eduexch.datasource.password}
 
+
     # druid
     druid:
       initial-size: 5
@@ -56,6 +57,31 @@ spring:
           min-idle: 1
           time-between-eviction-runs: 10s
       timeout: 20000            # 超时时间: 20s
+
+  # RabbitMQ
+  rabbitmq:
+    host: ${eduexch.rabbitmq.host}
+    username: ${eduexch.rabbitmq.username}
+    password: ${eduexch.rabbitmq.password}
+    virtual-host: ${eduexch.rabbitmq.virtual-host}
+    port: ${eduexch.rabbitmq.port}
+
+    listener:
+      simple:
+        concurrency: 10
+        max-concurrency: 10
+        prefetch: 1
+        auto-startup: true
+        default-requeue-rejected: true
+
+    template:
+      retry:
+        enabled: true
+        initial-interval: 1000ms
+        max-attempts: 3
+        max-interval: 10000ms
+        multiplier: 1
+
 
   #文件上传
   servlet:
@@ -94,9 +120,9 @@ mybatis-plus:
 logging:
   level:
     com.eduexch:
-      mapper: debug #mybatis日志
-      service: debug   #service日志 test
-      controller: info  #controller日志 test
+      mapper: info #mybatis日志
+      service: info   #service日志
+      controller: info  #controller日志
   pattern:
     dateformat: mm:ss.SSS
 

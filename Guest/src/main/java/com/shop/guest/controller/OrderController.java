@@ -57,6 +57,21 @@ public class OrderController {
     //http://localhost:8086/guest/order/start
 
 
+    /**
+     * 用户开启秒杀交易
+     * <p>秒杀流程</p>
+     */
+    @PostMapping("/start/seckill")
+    @Operation(summary = "用户开启交易(秒杀)")
+    @Parameters(@Parameter(name = "prodLocateDTO", description = "商品定位DTO", required = true))
+    public Result startSeckillOrder(@RequestBody ProdLocateDTO prodLocateDTO) {
+        orderService.seckillStartOrder(prodLocateDTO);
+        return Result.success();
+    }
+    //http://localhost:8086/guest/order/start/seckill
+
+
+
     //! DELETE
 
 

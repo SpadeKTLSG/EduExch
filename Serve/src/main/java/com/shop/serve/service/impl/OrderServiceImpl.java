@@ -101,6 +101,15 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
 
+    /**
+     * ! 秒杀下单流程 TODO
+     */
+    @Override
+    public void seckillStartOrder(ProdLocateDTO prodLocateDTO) {
+
+    }
+
+
     @Override
     @Transactional
     public void closeOrder(OrderAllDTO orderAllDTO) {
