@@ -4,9 +4,12 @@ package com.shop.guest.controller;
 import com.shop.common.utils.AliOssUtil;
 import com.shop.pojo.Result;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -40,7 +43,7 @@ public class CommonController {
      * @param file 文件
      * @return 文件访问路径
      */
-    @PostMapping("/upload")
+    @PostMapping("/file/add")
     @Operation(summary = "文件上传")
     public Result upload(MultipartFile file) { //MultiPartFile是SpringMVC封装的文件上传对象
         log.debug("文件上传：{}", file);
@@ -66,4 +69,14 @@ public class CommonController {
 
         return Result.error(UPLOAD_FAILED);
     }
+
+
+    @DeleteMapping("/file/delete")
+    @Operation(summary = "文件删除")
+    @Parameters(@Parameter(name = "name", description = "文件路径", required = true))
+    public Result deleteFile(String path) {
+        aliOssUtil.delete(path);
+        return Result.success();
+    }
+
 }

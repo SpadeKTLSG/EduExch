@@ -35,12 +35,11 @@ public class AliOssUtil {
      */
     public String upload(byte[] bytes, String objectName) {
 
-        // 创建OSSClient实例。
-        OSS ossClient = new OSSClientBuilder().build(endpoint, accessKeyId, accessKeySecret);
+
+        OSS ossClient = new OSSClientBuilder().build(endpoint, accessKeyId, accessKeySecret);  // 创建OSSClient实例
 
         try {
-            // 创建PutObject请求。
-            ossClient.putObject(bucketName, objectName, new ByteArrayInputStream(bytes));
+            ossClient.putObject(bucketName, objectName, new ByteArrayInputStream(bytes));// 创建PutObject请求
 
         } catch (OSSException oe) {
 
@@ -79,5 +78,35 @@ public class AliOssUtil {
         log.info("文件上传到:{}", stringBuilder);
 
         return stringBuilder.toString();
+    }
+
+    public void delete(String path) {
+
+        OSS ossClient = new OSSClientBuilder().build(endpoint, accessKeyId, accessKeySecret); // 创建OSSClient实例
+
+        try {
+            ossClient.deleteObject(bucketName, path);// 删除文件请求
+
+        } catch (OSSException oe) {
+
+            log.error("Caught an OSSException, which means your request made it to OSS, "
+                    + "but was rejected with an error response for some reason.");
+            log.error("Error Message:" + oe.getErrorMessage());
+            log.error("Error Code:" + oe.getErrorCode());
+            log.error("Request ID:" + oe.getRequestId());
+            log.error("Host ID:" + oe.getHostId());
+        } catch (ClientException ce) {
+
+            log.error("Caught an ClientException, which means the client encountered "
+                    + "a serious internal problem while trying to communicate with OSS, "
+                    + "such as not being able to access the network.");
+            log.error("Error Message:" + ce.getMessage());
+
+        } finally {
+
+            if (ossClient != null) {
+                ossClient.shutdown();
+            }
+        }
     }
 }
