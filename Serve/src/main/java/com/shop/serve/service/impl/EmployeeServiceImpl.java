@@ -95,7 +95,7 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
             stringRedisTemplate.delete(keys);
         }
 
-        String code = RandomUtil.randomNumbers(6); //生成
+        String code = RandomUtil.randomNumbers(6); //简单生成(管理员端)
 
         stringRedisTemplate.opsForValue().set(LOGIN_CODE_KEY_ADMIN + phone, code, LOGIN_CODE_TTL_ADMIN, TimeUnit.MINUTES);
 

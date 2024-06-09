@@ -283,43 +283,43 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         // 1. 判断是否在一级限制条件内
         Boolean oneLevelLimit = stringRedisTemplate.opsForSet().isMember(ONE_LEVERLIMIT_KEY + phone, "1");
+
         if (oneLevelLimit != null && oneLevelLimit) {
-            // 在一级限制条件内，不能发送验证码
             return "!您需要等5分钟后再请求";
         }
 
         // 2. 判断是否在二级限制条件内
         Boolean twoLevelLimit = stringRedisTemplate.opsForSet().isMember(TWO_LEVERLIMIT_KEY + phone, "1");
+
         if (twoLevelLimit != null && twoLevelLimit) {
-            // 在二级限制条件内，不能发送验证码
             return "!您需要等20分钟后再请求";
         }
+
 
         // 3. 检查过去1分钟内发送验证码的次数
         long oneMinuteAgo = System.currentTimeMillis() - 60 * 1000;
         long count_oneminute = stringRedisTemplate.opsForZSet().count(SENDCODE_SENDTIME_KEY + phone, oneMinuteAgo, System.currentTimeMillis());
         if (count_oneminute >= 1) {
-            // 过去1分钟内已经发送了1次，不能再发送验证码
             return "!距离上次发送时间不足1分钟, 请1分钟后重试";
         }
 
         // 4. 检查发送验证码的次数
         long fiveMinutesAgo = System.currentTimeMillis() - 5 * 60 * 1000;
         long count_fiveminute = stringRedisTemplate.opsForZSet().count(SENDCODE_SENDTIME_KEY + phone, fiveMinutesAgo, System.currentTimeMillis());
+
         if (count_fiveminute % 3 == 2 && count_fiveminute > 5) {
-            // 发送了8, 11, 14, ...次，进入二级限制
             stringRedisTemplate.opsForSet().add(TWO_LEVERLIMIT_KEY + phone, "1");
             stringRedisTemplate.expire(TWO_LEVERLIMIT_KEY + phone, 20, TimeUnit.MINUTES);
-            return "!请求过于频繁, 请20分钟后再请求";
+            return "!请求过于频繁, 请20分钟后再请求"; // 发送了8, 11, 14, ...次，进入二级限制
+
         } else if (count_fiveminute == 5) {
-            // 过去5分钟内已经发送了5次，进入一级限制
             stringRedisTemplate.opsForSet().add(ONE_LEVERLIMIT_KEY + phone, "1");
             stringRedisTemplate.expire(ONE_LEVERLIMIT_KEY + phone, 5, TimeUnit.MINUTES);
-            return "!5分钟内您已经发送了5次, 请等待5分钟后重试";
+            return "!5分钟内您已经发送了5次, 请等待5分钟后重试";  // 过去5分钟内已经发送了5次，进入一级限制
         }
 
 
-        if (RegexUtil.isPhoneInvalid(phone)) throw new InvalidInputException(PHONE_INVALID);
+        if (RegexUtil.isPhoneInvalid(phone)) throw new InvalidInputException(PHONE_INVALID); //校验手机号
 
         Set<String> keys = stringRedisTemplate.keys(LOGIN_USER_KEY_GUEST + phone + "*"); //删除之前的验证码
         if (keys != null) {

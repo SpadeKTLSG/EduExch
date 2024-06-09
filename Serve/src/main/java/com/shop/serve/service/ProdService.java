@@ -35,6 +35,8 @@ public interface ProdService extends IService<Prod> {
 
     ProdGreatVO GetByNameSingle(ProdLocateDTO prodLocateDTO);
 
+    ProdGreatVO GetByNameSingleCache(ProdLocateDTO prodLocateDTO);
+
     Page<Prod> getPageByCate(String cate, Integer current);
 
     Page<Prod> pageCateAllProd(String cate, Integer current);

@@ -139,6 +139,12 @@ public class ProdController {
 
 
     /**
+     * 按Name搜索商品
+     */
+    //TODO 等前端
+
+
+    /**
      * name查询自己单个商品详细信息
      * <p>联表查询VO</p>
      */
@@ -149,6 +155,20 @@ public class ProdController {
         return Result.success(prodService.GetByNameSingle(prodLocateDTO));
     }
     //http://localhost:8086/guest/prod/get
+
+
+    /**
+     * name查询自己单个商品详细信息
+     * <p>联表查询VO</p>
+     * !<p>缓存引入示例</p>
+     */
+    @GetMapping("/get/cache")
+    @Operation(summary = "查询单个商品详细信息")
+    @Parameters(@Parameter(name = "prodLocateDTO", description = "商品定位DTO"))
+    public Result getProd4Cache(@RequestBody ProdLocateDTO prodLocateDTO) {
+        return Result.success(prodService.GetByNameSingleCache(prodLocateDTO));
+    }
+    //http://localhost:8086/guest/prod/get/cache
 
 
     /**

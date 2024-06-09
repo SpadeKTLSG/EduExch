@@ -150,5 +150,9 @@ public class ProdController {
     }
     //http://localhost:8085/admin/prod/page
 
+    /**
+     * 按Name搜索商品
+     */
+    //TODO 等前端
 
 }

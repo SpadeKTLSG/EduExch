@@ -345,6 +345,13 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
         return prodGreatVO;
     }
 
+    @Override
+    public ProdGreatVO GetByNameSingleCache(ProdLocateDTO prodLocateDTO) {
+
+        //TODO: 缓存引入
+        return GetByNameSingle(prodLocateDTO);
+    }
+
 
     @Override
     public Page<Prod> getPageByCate(String cate, Integer current) {
