@@ -71,6 +71,9 @@ public class CommonController {
     }
 
 
+    /**
+     * 文件删除
+     */
     @DeleteMapping("/file/delete")
     @Operation(summary = "文件删除")
     @Parameters(@Parameter(name = "name", description = "文件路径", required = true))

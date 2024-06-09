@@ -3,7 +3,7 @@ package com.shop.serve.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.shop.common.exception.SthHasCreatedException;
-import com.shop.pojo.dto.ProdCateDTO;
+import com.shop.pojo.dto.ProdCateAllDTO;
 import com.shop.pojo.entity.ProdCate;
 import com.shop.serve.mapper.ProdCateMapper;
 import com.shop.serve.service.ProdCateService;
@@ -17,14 +17,24 @@ import static com.shop.common.constant.MessageConstant.OBJECT_HAS_ALIVE;
 public class ProdCateServiceImpl extends ServiceImpl<ProdCateMapper, ProdCate> implements ProdCateService {
 
     @Override
-    public void saveCate(ProdCateDTO prodCateDTO) {
+    public void saveCate(ProdCateAllDTO prodCateAllDTO) {
 
-        if (this.getOne(new LambdaQueryWrapper<ProdCate>().eq(ProdCate::getName, prodCateDTO.getName()), false) != null) throw new SthHasCreatedException(OBJECT_HAS_ALIVE);
+        if (this.getOne(new LambdaQueryWrapper<ProdCate>()
+                .eq(ProdCate::getName, prodCateAllDTO.getName()), false) != null) throw new SthHasCreatedException(OBJECT_HAS_ALIVE);
 
         this.save(ProdCate.builder()
-                .name(prodCateDTO.getName())
-                .description(prodCateDTO.getDescription())
+                .name(prodCateAllDTO.getName())
+                .description(prodCateAllDTO.getDescription())
                 .build());
     }
+
+    @Override
+    public void deleteCate(ProdCateAllDTO prodCateAllDTO) {
+
+        this.remove(new LambdaQueryWrapper<ProdCate>()
+                .eq(ProdCate::getName, prodCateAllDTO.getName()));
+
+    }
+
 
 }

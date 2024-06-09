@@ -18,8 +18,8 @@ public class UserHolder {
     /**
      * 保存用户
      */
-    public static void saveUser(UserLocalDTO user) {
-        userTL.set(user);
+    public static void saveUser(UserLocalDTO userLocalDTO) {
+        userTL.set(userLocalDTO);
     }
 
     /**

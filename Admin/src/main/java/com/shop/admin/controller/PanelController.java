@@ -61,6 +61,7 @@ public class PanelController {
     //http://localhost:8085/admin/panel/notice/save
 
 
+
     //! DELETE
 
     /**
@@ -266,6 +267,7 @@ public class PanelController {
     public Result queryUpshowPage(@RequestParam(value = "current", defaultValue = "1") Integer current) {
         return Result.success(upshowService.page(new Page<>(current, SystemConstant.DEFAULT_PAGE_SIZE)));
     }
+    //http://localhost:8085/admin/panel/upshow/query/page
 
 
 }

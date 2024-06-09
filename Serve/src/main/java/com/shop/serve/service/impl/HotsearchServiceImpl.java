@@ -2,7 +2,7 @@ package com.shop.serve.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.shop.pojo.dto.HotsearchDTO;
+import com.shop.pojo.dto.HotsearchAllDTO;
 import com.shop.pojo.dto.ProdLocateDTO;
 import com.shop.pojo.entity.Hotsearch;
 import com.shop.pojo.entity.Prod;
@@ -28,9 +28,9 @@ public class HotsearchServiceImpl extends ServiceImpl<HotsearchMapper, Hotsearch
 
 
     @Override
-    public void add2Hotsearch(HotsearchDTO hotsearchDTO) {
+    public void add2Hotsearch(HotsearchAllDTO hotsearchAllDTO) {
         Hotsearch hotsearch = new Hotsearch();
-        BeanUtils.copyProperties(hotsearchDTO, hotsearch);
+        BeanUtils.copyProperties(hotsearchAllDTO, hotsearch);
         this.save(hotsearch);
     }
 
@@ -42,21 +42,21 @@ public class HotsearchServiceImpl extends ServiceImpl<HotsearchMapper, Hotsearch
                 .eq(Prod::getUserId, prodLocateDTO.getUserId()));
         ProdFunc prodFunc = prodFuncService.getById(prod2Get.getId());
 
-        HotsearchDTO hotsearchDTO = HotsearchDTO.builder()
+        HotsearchAllDTO hotsearchAllDTO = HotsearchAllDTO.builder()
                 .prodId(prod2Get.getId())
                 .name(prod2Get.getName())
                 .visit(prodFunc.getVisit())
                 .build();
-        this.add2Hotsearch(hotsearchDTO);
+        this.add2Hotsearch(hotsearchAllDTO);
     }
 
 
     @Override
-    public void remove4Hotsearch(HotsearchDTO hotsearchDTO) {
+    public void remove4Hotsearch(HotsearchAllDTO hotsearchAllDTO) {
 
         Hotsearch hotsearch = this.getOne(new LambdaQueryWrapper<Hotsearch>()
-                .eq(Hotsearch::getName, hotsearchDTO.getName())
-                .eq(Hotsearch::getProdId, hotsearchDTO.getProdId()));
+                .eq(Hotsearch::getName, hotsearchAllDTO.getName())
+                .eq(Hotsearch::getProdId, hotsearchAllDTO.getProdId()));
         this.removeById(hotsearch);
     }
 
@@ -68,12 +68,12 @@ public class HotsearchServiceImpl extends ServiceImpl<HotsearchMapper, Hotsearch
                 .eq(Prod::getUserId, prodLocateDTO.getUserId()));
         ProdFunc prodFunc = prodFuncService.getById(prod2Get.getId());
 
-        HotsearchDTO hotsearchDTO = HotsearchDTO.builder()
+        HotsearchAllDTO hotsearchAllDTO = HotsearchAllDTO.builder()
                 .prodId(prod2Get.getId())
                 .name(prod2Get.getName())
                 .visit(prodFunc.getVisit())
                 .build();
-        this.add2Hotsearch(hotsearchDTO);
+        this.add2Hotsearch(hotsearchAllDTO);
     }
 
 

@@ -49,16 +49,18 @@ import static com.shop.common.utils.NewBeanUtil.dtoMapService;
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
-    @Autowired
-    private StringRedisTemplate stringRedisTemplate;
+
     @Autowired
     private UserFuncService userFuncService;
     @Autowired
     private UserDetailService userDetailService;
     @Autowired
     private ProdService prodService;
+
     @Autowired
     private NewDTOUtils dtoUtils;
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
 
 
     @Override
@@ -73,9 +75,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         String code = userLoginDTO.getCode();
         if (cacheCode == null || !cacheCode.equals(code)) throw new InvalidInputException(CODE_INVALID);
 
+
         //校验账户是否已存在
         User userExist = query().eq("account", userLoginDTO.getAccount()).one();
         if (userExist != null) throw new AccountAlivedException(ACCOUNT_ALIVED);
+
 
         //创建账户 + 账户具体信息 + 账户功能信息, 填充必须字段
         User user = User.builder()
@@ -86,7 +90,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         save(user);
 
         UserDetail userDetail = UserDetail.builder()
-                .school("维也纳艺术学院")
+                .school("蚌埠坦克学院")
                 .createTime(LocalDateTime.now())
                 .introduce("这个人很懒，什么都没留下")
                 .build();
@@ -145,7 +149,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public void logout() {
+
         Set<String> keys = stringRedisTemplate.keys(LOGIN_USER_KEY_GUEST + "*");        //删除掉之前本地的所有登陆令牌
+
         if (keys != null) {
             stringRedisTemplate.delete(keys);
         }
@@ -155,6 +161,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     @Transactional
     public void updateUserGreatDTO(UserGreatDTO userGreatDTO) throws InstantiationException, IllegalAccessException {
+
         //联表选择性更新
         userGreatDTO.setPassword(DigestUtils.md5DigestAsHex(userGreatDTO.getPassword().getBytes())); //预先处理密码
 
@@ -190,15 +197,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     @Transactional
     public void doCollect(ProdLocateDTO prodLocateDTO) {
+
         Long userId = UserHolder.getUser().getId();
 
-        //判断是否已经收藏
-        String key = PROD_COLLECT_KEY + prodLocateDTO.getUserId() + ":" + prodLocateDTO.getName(); //拼接key = prod:collect:1:天选5PRO
         Prod prod = prodService.getOne(Wrappers.<Prod>lambdaQuery()
                 .eq(Prod::getUserId, prodLocateDTO.getUserId())
                 .eq(Prod::getName, prodLocateDTO.getName()));
 
+        if (prod == null) throw new SthNotFoundException(OBJECT_NOT_ALIVE);
+
+        //从ZSet判断是否已经收藏
+        String key = PROD_COLLECT_KEY + prodLocateDTO.getUserId() + ":" + prodLocateDTO.getName(); //拼接key = prod:collect:1:天选5PRO
         Double score = stringRedisTemplate.opsForZSet().score(key, userId.toString());
+
+        //获取collections
         UserFunc userFunc = userFuncService.getById(userId);
         String collections = userFunc.getCollections();
         String prodNameInCollection = prodLocateDTO.getUserId() + ":" + prodLocateDTO.getName() + ","; // 拼接到collections字段中, 以逗号分隔.
@@ -385,10 +397,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         int count = 0;
 
-        while ((num & 1) != 0) {
-            // 让这个数字与1做与运算，得到数字的最后一个bit位  // 判断这个bit位是否为0
+        while ((num & 1) != 0) { // 判断这个bit位是否为0
+            // 让这个数字与1做与运算,得到数字的最后一个bit位
             count++;
-            num >>>= 1;// 把数字右移一位，抛弃最后一个bit位，继续下一个bit位
+            num >>>= 1;// 把数字右移一位,抛弃最后一个bit位，继续下一个bit位
         }
         return count;
     }
@@ -422,8 +434,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         UserLocalDTO userLocalDTO = UserHolder.getUser();
         BeanUtils.copyProperties(this.getById(1L), userLocalDTO);
 
-        if (userLocalDTO == null) throw new NotLoginException(USER_NOT_LOGIN);
-
         if (this.getById(userLocalDTO.getId()) == null) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
 
 
@@ -441,6 +451,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public void killMyAccount() {
         UserLocalDTO userLocalDTO = UserHolder.getUser();
+
+        //连续删除
         this.removeById(userLocalDTO.getId());
         userDetailService.removeById(userLocalDTO.getId());
         userFuncService.removeById(userLocalDTO.getId());

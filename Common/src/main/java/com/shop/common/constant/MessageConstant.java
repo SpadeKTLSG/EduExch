@@ -22,9 +22,8 @@ public class MessageConstant {
     public static final String PHONE_INVALID = "手机号不合法";
     public static final String CODE_INVALID = "验证码不合法";
     public static final String ACCOUNT_LOCKED = "账号被锁定";
-    public static final String PASSWORD_EDIT_FAILED = "密码修改失败";
-    public static final String LOGIN_FAILED = "登录失败";
-    public static final String PASSWORD_ERROR = "密码错误";
     public static final String BLOCK_ACTION = "达咩达呐, 哒咩哟";
+    public static final String PASSWORD_EDIT_FAILED = "密码修改失败";
+    public static final String PASSWORD_ERROR = "密码错误";
 
 }

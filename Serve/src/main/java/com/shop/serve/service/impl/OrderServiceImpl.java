@@ -5,10 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.util.concurrent.RateLimiter;
 import com.shop.common.context.UserHolder;
-import com.shop.common.exception.BadArgsException;
-import com.shop.common.exception.NetWorkException;
-import com.shop.common.exception.SthHasCreatedException;
-import com.shop.common.exception.SthNotFoundException;
+import com.shop.common.exception.*;
 import com.shop.pojo.dto.OrderAllDTO;
 import com.shop.pojo.dto.ProdLocateDTO;
 import com.shop.pojo.entity.*;
@@ -118,19 +115,16 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         Long seller_id = prod.getUserId();
         Long prod_id = prod.getId();
 
-        //查询可能存在的脏订单对象
+        //查询可能存在的旧订单对象
         Long count = this.query()
                 .eq("buyer_id", buyer_id)
                 .eq("seller_id", seller_id)
                 .eq("prod_id", prod_id)
                 .count();
 
-        //重复购买判定
-        if (count > 0) {
-            log.error("{}已购买过, 但是重复购买", buyer_id);
-            throw new SthHasCreatedException(ORDER_STATUS_ERROR);
-        }
+        if (count > 0) throw new BlockActionException(ORDER_STATUS_ERROR); //重复购买判定
 
+        //构造订单对象并存储
         Order order = Order.builder()
                 .buyerId(buyer_id)
                 .sellerId(seller_id)
@@ -154,7 +148,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Override
     public void seckillStartOrder(ProdLocateDTO prodLocateDTO) {
 
-        // 令牌桶算法进行限流
+        // 用令牌桶算法进行限流
         if (!rateLimiter.tryAcquire(1000, TimeUnit.MILLISECONDS)) throw new NetWorkException(NETWORK_ERROR);
 
         // 执行流程
@@ -171,10 +165,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 .eq(Prod::getUserId, userId)
         );
         if (prod == null) throw new SthNotFoundException(OBJECT_NOT_ALIVE);
+
         ProdFunc prodFunc = prodFuncService.getOne(new LambdaQueryWrapper<ProdFunc>()
                 .eq(ProdFunc::getId, prod.getId())
         );
-        if (!Objects.equals(prodFunc.getStatus(), ProdFunc.NORMAL)) throw new BadArgsException(BAD_ARGS);//审核未通过的商品不可交易
+        if (!Objects.equals(prodFunc.getStatus(), ProdFunc.NORMAL)) throw new BlockActionException(BLOCK_ACTION);//审核未通过的商品不可交易
 
 
         // 构造输入参数
@@ -230,8 +225,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         orderDetail.setCheckoutTime(LocalDateTime.now());
 
         orderDetailService.updateById(orderDetail);
-
     }
+
 
 
     @Override
@@ -239,7 +234,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     public void sellerKnowAnswer(OrderAllDTO orderAllDTO) {
         Order order1 = dtoFindEntity(orderAllDTO);
         //限制上一个状态为等待卖家确认
-        if (!Objects.equals(order1.getStatus(), Order.WAITCHECK)) throw new BadArgsException(BAD_ARGS);
+        if (!Objects.equals(order1.getStatus(), Order.WAITCHECK)) throw new BlockActionException(BLOCK_ACTION);
         order1.setStatus(Order.TALKING);
         this.updateById(order1);
     }
@@ -250,7 +245,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     public void buyerKnowAnswer(OrderAllDTO orderAllDTO) {
         Order order1 = dtoFindEntity(orderAllDTO);
         //限制上一个状态为交涉中
-        if (!Objects.equals(order1.getStatus(), Order.TALKING)) throw new BadArgsException(BAD_ARGS);
+        if (!Objects.equals(order1.getStatus(), Order.TALKING)) throw new BlockActionException(BLOCK_ACTION);
         order1.setStatus(Order.EXCHANGING);
         this.updateById(order1);
     }
@@ -261,7 +256,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     public void sellerKnowClose(OrderAllDTO orderAllDTO) {
         Order order1 = dtoFindEntity(orderAllDTO);
         //限制上一个状态为正在交易
-        if (!Objects.equals(order1.getStatus(), Order.EXCHANGING)) throw new BadArgsException(BAD_ARGS);
+        if (!Objects.equals(order1.getStatus(), Order.EXCHANGING)) throw new BlockActionException(BLOCK_ACTION);
         order1.setStatus(Order.OVER);
         this.updateById(order1);
 

@@ -1,30 +1,36 @@
 package com.shop.pojo.dto;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 商品分类 DTO
+ * 热搜DTO
  *
  * @author SK
- * @date 2024/06/02
+ * @date 2024/06/09
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProdCateDTO {
+public class HotsearchAllDTO {
+
 
     /**
-     * 分类名
+     * 对应商品ID
+     */
+    private Long prodId;
+
+    /**
+     * 对应商品名
      */
     private String name;
 
     /**
-     * 描述
+     * 对应商品浏览量
      */
-    private String description;
-
+    private Long visit;
 }

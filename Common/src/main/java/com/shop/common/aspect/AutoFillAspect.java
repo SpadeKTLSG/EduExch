@@ -17,7 +17,10 @@ import java.time.LocalDateTime;
 
 
 /**
- * 自定义切面，实现公共字段自动填充处理逻辑
+ * 公共字段自动填充处理自定义切面
+ *
+ * @author SK
+ * @date 2024/06/09
  */
 @Aspect
 @Component
@@ -57,7 +60,7 @@ public class AutoFillAspect {
 
         LocalDateTime now = LocalDateTime.now();//准备赋值的数据
 
-        //根据当前不同的操作类型，为对应的属性通过反射来赋值
+        //根据当前不同的操作类型为对应的属性通过反射赋值
         if (operationType == OperationType.INSERT) {
             try {
                 Method setCreateTime = entity.getClass().getDeclaredMethod(AutoFillConstant.NOTICE_SET_PUBLISH_TIME, LocalDateTime.class);

@@ -19,8 +19,8 @@ public class EmployeeHolder {
     /**
      * 保存用户
      */
-    public static void saveEmployee(EmployeeLocalDTO user) {
-        employeeTL.set(user);
+    public static void saveEmployee(EmployeeLocalDTO employeeLocalDTO) {
+        employeeTL.set(employeeLocalDTO);
     }
 
     /**

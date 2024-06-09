@@ -44,9 +44,13 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
 
 
         UserFunc fan_userFunc = userFuncService.getOne(new LambdaQueryWrapper<>(UserFunc.class)
-                .eq(UserFunc::getId, userId));
+                .eq(UserFunc::getId, userId)
+        );
+
         UserFunc follower_userFunc = userFuncService.getOne(new LambdaQueryWrapper<>(UserFunc.class)
-                .eq(UserFunc::getId, followUserId));
+                .eq(UserFunc::getId, followUserId)
+        );
+
 
         if (isFollow && save(UserFollow.builder() //关注 -> 新增
                 .followerId(userId)
@@ -92,6 +96,7 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
 
     @Override
     public List<UserLocalDTO> shareFollow(Long id) {
+
         Long userId = UserHolder.getUser().getId();
 
         String key1 = "follows:" + userId;
@@ -102,7 +107,6 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
         if (intersect == null || intersect.isEmpty()) {
             return Collections.emptyList();
         }
-
 
         List<Long> ids = intersect.stream()
                 .map(Long::valueOf)

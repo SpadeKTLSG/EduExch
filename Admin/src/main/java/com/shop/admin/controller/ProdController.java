@@ -3,7 +3,7 @@ package com.shop.admin.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.shop.common.constant.SystemConstant;
 import com.shop.pojo.Result;
-import com.shop.pojo.dto.ProdCateDTO;
+import com.shop.pojo.dto.ProdCateAllDTO;
 import com.shop.pojo.dto.ProdLocateDTO;
 import com.shop.serve.service.ProdCateService;
 import com.shop.serve.service.ProdService;
@@ -77,6 +77,7 @@ public class ProdController {
     //http://localhost:8085/admin/prod/page2Check
 
 
+
     //! ADD
 
     /**
@@ -84,9 +85,9 @@ public class ProdController {
      */
     @PostMapping("/cate/save")
     @Operation(summary = "添加商品分类")
-    @Parameters(@Parameter(name = "prodCateDTO", description = "商品分类DTO", required = true))
-    public Result saveCate(@RequestBody ProdCateDTO prodCateDTO) {
-        prodCateService.saveCate(prodCateDTO);
+    @Parameters(@Parameter(name = "prodCateAllDTO", description = "商品分类DTO", required = true))
+    public Result saveCate(@RequestBody ProdCateAllDTO prodCateAllDTO) {
+        prodCateService.saveCate(prodCateAllDTO);
         return Result.success();
     }
     //http://localhost:8085/admin/prod/cate/save
@@ -106,6 +107,20 @@ public class ProdController {
         return Result.success();
     }
     //http://localhost:8085/admin/prod/delete/one
+
+
+    /**
+     * 删除商品分类
+     */
+    @DeleteMapping("/cate/delete")
+    @Operation(summary = "删除商品分类")
+    @Parameters(@Parameter(name = "prodCateAllDTO", description = "商品分类DTO", required = true))
+    public Result deleteCate(@RequestBody ProdCateAllDTO prodCateAllDTO) {
+        prodCateService.deleteCate(prodCateAllDTO);
+        return Result.success();
+    }
+    //http://localhost:8085/admin/prod/cate/delete
+
 
 
     //! UPDATE

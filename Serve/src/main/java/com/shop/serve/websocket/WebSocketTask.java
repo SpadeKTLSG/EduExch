@@ -9,6 +9,12 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * WebSocket定时任务
+ *
+ * @author SK
+ * @date 2024/06/09
+ */
 @Component
 @Slf4j
 public class WebSocketTask {

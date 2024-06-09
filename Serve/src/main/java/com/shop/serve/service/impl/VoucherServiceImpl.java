@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static com.shop.common.constant.MessageConstant.*;
+import static com.shop.common.constant.ServiceConstant.UPSHOW_LEVEL_TTL;
 import static com.shop.common.constant.TestsConstant.BUYER_USERID;
 import static com.shop.common.constant.TestsConstant.STORE_USERID;
 
@@ -107,14 +108,7 @@ public class VoucherServiceImpl extends ServiceImpl<VoucherMapper, Voucher> impl
         //执行功能: 修改当前Voucher对象
         voucher.setStatus(Voucher.USED);
         voucher.setBeginTime(LocalDateTime.now());
-
-        if (voucher.getFunc() == 0) { //基础功能类型
-            voucher.setEndTime(LocalDateTime.now().plusDays(1)); // 1天
-        } else if (voucher.getFunc() == 1) { //高级功能类型
-            voucher.setEndTime(LocalDateTime.now().plusDays(3)); // 3天
-        } else if (voucher.getFunc() == 2) { //超级功能类型
-            voucher.setEndTime(LocalDateTime.now().plusDays(7)); // 7天
-        }
+        voucher.setEndTime(LocalDateTime.now().plusDays(UPSHOW_LEVEL_TTL[voucher.getFunc()]));
 
         this.updateById(voucher);
 
@@ -152,14 +146,7 @@ public class VoucherServiceImpl extends ServiceImpl<VoucherMapper, Voucher> impl
         //执行功能: 修改当前Voucher对象
         voucher.setStatus(Voucher.USED);
         voucher.setBeginTime(LocalDateTime.now());
-
-        if (voucher.getFunc() == 0) { //基础功能类型
-            voucher.setEndTime(LocalDateTime.now().plusDays(1)); // 1天
-        } else if (voucher.getFunc() == 1) { //高级功能类型
-            voucher.setEndTime(LocalDateTime.now().plusDays(3)); // 3天
-        } else if (voucher.getFunc() == 2) { //超级功能类型
-            voucher.setEndTime(LocalDateTime.now().plusDays(7)); // 7天
-        }
+        voucher.setEndTime(LocalDateTime.now().plusDays(UPSHOW_LEVEL_TTL[voucher.getFunc()]));
 
         this.updateById(voucher);
 

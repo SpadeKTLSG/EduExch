@@ -10,6 +10,9 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * 用于创建AliOssUtil对象配置类
+ *
+ * @author SK
+ * @date 2024/06/09
  */
 @Configuration
 @Slf4j

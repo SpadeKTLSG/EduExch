@@ -66,5 +66,8 @@ public class CommonController {
 
         return Result.error(UPLOAD_FAILED);
     }
+    //http://localhost:8085/admin/common/upload
+
+
 
 }

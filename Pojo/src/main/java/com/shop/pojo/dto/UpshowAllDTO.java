@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpshowDTO {
+public class UpshowAllDTO {
 
     /**
      * 对应商品ID

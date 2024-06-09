@@ -35,7 +35,6 @@ public class NewDTOUtils {
     /**
      * 创建并组合DTOs
      * <p>劲啊, 联表查询组合特攻</p>
-     * <p></p>
      */
     public <VO> VO createAndCombineDTOs(Class<VO> voClass, Object id, Class<?>... dtoClasses) throws Exception {
         VO vo = voClass.getDeclaredConstructor().newInstance();
@@ -77,5 +76,5 @@ public class NewDTOUtils {
 
         return vo;
     }
-    
+
 }

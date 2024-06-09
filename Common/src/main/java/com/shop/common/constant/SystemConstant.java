@@ -14,11 +14,6 @@ public class SystemConstant {
     public static final String IMAGE_UPLOAD_DIR = "D:\\CODE\\JA\\EduExch\\res\\img";
 
     /**
-     * 用户昵称前缀
-     */
-    public static final String USER_NICK_NAME_PREFIX = "";
-
-    /**
      * 默认分页大小
      */
     public static final int DEFAULT_PAGE_SIZE = 5;

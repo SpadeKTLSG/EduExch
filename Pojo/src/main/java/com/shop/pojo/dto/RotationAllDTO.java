@@ -6,11 +6,17 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * 轮播 DTO
+ *
+ * @author SK
+ * @date 2024/06/08
+ */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class HotsearchDTO {
+public class RotationAllDTO {
 
 
     /**
@@ -24,7 +30,13 @@ public class HotsearchDTO {
     private String name;
 
     /**
-     * 对应商品浏览量
+     * 对应商品图片
      */
-    private Long visit;
+    private String picture;
+
+    /**
+     * 对应商品权重
+     */
+    private Long weight;
+
 }
