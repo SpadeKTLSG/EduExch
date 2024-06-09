@@ -38,9 +38,4 @@ public class EmployeeLoginVO {
     private String name;
 
 
-    /**
-     * jwt令牌
-     */
-    private String token;
-
 }
