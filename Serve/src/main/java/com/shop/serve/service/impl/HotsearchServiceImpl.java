@@ -26,6 +26,7 @@ public class HotsearchServiceImpl extends ServiceImpl<HotsearchMapper, Hotsearch
     @Autowired
     private ProdFuncService prodFuncService;
 
+
     @Override
     public void add2Hotsearch(HotsearchDTO hotsearchDTO) {
         Hotsearch hotsearch = new Hotsearch();

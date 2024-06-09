@@ -108,6 +108,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             stringRedisTemplate.delete(keys);
         }
 
+        //校验手机号
         String phone = userLoginDTO.getPhone();
         if (RegexUtil.isPhoneInvalid(phone)) throw new InvalidInputException(PHONE_INVALID);
 
@@ -119,6 +120,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         //根据用户名查询用户
         User user = query().eq("account", userLoginDTO.getAccount()).one();
         if (user == null) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
+
+        //判断是否被锁定了
+        UserFunc userFunc = userFuncService.getById(user.getId());
+        if (Objects.equals(userFunc.getStatus(), UserFunc.BLOCK)) throw new BlockActionException(ACCOUNT_LOCKED);
 
 
         // 随机生成token，作为登录令牌

@@ -49,12 +49,14 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
     @Override
     public String login(EmployeeLoginDTO employeeLoginDTO, HttpSession session) {
 
-        //删除掉之前的所有登陆令牌
+        //删除掉之前本地的所有登陆令牌
+        // ? (localhost环境) 仅本地调试时使用
         Set<String> keys = stringRedisTemplate.keys(LOGIN_USER_KEY_ADMIN + "*");
         if (keys != null) {
             stringRedisTemplate.delete(keys);
         }
 
+        //校验手机号
         String phone = employeeLoginDTO.getPhone();
         if (RegexUtil.isPhoneInvalid(phone)) throw new InvalidInputException(PHONE_INVALID);
 
@@ -133,9 +135,7 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
         // 选择性更新
 
         Optional<Employee> optionalEmployee = Optional.ofNullable(this.getOne(Wrappers.<Employee>lambdaQuery().eq(Employee::getAccount, employee.getAccount())));
-        if (optionalEmployee.isEmpty()) {
-            throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
-        }
+        if (optionalEmployee.isEmpty()) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
 
         Employee e2 = optionalEmployee.get();
         String[] nullPropertyNames = getNullPropertyNames(employee);

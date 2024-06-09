@@ -64,9 +64,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     private static final DefaultRedisScript<Long> SECKILL_SCRIPT;
 
     static {
+        //加载Lua脚本
         SECKILL_SCRIPT = new DefaultRedisScript<>();
-        SECKILL_SCRIPT.setLocation(new ClassPathResource("seckill.lua"));
-        SECKILL_SCRIPT.setResultType(Long.class);
+        SECKILL_SCRIPT.setLocation(new ClassPathResource("seckill.lua")); //位置
+        SECKILL_SCRIPT.setResultType(Long.class); //返回类型
     }
 
 
