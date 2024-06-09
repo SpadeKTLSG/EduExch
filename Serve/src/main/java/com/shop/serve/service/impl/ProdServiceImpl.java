@@ -1,5 +1,7 @@
 package com.shop.serve.service.impl;
 
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -8,6 +10,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.shop.common.constant.SystemConstant;
 import com.shop.common.context.UserHolder;
 import com.shop.common.exception.*;
+import com.shop.common.utils.CacheClient;
 import com.shop.pojo.dto.*;
 import com.shop.pojo.entity.Order;
 import com.shop.pojo.entity.Prod;
@@ -26,10 +29,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static com.shop.common.constant.MessageConstant.*;
-import static com.shop.common.constant.RedisConstant.SECKILL_STOCK_KEY;
-import static com.shop.common.constant.RedisConstant.USER_VO_KEY;
+import static com.shop.common.constant.RedisConstant.*;
 import static com.shop.common.constant.SystemConstant.DEFAULT_WEIGHT;
 import static com.shop.common.utils.NewBeanUtil.dtoMapService;
 
@@ -55,6 +58,9 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
     private NewDTOUtils dtoUtils;
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
+
+    @Autowired
+    private CacheClient cacheClient;
 
 
     @Override
@@ -345,11 +351,81 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
         return prodGreatVO;
     }
 
+    /**
+     * 通过缓存穿透等方法查询商品
+     */
     @Override
     public ProdGreatVO GetByNameSingleCache(ProdLocateDTO prodLocateDTO) {
 
-        //TODO: 缓存引入
-        return GetByNameSingle(prodLocateDTO);
+        // 这里不能用prodLocateDTO直接查, 需要用prodLocateDTO的name和userId拼接,
+        // 因为这里不允许传递id进来查询, 于是参照CacheClient的缓存穿透查询进行改造, 存在Prod内作为内部方法
+
+        Prod prod = queryProdWithPassThrough(prodLocateDTO);
+
+        //? 以下为通用余下流程
+
+        if (prod == null) throw new SthNotFoundException(OBJECT_NOT_ALIVE);
+
+        //视为一次对具体商品的浏览, 记录浏览量到Redis
+        String productKey = USER_VO_KEY + prod.getId();
+
+        // 使用HyperLogLog记录用户id -> 浏览商品记录
+        stringRedisTemplate.opsForHyperLogLog().add(productKey, UserHolder.getUser().getId().toString());
+
+        // 统计该商品浏览量
+        Long count = stringRedisTemplate.opsForHyperLogLog().size(productKey);
+
+        // 更新商品浏览量, 同时提升权重
+        ProdFunc prodFunc = prodFuncService.getOne(Wrappers.<ProdFunc>lambdaQuery().eq(ProdFunc::getId, prod.getId()));
+        prodFunc.setVisit(prodFunc.getVisit() + count);
+        prodFunc.setWeight(prodFunc.getWeight() + count * DEFAULT_WEIGHT);
+        prodFuncService.updateById(prodFunc);
+
+        ProdGreatVO prodGreatVO;
+
+        try {
+            prodGreatVO = dtoUtils.createAndCombineDTOs(ProdGreatVO.class, prod.getId(), ProdAllDTO.class, ProdFuncAllDTO.class);
+        } catch (Exception e) {
+            throw new BaseException(UNKNOWN_ERROR);
+        }
+
+        return prodGreatVO;
+    }
+
+
+    /**
+     * 通过缓存穿透方法查询商品
+     */
+    private Prod queryProdWithPassThrough(ProdLocateDTO prodLocateDTO) {
+        //针对传入的prodLocateDTO进行Key构建: 选择name和userId作为Key, userId.toString() : name, 加上前缀
+        String key = CACHE_PROD_KEY + prodLocateDTO.getUserId() + ":" + prodLocateDTO.getName();
+
+        String prodJson = stringRedisTemplate.opsForValue().get(key);//执行查询
+
+        if (StrUtil.isNotBlank(prodJson)) { //不为空就把json转为Prod返回, 表示拿到了prod
+            return JSONUtil.toBean(prodJson, Prod.class);
+        }
+
+        if (prodJson != null) { //查询到了, 但是是空字符串, 意味着是缓存空数据, 返回null
+            return null;
+        }
+
+        //查数据库流程: MP的lambdaQuery查询
+        Prod prod = this.getOne(Wrappers.<Prod>lambdaQuery()
+                .eq(Prod::getName, prodLocateDTO.getName())
+                .eq(Prod::getUserId, prodLocateDTO.getUserId()));
+
+
+        if (prod == null) { //还查不到就要进行缓存穿透的空数据设置
+            stringRedisTemplate.opsForValue().set(key, "", CACHE_NULL_TTL, TimeUnit.MINUTES); //设置TTL - NULL
+            return null;
+        }
+
+        //查到了就要进行缓存设置
+        String jsonStr = JSONUtil.toJsonStr(prod);
+        stringRedisTemplate.opsForValue().set(key, jsonStr, CACHE_PROD_TTL, TimeUnit.MINUTES); //设置TTL - PROD
+
+        return prod;
     }
 
 

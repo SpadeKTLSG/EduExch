@@ -17,15 +17,18 @@ public class RedisConstant {
      */
     public static final String LOGIN_CODE_KEY_ADMIN = "admin:login:code:";
 
+
     /**
      * 验证码过期时间
      */
     public static final Long LOGIN_CODE_TTL_ADMIN = 1800L; // 30分钟
 
+
     /**
      * 登录接受Key前缀
      */
     public static final String LOGIN_USER_KEY_ADMIN = "admin:login:token:";
+
 
     /**
      * 登录用户过期时间
@@ -40,16 +43,19 @@ public class RedisConstant {
      */
     public static final String LOGIN_CODE_KEY_GUEST = "guest:login:code:";
 
+
     /**
      * 验证码过期时间
      */
     public static final Long LOGIN_CODE_TTL_GUEST = 1800L; // 30分钟
+
 
     /**
      * 登录TOKEN Key前缀
      * <p>单机状态下默认清理掉所有的登陆TOKEN</p>
      */
     public static final String LOGIN_USER_KEY_GUEST = "guest:login:token:";
+
 
     /**
      * 登录用户过期时间
@@ -67,6 +73,7 @@ public class RedisConstant {
      * 用户VO浏览Key前缀
      */
     public static final String USER_VO_KEY = "vo:";
+
 
     /**
      * 用户收藏Key前缀
@@ -91,7 +98,7 @@ public class RedisConstant {
     /**
      * 缓存空数据时间
      */
-    public static final Long CACHE_NULL_TTL = 2L;
+    public static final Long CACHE_NULL_TTL = 2L; // 2 分钟
 
     /**
      * 缓存卖家Key前缀
@@ -101,15 +108,18 @@ public class RedisConstant {
 
     //* Ultra - 限流逻辑 -
 
+
     /**
      * 发送验证码时间Key前缀
      */
     public static final String SENDCODE_SENDTIME_KEY = "sms:sendtime:";
 
+
     /**
      * 一级限流Key前缀
      */
     public static final String ONE_LEVERLIMIT_KEY = "limit:onelevel:";
+
 
     /**
      * 二级限流Key前缀
@@ -117,12 +127,25 @@ public class RedisConstant {
     public static final String TWO_LEVERLIMIT_KEY = "limit:twolevel:";
 
 
-    public static final Long CACHE_SHOP_TTL = 30L;
+    //* Ultra - 限流逻辑 -
 
 
-    public static final String CACHE_SHOP_KEY = "cache:shop:";
+    /**
+     * 缓存商品Key前缀
+     */
+    public static final String CACHE_PROD_KEY = "cache:prod:";
 
-    public static final Long LOCK_SHOP_TTL = 10L;
+
+    /**
+     * 缓存商品过期时间
+     */
+    public static final Long CACHE_PROD_TTL = 30L; // 30 分钟
+
+
+    /**
+     * 锁定商品Key前缀
+     */
+    public static final Long LOCK_PROD_TTL = 10L;
 
 
 }

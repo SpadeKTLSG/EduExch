@@ -160,7 +160,7 @@ public class ProdController {
     /**
      * name查询自己单个商品详细信息
      * <p>联表查询VO</p>
-     * !<p>缓存引入示例</p>
+     * !<p>缓存引入示例*2</p>
      */
     @GetMapping("/get/cache")
     @Operation(summary = "查询单个商品详细信息")
