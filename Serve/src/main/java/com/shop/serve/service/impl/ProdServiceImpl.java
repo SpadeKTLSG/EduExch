@@ -89,8 +89,22 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
 
     @Override
     public void update4UserCache(ProdGreatDTO prodGreatDTO) throws InstantiationException, IllegalAccessException {
+
+        // 联表选择性更新
+        Optional<Prod> optionalProd = Optional.ofNullable(this.getOne(Wrappers.<Prod>lambdaQuery().eq(Prod::getName, prodGreatDTO.getName())));
+        if (optionalProd.isEmpty()) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
+
+        optionalProd.get().setUserId(UserHolder.getUser().getId());//这里商品的userId是自己
+
+        Map<Object, IService> dtoServiceMap = new HashMap<>();
+        dtoServiceMap.put(createDTOFromProdGreatDTO(prodGreatDTO, ProdAllDTO.class), this);
+        dtoServiceMap.put(createDTOFromProdGreatDTO(prodGreatDTO, ProdFuncAllDTO.class), prodFuncService);
+
+        dtoMapService(dtoServiceMap, optionalProd.get().getId(), optionalProd);
+
+
         //包含缓存的更新逻辑, 在更新数据库之后更新缓存(正常流程后)
-        this.update4User(prodGreatDTO);
+
         String key = CACHE_PROD_KEY + prodGreatDTO.getUserId() + ":" + prodGreatDTO.getName();
         stringRedisTemplate.delete(key);
     }
@@ -374,15 +388,25 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
     @Override
     public ProdGreatVO GetByNameSingleCache(ProdLocateDTO prodLocateDTO) {
 
-        // 这里不能用prodLocateDTO直接查, 需要用prodLocateDTO的name和userId拼接,
-        // 因为这里不允许传递id进来查询, 于是参照CacheClient的缓存穿透查询进行改造, 存在Prod内作为内部方法
+        // 这里是双'主键'情况不能用prodLocateDTO直接查, 需要用prodLocateDTO的name和userId拼接改造CacheClient
 
-        //1 - fix缓存穿透 (use 空对象)
+        //? 1 - fix缓存穿透 (use 空对象)
 //        Prod prod = queryProdWithBlankObject(prodLocateDTO);
-        //2 - fix缓存击穿 + 穿透 (use 互斥锁 + 空对象)
-//        Prod prod = queryProdWithMutex(prodLocateDTO);
-        //3 - fix缓存击穿 (use 逻辑过期)
-        Prod prod = queryProdWithLogicalExpire(prodLocateDTO);
+
+
+        //? 2 - fix缓存击穿 + 穿透 (use 互斥锁 + 空对象) [采用]
+        Prod prod = queryProdWithMutex(prodLocateDTO);
+
+
+        //? 3 - fix缓存击穿 (use 逻辑过期) [不采用]
+
+/*        try {   //调试: 预热对应商品缓存
+            saveProd2Redis(prodLocateDTO, 114514L);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        Prod prod = queryProdWithLogicalExpire(prodLocateDTO);*/
 
 
         //? 以下为通用余下流程
@@ -465,7 +489,7 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
      * @param prodLocateDTO 商品定位DTO
      * @param expirSeconds  过期时间
      */
-    private void saveProd2Redis(ProdLocateDTO prodLocateDTO, Long expirSeconds) throws InterruptedException {
+    public void saveProd2Redis(ProdLocateDTO prodLocateDTO, Long expirSeconds) throws InterruptedException {
 
         String keyProd = CACHE_PROD_KEY + prodLocateDTO.getUserId() + ":" + prodLocateDTO.getName();
         //数据库查询 : MP的lambdaQuery查询

@@ -96,10 +96,11 @@ public class ProdController {
      * <p>包括: 商品冻结/恢复</p>
      * !<p>缓存引入示例: 刷新对应对象缓存</p>
      */
-    @PutMapping("/update")
-    @Operation(summary = "用户更新商品")
+    @PutMapping("/update/cache")
+    @Operation(summary = "用户更新商品 - Cache")
     @Parameters(@Parameter(name = "prodGreatDTO", description = "商品更新DTO", required = true))
     public Result update4UserCache(@RequestBody ProdGreatDTO prodGreatDTO) {
+
         try {
             prodService.update4UserCache(prodGreatDTO);
             return Result.success();
@@ -107,7 +108,7 @@ public class ProdController {
             return Result.error(e.getMessage());
         }
     }
-    //http://localhost:8086/guest/prod/update
+    //http://localhost:8086/guest/prod/update/cache
 
 
     /**
@@ -182,7 +183,7 @@ public class ProdController {
      * !<p>缓存引入示例*3 fix 缓存穿透, 缓存击穿</p>
      */
     @GetMapping("/get/cache")
-    @Operation(summary = "查询单个商品详细信息")
+    @Operation(summary = "查询单个商品详细信息 - Cache")
     @Parameters(@Parameter(name = "prodLocateDTO", description = "商品定位DTO"))
     public Result getProd4Cache(@RequestBody ProdLocateDTO prodLocateDTO) {
         return Result.success(prodService.GetByNameSingleCache(prodLocateDTO));
