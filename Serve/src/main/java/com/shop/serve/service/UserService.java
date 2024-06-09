@@ -43,4 +43,6 @@ public interface UserService extends IService<User> {
     int collectCount();
 
     Page<Prod> collectPage(Integer current);
+
+    Page<UserVO> searchByAccount(String account, Integer current);
 }

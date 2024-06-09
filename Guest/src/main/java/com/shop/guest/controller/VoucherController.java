@@ -184,7 +184,15 @@ public class VoucherController {
     /**
      * Name搜索卷
      */
-    //TODO 等前端
-
+    @GetMapping("/search/name")
+    @Operation(summary = "Name模糊搜索卷")
+    @Parameters({
+            @Parameter(name = "name", description = "卷名", required = true),
+            @Parameter(name = "current", description = "当前页", required = true)
+    })
+    public Result searchVoucherByName(@RequestParam("name") String name, @RequestParam(value = "current", defaultValue = "1") Integer current) {
+        return Result.success(voucherService.searchVoucherByName(name, current));
+    }
+    //http://localhost:8086/guest/voucher/search/name
 
 }

@@ -1,6 +1,7 @@
 package com.shop.serve.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.shop.common.context.UserHolder;
 import com.shop.common.exception.BadArgsException;
@@ -189,6 +190,15 @@ public class VoucherServiceImpl extends ServiceImpl<VoucherMapper, Voucher> impl
     public void ruinVoucher(Voucher voucher) {
         voucher.setStatus(2);
         this.updateById(voucher);
+    }
+
+    @Override
+    public Page<Voucher> searchVoucherByName(String name, Integer current) {
+
+        //分页展示模糊匹配的所有可能结果
+        return this.page(new Page<>(current, 10),
+                new LambdaQueryWrapper<Voucher>()
+                        .like(Voucher::getName, name));
     }
 
 

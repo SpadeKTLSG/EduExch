@@ -18,6 +18,7 @@ import com.shop.pojo.entity.Order;
 import com.shop.pojo.entity.Prod;
 import com.shop.pojo.entity.ProdCate;
 import com.shop.pojo.entity.ProdFunc;
+import com.shop.pojo.vo.ProdAllVO;
 import com.shop.pojo.vo.ProdGreatVO;
 import com.shop.serve.mapper.ProdMapper;
 import com.shop.serve.service.*;
@@ -158,24 +159,24 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
 
 
     @Override
-    public Page<ProdGreatDTO> page2Check(Integer current) {
+    public Page<ProdGreatVO> page2Check(Integer current) {
 
         Page<ProdFunc> prodFuncPage = prodFuncService.page(new Page<>(current, SystemConstant.MAX_PAGE_SIZE),
                 new LambdaQueryWrapper<ProdFunc>().eq(ProdFunc::getStatus, 0));
 
-        List<ProdGreatDTO> mergedList = new ArrayList<>();
+        List<ProdGreatVO> mergedList = new ArrayList<>();
 
         for (ProdFunc prodFunc : prodFuncPage.getRecords()) {
             Prod prod = this.getById(prodFunc.getId());
             if (prod != null) {
-                ProdGreatDTO prodGreatDTO = new ProdGreatDTO();
-                BeanUtils.copyProperties(prod, prodGreatDTO);
-                BeanUtils.copyProperties(prodFunc, prodGreatDTO);
-                mergedList.add(prodGreatDTO);
+                ProdGreatVO prodGreatVO = new ProdGreatVO();
+                BeanUtils.copyProperties(prod, prodGreatVO);
+                BeanUtils.copyProperties(prodFunc, prodGreatVO);
+                mergedList.add(prodGreatVO);
             }
         }
 
-        Page<ProdGreatDTO> mergedPage = new Page<>(current, SystemConstant.MAX_PAGE_SIZE);
+        Page<ProdGreatVO> mergedPage = new Page<>(current, SystemConstant.MAX_PAGE_SIZE);
         mergedPage.setRecords(mergedList);
         mergedPage.setTotal(mergedList.size());
 
@@ -202,25 +203,25 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
 
 
     @Override
-    public Page<ProdGreatDTO> pageProd(Integer current) {
+    public Page<ProdGreatVO> pageProd(Integer current) {
 
         Page<Prod> prodPage = this.page(new Page<>(current, SystemConstant.MAX_PAGE_SIZE));
         Page<ProdFunc> prodFuncPage = prodFuncService.page(new Page<>(current, SystemConstant.MAX_PAGE_SIZE));
 
         // 存储合并后的结果
-        List<ProdGreatDTO> mergedList = new ArrayList<>();
+        List<ProdGreatVO> mergedList = new ArrayList<>();
 
         for (int i = 0; i < prodPage.getRecords().size(); i++) { //合并两个Page的Records
             Prod prod = prodPage.getRecords().get(i);
             ProdFunc prodFunc = prodFuncPage.getRecords().get(i);
 
-            ProdGreatDTO prodGreatDTO = new ProdGreatDTO();
-            BeanUtils.copyProperties(prod, prodGreatDTO);
-            BeanUtils.copyProperties(prodFunc, prodGreatDTO);
-            mergedList.add(prodGreatDTO);
+            ProdGreatVO prodGreatVO = new ProdGreatVO();
+            BeanUtils.copyProperties(prod, prodGreatVO);
+            BeanUtils.copyProperties(prodFunc, prodGreatVO);
+            mergedList.add(prodGreatVO);
         }
 
-        Page<ProdGreatDTO> mergedPage = new Page<>(current, SystemConstant.MAX_PAGE_SIZE);
+        Page<ProdGreatVO> mergedPage = new Page<>(current, SystemConstant.MAX_PAGE_SIZE);
         mergedPage.setRecords(mergedList);
         mergedPage.setTotal(prodPage.getTotal() + prodFuncPage.getTotal());
 
@@ -696,6 +697,59 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
                 .build();
 
         hotsearchService.add2Hotsearch(hotsearchAllDTO);
+    }
+
+    @Override
+    public Page<ProdGreatVO> searchByName(String name, Integer current) {
+
+        Page<Prod> prodPage = this.page(new Page<>(current, SystemConstant.MAX_PAGE_SIZE),
+                Wrappers.<Prod>lambdaQuery()
+                        .like(Prod::getName, name));
+
+
+        List<Long> ids = new ArrayList<>();     //通过prodPage中的id找到对应的ProdFunc对象
+        for (Prod prod : prodPage.getRecords()) {
+            ids.add(prod.getId());
+        }
+
+        Page<ProdFunc> prodFuncPage = prodFuncService.page(new Page<>(current, SystemConstant.MAX_PAGE_SIZE),
+                Wrappers.<ProdFunc>lambdaQuery()
+                        .in(ProdFunc::getId, ids));
+
+
+        // 存储合并后的结果
+        List<ProdGreatVO> mergedList = new ArrayList<>();
+
+        for (int i = 0; i < prodPage.getRecords().size(); i++) { //合并两个Page的Records
+            Prod prod = prodPage.getRecords().get(i);
+            ProdFunc prodFunc = prodFuncPage.getRecords().get(i);
+
+            ProdGreatVO prodGreatVO = new ProdGreatVO();
+            BeanUtils.copyProperties(prod, prodGreatVO);
+            BeanUtils.copyProperties(prodFunc, prodGreatVO);
+            mergedList.add(prodGreatVO);
+        }
+
+        Page<ProdGreatVO> mergedPage = new Page<>(current, SystemConstant.MAX_PAGE_SIZE);
+        mergedPage.setRecords(mergedList);
+        mergedPage.setTotal(prodPage.getTotal() + prodFuncPage.getTotal());
+
+        return mergedPage;
+    }
+
+    @Override
+    public Page<ProdAllVO> searchByNameSimple(String name, Integer current) {
+
+        //只需要返回ProdVO
+        Page<Prod> page = this.page(new Page<>(current, SystemConstant.MAX_PAGE_SIZE), Wrappers.<Prod>lambdaQuery()
+                .like(Prod::getName, name)
+        );
+
+        return (Page<ProdAllVO>) page.convert(prod -> {
+            ProdAllVO prodAllVO = new ProdAllVO();
+            BeanUtils.copyProperties(prod, prodAllVO);
+            return prodAllVO;
+        });
     }
 
 

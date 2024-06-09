@@ -1,5 +1,6 @@
 package com.shop.serve.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.shop.pojo.dto.VoucherAllDTO;
 import com.shop.pojo.dto.VoucherLocateDTO;
@@ -23,4 +24,6 @@ public interface VoucherService extends IService<Voucher> {
     List<Voucher> getOutdateOnes(Integer status, LocalDateTime time);
 
     void ruinVoucher(Voucher voucher);
+
+    Page<Voucher> searchVoucherByName(String name, Integer current);
 }

@@ -459,6 +459,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
 
+    @Override
+    public Page<UserVO> searchByAccount(String account, Integer current) {
+
+        //分页展示模糊匹配的所有可能结果
+        Page<User> page = this.page(new Page<>(current, MAX_PAGE_SIZE), Wrappers.<User>lambdaQuery()
+                .like(User::getAccount, account)
+        );
+
+        return (Page<UserVO>) page.convert(user -> {
+            UserVO userVO = new UserVO();
+            BeanUtils.copyProperties(user, userVO);
+            return userVO;
+        });
+    }
+
     /**
      * 从UserGreatDTO创建DTO
      */

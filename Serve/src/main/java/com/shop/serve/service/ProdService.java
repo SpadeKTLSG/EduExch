@@ -6,6 +6,7 @@ import com.shop.pojo.dto.ProdGreatDTO;
 import com.shop.pojo.dto.ProdLocateDTO;
 import com.shop.pojo.entity.Prod;
 import com.shop.pojo.entity.ProdFunc;
+import com.shop.pojo.vo.ProdAllVO;
 import com.shop.pojo.vo.ProdGreatVO;
 
 import java.time.LocalDateTime;
@@ -21,13 +22,13 @@ public interface ProdService extends IService<Prod> {
 
     void freeze(ProdLocateDTO prodLocateDTO);
 
-    Page<ProdGreatDTO> page2Check(Integer current);
+    Page<ProdGreatVO> page2Check(Integer current);
 
     void deleteByNameUser(ProdLocateDTO prodLocateDTO);
 
     Prod getByNameUser(ProdLocateDTO prodLocateDTO);
 
-    Page<ProdGreatDTO> pageProd(Integer current);
+    Page<ProdGreatVO> pageProd(Integer current);
 
     void publishGood(ProdGreatDTO prodGreatDTO);
 
@@ -53,5 +54,7 @@ public interface ProdService extends IService<Prod> {
 
     void add2HotSearch(ProdFunc prodFunc);
 
+    Page<ProdGreatVO> searchByName(String name, Integer current);
 
+    Page<ProdAllVO> searchByNameSimple(String name, Integer current);
 }

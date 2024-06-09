@@ -61,15 +61,13 @@ public class OrderController {
      * <p>联表</p>
      */
     @GetMapping("/detail")
+    @Operation(summary = "查看一个订单详情")
+    @Parameters(@Parameter(name = "orderAllDTO", description = "订单详情DTO", required = true))
     public Result orderDetail(@RequestBody OrderAllDTO orderAllDTO) {
         return Result.success(orderService.orderDetail(orderAllDTO));
     }
     //http://localhost:8085/admin/order/detail
 
 
-    /**
-     * Name搜索订单
-     */
-    // TODO 等前端
 }
 

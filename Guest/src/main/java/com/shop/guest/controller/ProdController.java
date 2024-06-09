@@ -159,12 +159,6 @@ public class ProdController {
 
 
     /**
-     * 按Name搜索商品
-     */
-    //TODO 等前端
-
-
-    /**
      * name查询自己单个商品详细信息
      * <p>联表查询VO</p>
      */
@@ -226,4 +220,23 @@ public class ProdController {
         return Result.success(prodService.pageCateAllProd(cate, current));
     }
     //http://localhost:8086/guest/prod/cateall/page/人类
+
+
+    /**
+     * 按Name模糊搜索商品
+     * <p>前端搜索框, 分页展示结果</p>
+     */
+    @GetMapping("/search/name")
+    @Operation(summary = "按Name模糊搜索商品")
+    @Parameters({
+            @Parameter(name = "name", description = "商品名称", required = true),
+            @Parameter(name = "current", description = "当前页", required = true)
+    })
+    public Result searchByName(@RequestParam("name") String name, @RequestParam(value = "current", defaultValue = "1") Integer current) {
+        return Result.success(prodService.searchByNameSimple(name, current));
+    }
+    //http://localhost:8086/guest/prod/search/name
+
+
+
 }

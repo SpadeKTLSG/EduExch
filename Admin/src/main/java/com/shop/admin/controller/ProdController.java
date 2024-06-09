@@ -77,7 +77,6 @@ public class ProdController {
     //http://localhost:8085/admin/prod/page2Check
 
 
-
     //! ADD
 
     /**
@@ -122,7 +121,6 @@ public class ProdController {
     //http://localhost:8085/admin/prod/cate/delete
 
 
-
     //! UPDATE
     // 管理员修改商品信息 : 不允许
 
@@ -165,9 +163,20 @@ public class ProdController {
     }
     //http://localhost:8085/admin/prod/page
 
+
     /**
-     * 按Name搜索商品
+     * 按Name模糊搜索商品
+     * <p>前端搜索框, 分页展示结果</p>
      */
-    //TODO 等前端
+    @GetMapping("/search/name")
+    @Operation(summary = "按Name模糊搜索商品")
+    @Parameters({
+            @Parameter(name = "name", description = "商品名称", required = true),
+            @Parameter(name = "current", description = "当前页", required = true)
+    })
+    public Result searchByName(@RequestParam("name") String name, @RequestParam(value = "current", defaultValue = "1") Integer current) {
+        return Result.success(prodService.searchByName(name, current));
+    }
+    //http://localhost:8085/admin/prod/search/name?name=天&current=1
 
 }

@@ -277,8 +277,19 @@ public class UserController {
 
 
     /**
-     * Name搜索用户
+     * Account模糊搜索用户
+     * <p>前端搜索框, 分页展示结果</p>
      */
-    // TODO 等前端
+    @GetMapping("/search/account")
+    @Operation(summary = "Account模糊搜索用户")
+    @Parameters({
+            @Parameter(name = "account", description = "用户账号", required = true),
+            @Parameter(name = "current", description = "当前页", required = true)
+    })
+    public Result searchByAccount(@RequestParam("account") String account, @RequestParam(value = "current", defaultValue = "1") Integer current) {
+        return Result.success(userService.searchByAccount(account, current));
+    }
+    //http://localhost:8086/guest/user/search/account?account=Store&current=1
+
 
 }

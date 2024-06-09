@@ -1,8 +1,8 @@
 package com.shop.serve.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.shop.pojo.dto.UserLocalDTO;
 import com.shop.pojo.entity.UserFollow;
+import com.shop.pojo.vo.UserVO;
 
 import java.util.List;
 
@@ -12,5 +12,5 @@ public interface UserFollowService extends IService<UserFollow> {
 
     boolean isFollow(Long followUserId);
 
-    List<UserLocalDTO> shareFollow(Long id);
+    List<UserVO> shareFollow(Long id);
 }

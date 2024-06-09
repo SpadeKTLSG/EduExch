@@ -5,9 +5,9 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.shop.common.context.UserHolder;
-import com.shop.pojo.dto.UserLocalDTO;
 import com.shop.pojo.entity.UserFollow;
 import com.shop.pojo.entity.UserFunc;
+import com.shop.pojo.vo.UserVO;
 import com.shop.serve.mapper.UserFollowMapper;
 import com.shop.serve.service.UserFollowService;
 import com.shop.serve.service.UserFuncService;
@@ -95,7 +95,7 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
 
 
     @Override
-    public List<UserLocalDTO> shareFollow(Long id) {
+    public List<UserVO> shareFollow(Long id) {
 
         Long userId = UserHolder.getUser().getId();
 
@@ -113,9 +113,9 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
                 .collect(Collectors.toList());  // 解析id集合
 
 
-        List<UserLocalDTO> users = userService.listByIds(ids)
+        List<UserVO> users = userService.listByIds(ids)
                 .stream()
-                .map(user -> BeanUtil.copyProperties(user, UserLocalDTO.class))
+                .map(user -> BeanUtil.copyProperties(user, UserVO.class))
                 .collect(Collectors.toList());   // 查询用户
 
         return users;
