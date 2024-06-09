@@ -160,4 +160,11 @@ public class RedisConstant {
     public static final Long LOCK_PROD_FAIL_WT = 50L; // 50 秒
 
 
+    /**
+     * 活动商品过期时间
+     */
+    public static final Long ACTIVE_PROD_TTL = 30L; // 30 秒
+
+
+
 }

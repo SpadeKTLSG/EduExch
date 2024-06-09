@@ -2,6 +2,7 @@ package com.shop.serve.service.impl;
 
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -11,7 +12,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.shop.common.constant.SystemConstant;
 import com.shop.common.context.UserHolder;
 import com.shop.common.exception.*;
-import com.shop.common.utils.CacheClient;
+import com.shop.pojo.RedisData;
 import com.shop.pojo.dto.*;
 import com.shop.pojo.entity.Order;
 import com.shop.pojo.entity.Prod;
@@ -30,6 +31,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static com.shop.common.constant.MessageConstant.*;
@@ -60,8 +63,11 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
-    @Autowired
-    private CacheClient cacheClient;
+
+    /**
+     * 线程池[缓存击穿问题], 完成重构缓存
+     */
+    private static final ExecutorService CACHE_REBUILD_EXECUTOR = Executors.newFixedThreadPool(10);
 
 
     @Override
@@ -374,9 +380,9 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
         //1 - fix缓存穿透 (use 空对象)
 //        Prod prod = queryProdWithBlankObject(prodLocateDTO);
         //2 - fix缓存击穿 + 穿透 (use 互斥锁 + 空对象)
-        Prod prod = queryProdWithMutex(prodLocateDTO);
-        //3 - fix缓存击穿 (逻辑过期)
-//        Prod prod = queryProdWithLogicalExpire(prodLocateDTO);
+//        Prod prod = queryProdWithMutex(prodLocateDTO);
+        //3 - fix缓存击穿 (use 逻辑过期)
+        Prod prod = queryProdWithLogicalExpire(prodLocateDTO);
 
 
         //? 以下为通用余下流程
@@ -410,6 +416,75 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
     }
 
     /**
+     * 查询商品 通过设置逻辑过期方法 -> 解决缓存击穿
+     */
+    private Prod queryProdWithLogicalExpire(ProdLocateDTO prodLocateDTO) {
+        String locateKey = prodLocateDTO.getUserId() + ":" + prodLocateDTO.getName();
+        String keyProd = CACHE_PROD_KEY + locateKey;  //构建Prod的Key
+
+        String prodJson = stringRedisTemplate.opsForValue().get(keyProd);//执行查询
+
+        if (StrUtil.isBlank(prodJson)) return null; //为空直接返回null
+
+        // 命中则使用一个RedisData的R对象来存储数据和过期时间
+        RedisData redisData = JSONUtil.toBean(prodJson, RedisData.class);
+
+        //RedisData取出Data ->  JSON -> Prod
+        Prod prod = JSONUtil.toBean((JSONObject) redisData.getData(), Prod.class);
+
+        // 判断是否过期
+        if (LocalDateTime.now().isBefore(redisData.getExpireTime())) return prod; //未过期直接返回Prod
+
+        // 过期则尝试获取互斥锁
+        String keyProdLock = LOCK_PROD_KEY + locateKey; //构建Prod的Lock Key
+        boolean flag = tryLock(keyProdLock);
+
+        if (flag) { //获取到了锁
+            //开启独立线程
+            CACHE_REBUILD_EXECUTOR.submit(() -> {
+                try {
+                    // 重建缓存
+                    this.saveProd2Redis(prodLocateDTO, ACTIVE_PROD_TTL);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                } finally {
+                    unlock(keyProdLock);
+                }
+            });
+            return prod; //处理完毕返回Prod
+        }
+
+        //没获取到锁也直接返回Prod
+        return prod;
+    }
+
+
+    /**
+     * 保存商品到Redis
+     *
+     * @param prodLocateDTO 商品定位DTO
+     * @param expirSeconds  过期时间
+     */
+    private void saveProd2Redis(ProdLocateDTO prodLocateDTO, Long expirSeconds) throws InterruptedException {
+
+        String keyProd = CACHE_PROD_KEY + prodLocateDTO.getUserId() + ":" + prodLocateDTO.getName();
+        //数据库查询 : MP的lambdaQuery查询
+        Prod prod = this.getOne(Wrappers.<Prod>lambdaQuery()
+                .eq(Prod::getName, prodLocateDTO.getName())
+                .eq(Prod::getUserId, prodLocateDTO.getUserId()));
+
+        Thread.sleep(LOCK_PROD_FAIL_WT * 4); // 模拟重建缓存耗时
+
+        //包装 RedisData 对象
+        RedisData redisData = new RedisData();
+        redisData.setData(prod);
+        redisData.setExpireTime(LocalDateTime.now().plusSeconds(expirSeconds));
+
+        stringRedisTemplate.opsForValue().set(keyProd, JSONUtil.toJsonStr(redisData)); //因为是手动判断过期, 所以不需要设置TTL
+    }
+
+
+    /**
      * 查询商品 通过设置互斥锁方法 -> 解决缓存击穿 + 缓存穿透
      */
     private Prod queryProdWithMutex(ProdLocateDTO prodLocateDTO) {
@@ -426,7 +501,7 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
             return null;
         }
 
-        //实现在高并发的情况下缓存击穿缓存重建
+        // 实现在高并发的情况下缓存击穿缓存重建
         Prod prod;
         String keyProdLock = LOCK_PROD_KEY + locateKey; //构建Prod的Lock Key
         try {
