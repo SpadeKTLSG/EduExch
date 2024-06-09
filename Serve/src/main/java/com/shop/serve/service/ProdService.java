@@ -15,6 +15,8 @@ public interface ProdService extends IService<Prod> {
 
     void update4User(ProdGreatDTO prodGreatDTO) throws InstantiationException, IllegalAccessException;
 
+    void update4UserCache(ProdGreatDTO prodGreatDTO) throws InstantiationException, IllegalAccessException;
+
     void check(ProdLocateDTO prodLocateDTO);
 
     void freeze(ProdLocateDTO prodLocateDTO);

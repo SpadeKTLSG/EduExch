@@ -1,5 +1,6 @@
 package com.shop.serve.service.impl;
 
+import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -77,6 +78,15 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
         dtoServiceMap.put(createDTOFromProdGreatDTO(prodGreatDTO, ProdFuncAllDTO.class), prodFuncService);
 
         dtoMapService(dtoServiceMap, optionalProd.get().getId(), optionalProd);
+    }
+
+
+    @Override
+    public void update4UserCache(ProdGreatDTO prodGreatDTO) throws InstantiationException, IllegalAccessException {
+        //包含缓存的更新逻辑, 在更新数据库之后更新缓存(正常流程后)
+        this.update4User(prodGreatDTO);
+        String key = CACHE_PROD_KEY + prodGreatDTO.getUserId() + ":" + prodGreatDTO.getName();
+        stringRedisTemplate.delete(key);
     }
 
 
@@ -351,8 +361,9 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
         return prodGreatVO;
     }
 
+
     /**
-     * 通过缓存穿透等方法查询商品
+     * 通过缓存查询商品, 解决缓存穿透, 缓存击穿等问题
      */
     @Override
     public ProdGreatVO GetByNameSingleCache(ProdLocateDTO prodLocateDTO) {
@@ -360,7 +371,13 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
         // 这里不能用prodLocateDTO直接查, 需要用prodLocateDTO的name和userId拼接,
         // 因为这里不允许传递id进来查询, 于是参照CacheClient的缓存穿透查询进行改造, 存在Prod内作为内部方法
 
-        Prod prod = queryProdWithPassThrough(prodLocateDTO);
+        //1 - fix缓存穿透 (use 空对象)
+//        Prod prod = queryProdWithBlankObject(prodLocateDTO);
+        //2 - fix缓存击穿 + 穿透 (use 互斥锁 + 空对象)
+        Prod prod = queryProdWithMutex(prodLocateDTO);
+        //3 - fix缓存击穿 (逻辑过期)
+//        Prod prod = queryProdWithLogicalExpire(prodLocateDTO);
+
 
         //? 以下为通用余下流程
 
@@ -392,11 +409,82 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
         return prodGreatVO;
     }
 
+    /**
+     * 查询商品 通过设置互斥锁方法 -> 解决缓存击穿 + 缓存穿透
+     */
+    private Prod queryProdWithMutex(ProdLocateDTO prodLocateDTO) {
+        String locateKey = prodLocateDTO.getUserId() + ":" + prodLocateDTO.getName();
+        String keyProd = CACHE_PROD_KEY + locateKey;  //构建Prod的Key
+
+        String prodJson = stringRedisTemplate.opsForValue().get(keyProd);//执行查询
+
+        if (StrUtil.isNotBlank(prodJson)) { //不为空就把json转为Prod返回, 表示拿到了prod
+            return JSONUtil.toBean(prodJson, Prod.class);
+        }
+
+        if (prodJson != null) { //查询到了, 但是是空字符串, 意味着是缓存空数据, 返回null
+            return null;
+        }
+
+        //实现在高并发的情况下缓存击穿缓存重建
+        Prod prod;
+        String keyProdLock = LOCK_PROD_KEY + locateKey; //构建Prod的Lock Key
+        try {
+            // 尝试获取锁
+            boolean flag = tryLock(keyProdLock);
+
+            while (!flag) {
+                Thread.sleep(LOCK_PROD_FAIL_WT); // 获取失败则等待后重试
+                return queryProdWithMutex(prodLocateDTO); //递归调用
+            }
+            //获取成功执行重建操作
+
+            //查数据库流程: MP的lambdaQuery查询
+            prod = this.getOne(Wrappers.<Prod>lambdaQuery()
+                    .eq(Prod::getName, prodLocateDTO.getName())
+                    .eq(Prod::getUserId, prodLocateDTO.getUserId()));
+
+            if (prod == null) { //还查不到就要进行缓存穿透的空数据设置
+                stringRedisTemplate.opsForValue().set(keyProd, "", CACHE_NULL_TTL, TimeUnit.MINUTES); //设置TTL - NULL
+                return null;
+            }
+
+            //查到了就要进行缓存设置
+            String jsonStr = JSONUtil.toJsonStr(prod);
+            stringRedisTemplate.opsForValue().set(keyProd, jsonStr, CACHE_PROD_TTL, TimeUnit.MINUTES); //设置TTL - PROD
+
+            //返回查询到的Prod
+            return prod;
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            unlock(keyProdLock); //业务结束释放锁
+        }
+    }
+
 
     /**
-     * 通过缓存穿透方法查询商品
+     * 缓存击穿的互斥锁实现 - 加锁
      */
-    private Prod queryProdWithPassThrough(ProdLocateDTO prodLocateDTO) {
+    private boolean tryLock(String key) {
+        Boolean flag = stringRedisTemplate.opsForValue().setIfAbsent(key, "1", LOCK_PROD_TTL, TimeUnit.SECONDS);
+        return BooleanUtil.isTrue(flag);       //避免返回值为null使用了BooleanUtil工具类
+    }
+
+
+    /**
+     * 缓存击穿的互斥锁实现 - 解锁
+     */
+    private void unlock(String key) {
+        stringRedisTemplate.delete(key);
+    }
+
+
+    /**
+     * 查询商品 通过设置空对象方法 -> 解决缓存穿透
+     */
+    private Prod queryProdWithBlankObject(ProdLocateDTO prodLocateDTO) {
         //针对传入的prodLocateDTO进行Key构建: 选择name和userId作为Key, userId.toString() : name, 加上前缀
         String key = CACHE_PROD_KEY + prodLocateDTO.getUserId() + ":" + prodLocateDTO.getName();
 
@@ -409,6 +497,8 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
         if (prodJson != null) { //查询到了, 但是是空字符串, 意味着是缓存空数据, 返回null
             return null;
         }
+
+        //实现在高并发的情况下缓存穿透设置空对象
 
         //查数据库流程: MP的lambdaQuery查询
         Prod prod = this.getOne(Wrappers.<Prod>lambdaQuery()
@@ -425,6 +515,7 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
         String jsonStr = JSONUtil.toJsonStr(prod);
         stringRedisTemplate.opsForValue().set(key, jsonStr, CACHE_PROD_TTL, TimeUnit.MINUTES); //设置TTL - PROD
 
+        //返回查询到的Prod
         return prod;
     }
 

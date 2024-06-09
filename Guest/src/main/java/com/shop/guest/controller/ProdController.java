@@ -92,6 +92,25 @@ public class ProdController {
 
 
     /**
+     * 用户更新商品 联表选择性更新字段
+     * <p>包括: 商品冻结/恢复</p>
+     * !<p>缓存引入示例: 刷新对应对象缓存</p>
+     */
+    @PutMapping("/update")
+    @Operation(summary = "用户更新商品")
+    @Parameters(@Parameter(name = "prodGreatDTO", description = "商品更新DTO", required = true))
+    public Result update4UserCache(@RequestBody ProdGreatDTO prodGreatDTO) {
+        try {
+            prodService.update4UserCache(prodGreatDTO);
+            return Result.success();
+        } catch (RuntimeException | InstantiationException | IllegalAccessException e) {
+            return Result.error(e.getMessage());
+        }
+    }
+    //http://localhost:8086/guest/prod/update
+
+
+    /**
      * 优惠券触发商品状态修改
      */
     @PutMapping("/update/status/{func}")
@@ -160,7 +179,7 @@ public class ProdController {
     /**
      * name查询自己单个商品详细信息
      * <p>联表查询VO</p>
-     * !<p>缓存引入示例*2</p>
+     * !<p>缓存引入示例*3 fix 缓存穿透, 缓存击穿</p>
      */
     @GetMapping("/get/cache")
     @Operation(summary = "查询单个商品详细信息")

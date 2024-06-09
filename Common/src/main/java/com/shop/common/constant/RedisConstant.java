@@ -101,9 +101,9 @@ public class RedisConstant {
     public static final Long CACHE_NULL_TTL = 2L; // 2 分钟
 
     /**
-     * 缓存卖家Key前缀
+     * 对象锁示例
      */
-    public static final String LOCK_SHOP_KEY = "lock:shop:";
+    public static final String LOCK_EG_KEY = "lock:eg:";
 
 
     //* Ultra - 限流逻辑 -
@@ -143,9 +143,21 @@ public class RedisConstant {
 
 
     /**
-     * 锁定商品Key前缀
+     * 商品锁Key前缀
      */
-    public static final Long LOCK_PROD_TTL = 10L;
+    public static final String LOCK_PROD_KEY = "lock:prod:";
+
+
+    /**
+     * 商品锁过期时间
+     */
+    public static final Long LOCK_PROD_TTL = 10L; // 10 秒
+
+
+    /**
+     * 商品锁失败等待时间
+     */
+    public static final Long LOCK_PROD_FAIL_WT = 50L; // 50 秒
 
 
 }

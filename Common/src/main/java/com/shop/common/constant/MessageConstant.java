@@ -9,7 +9,7 @@ package com.shop.common.constant;
 public class MessageConstant {
 
 
-    //TODO fix here 扫一遍修复错误提示
+    // TODO fix here 扫一遍修复错误提示
     public static final String PASSWORD_EDIT_FAILED = "密码修改失败";
     public static final String ORDER_STATUS_ERROR = "订单状态错误";
     public static final String NETWORK_ERROR = "网络环境异常";
