@@ -149,7 +149,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     public void seckillStartOrder(ProdLocateDTO prodLocateDTO) {
 
         // 用令牌桶算法进行限流
-        if (!rateLimiter.tryAcquire(1000, TimeUnit.MILLISECONDS)) throw new NetWorkException(NETWORK_ERROR);
+        /*
+        原理: 令牌桶算法是一种限流算法，它的原理是系统会以一个恒定的速度往桶里放入令牌，而请求需要拿到令牌才能被处理，如果桶里没有令牌，那么请求就会被限流。
+        令牌桶算法既能够将所有的请求平均分布到时间区间内，又能接受服务器能够承受范围内的突发请求是目前使用较为广泛的一种限流算法
+         */
+        if (!rateLimiter.tryAcquire(1000, TimeUnit.MILLISECONDS)) throw new NetWorkException(NETWORK_ERROR); //如果没有拿到令牌, 则抛出网络环境异常
 
         // 执行流程
 
@@ -226,7 +230,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
         orderDetailService.updateById(orderDetail);
     }
-
 
 
     @Override
