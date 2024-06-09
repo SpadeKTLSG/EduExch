@@ -51,6 +51,8 @@ public class OrderController {
     @Operation(summary = "用户开启交易")
     @Parameters(@Parameter(name = "prodLocateDTO", description = "商品定位DTO", required = true))
     public Result startOrder(@RequestBody ProdLocateDTO prodLocateDTO) {
+        //? 压测: 插入用户数据, 同时关闭拦截器
+//        UserHolder.saveUser(UserLocalDTO.builder().id(1L).account("StoreMan").build());
         orderService.startOrder(prodLocateDTO);
         return Result.success();
     }
@@ -59,17 +61,18 @@ public class OrderController {
 
     /**
      * 用户开启秒杀交易
-     * <p>秒杀流程</p>
+     * !<p>秒杀流程</p>
      */
     @PostMapping("/start/seckill")
     @Operation(summary = "用户开启交易(秒杀)")
     @Parameters(@Parameter(name = "prodLocateDTO", description = "商品定位DTO", required = true))
     public Result startSeckillOrder(@RequestBody ProdLocateDTO prodLocateDTO) {
+        //? 压测: 插入用户数据, 同时关闭拦截器
+//        UserHolder.saveUser(UserLocalDTO.builder().id(1L).account("StoreMan").build());
         orderService.seckillStartOrder(prodLocateDTO);
         return Result.success();
     }
     //http://localhost:8086/guest/order/start/seckill
-
 
 
     //! DELETE
@@ -178,7 +181,7 @@ public class OrderController {
     public Result orderStatusCount(@PathVariable Integer status) {
 
         return Result.success(orderService.count(new LambdaQueryWrapper<Order>()
-                        .eq(Order::getStatus, status)
+                .eq(Order::getStatus, status)
                 .and(i -> i.eq(Order::getBuyerId, UserHolder.getUser().getId()).or().eq(Order::getSellerId, UserHolder.getUser().getId()))
         ));
     }

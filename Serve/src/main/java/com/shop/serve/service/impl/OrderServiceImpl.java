@@ -117,6 +117,19 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         Long seller_id = prod.getUserId();
         Long prod_id = prod.getId();
 
+        //查询可能存在的脏订单对象
+        Long count = this.query()
+                .eq("buyer_id", buyer_id)
+                .eq("seller_id", seller_id)
+                .eq("prod_id", prod_id)
+                .count();
+
+        //重复购买判定
+        if (count > 0) {
+            log.error("{}已购买过, 但是重复购买", buyer_id);
+            throw new SthHasCreatedException(ORDER_STATUS_ERROR);
+        }
+
         Order order = Order.builder()
                 .buyerId(buyer_id)
                 .sellerId(seller_id)
