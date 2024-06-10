@@ -12,6 +12,7 @@ import com.shop.common.exception.AccountAlivedException;
 import com.shop.common.exception.AccountNotFoundException;
 import com.shop.common.exception.InvalidInputException;
 import com.shop.common.utils.RegexUtil;
+import com.shop.pojo.dto.EmployeeAllDTO;
 import com.shop.pojo.dto.EmployeeDTO;
 import com.shop.pojo.dto.EmployeeLocalDTO;
 import com.shop.pojo.dto.EmployeeLoginDTO;
@@ -131,17 +132,18 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
 
     @Override
     @Transactional
-    public void updateOne(Employee employee) {
-        // 选择性更新
+    public void updateOne(EmployeeAllDTO employeeAllDTO) {
 
-        Optional<Employee> optionalEmployee = Optional.ofNullable(this.getOne(Wrappers.<Employee>lambdaQuery().eq(Employee::getAccount, employee.getAccount())));
+
+        Optional<Employee> optionalEmployee = Optional.ofNullable(this.getOne(Wrappers.<Employee>lambdaQuery().eq(Employee::getAccount, employeeAllDTO.getAccount())));
         if (optionalEmployee.isEmpty()) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
 
-        Employee e2 = optionalEmployee.get();
-        String[] nullPropertyNames = getNullPropertyNames(employee);
-        BeanUtils.copyProperties(employee, e2, nullPropertyNames);
+        // 选择性更新
+        Employee e2 = optionalEmployee.get(); //获取原始对象
+        String[] nullPropertyNames = getNullPropertyNames(employeeAllDTO); //获取所有的空属性名
+        BeanUtils.copyProperties(employeeAllDTO, e2, nullPropertyNames);
 
-        Optional.ofNullable(employee.getPassword()) //手动调整密码生成
+        Optional.ofNullable(employeeAllDTO.getPassword()) //手动调整密码生成
                 .ifPresent(password -> e2.setPassword(DigestUtils.md5DigestAsHex(password.getBytes())));
 
         this.updateById(e2);

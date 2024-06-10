@@ -124,6 +124,17 @@ public class ProdController {
     //! UPDATE
     // 管理员修改商品信息 : 不允许
 
+    /**
+     * 修改商品分类
+     */
+    @PutMapping("/cate/update")
+    @Operation(summary = "修改商品分类")
+    @Parameters(@Parameter(name = "prodCateAllDTO", description = "商品分类DTO", required = true))
+    public Result updateCate(@RequestBody ProdCateAllDTO prodCateAllDTO) {
+        prodCateService.updateCate(prodCateAllDTO);
+        return Result.success();
+    }
+
 
     //! QUERY
 

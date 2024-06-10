@@ -6,7 +6,18 @@ import com.shop.pojo.entity.ProdCate;
 
 public interface ProdCateService extends IService<ProdCate> {
 
+    /**
+     * 保存分类
+     */
     void saveCate(ProdCateAllDTO prodCateAllDTO);
 
+    /**
+     * 删除分类
+     */
     void deleteCate(ProdCateAllDTO prodCateAllDTO);
+
+    /**
+     * 更新分类
+     */
+    void updateCate(ProdCateAllDTO prodCateAllDTO);
 }

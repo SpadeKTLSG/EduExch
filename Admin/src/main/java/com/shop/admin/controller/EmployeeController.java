@@ -2,9 +2,9 @@ package com.shop.admin.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.shop.pojo.Result;
+import com.shop.pojo.dto.EmployeeAllDTO;
 import com.shop.pojo.dto.EmployeeDTO;
 import com.shop.pojo.dto.EmployeeLoginDTO;
-import com.shop.pojo.entity.Employee;
 import com.shop.pojo.vo.EmployeeVO;
 import com.shop.serve.service.EmployeeService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -116,8 +116,8 @@ public class EmployeeController {
     @PutMapping("/update")
     @Operation(summary = "选择性更新员工信息")
     @Parameters(@Parameter(name = "employee", description = "员工", required = true))
-    public Result updateOne(@RequestBody Employee employee) {
-        employeeService.updateOne(employee);
+    public Result updateOne(@RequestBody EmployeeAllDTO employeeAllDTO) {
+        employeeService.updateOne(employeeAllDTO);
         return Result.success();
     }
     //http://localhost:8085/admin/employee/update
