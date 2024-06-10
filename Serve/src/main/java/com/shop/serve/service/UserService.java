@@ -14,35 +14,116 @@ import jakarta.servlet.http.HttpSession;
 
 public interface UserService extends IService<User> {
 
-    String login(UserLoginDTO userLoginDTO, HttpSession session);
 
-    String sendCode(String phone, HttpSession session);
+    //! Func
 
-    void logout();
+    /**
+     * 发送手机验证码
+     *
+     * @return 验证码
+     */
+    String sendCodeG(String phone, HttpSession session);
 
-    void register(UserLoginDTO userLoginDTO, HttpSession session);
 
-    void updateUserGreatDTO(UserGreatDTO userGreatDTO) throws InstantiationException, IllegalAccessException;
+    /**
+     * 登录
+     *
+     * @return Token
+     */
+    String loginG(UserLoginDTO userLoginDTO, HttpSession session);
 
-    void sign();
 
-    int signCount();
+    /**
+     * 注销
+     */
+    void logoutG();
 
-    UserVO getByAccount(String account);
 
-    UserVO getByUserId(Long id);
+    /**
+     * 签到
+     */
+    void doSignG();
 
-    UserGreatVO info();
 
-    void killMyAccount();
+    /**
+     * 签到计数
+     */
+    int signCountG();
 
-    void updateUserCode(UserLoginDTO userLoginDTO);
 
-    void doCollect(ProdLocateDTO prodLocateDTO);
+    /**
+     * 收藏
+     */
+    void doCollectG(ProdLocateDTO prodLocateDTO);
 
-    int collectCount();
 
-    Page<Prod> collectPage(Integer current);
+    /**
+     * 收藏计数
+     */
+    int collectCountG();
 
-    Page<UserVO> searchByAccount(String account, Integer current);
+
+    /**
+     * 分页收藏
+     */
+    Page<Prod> pageCollectG(Integer current);
+
+
+    //! ADD
+
+
+    /**
+     * 注册
+     */
+    void registerG(UserLoginDTO userLoginDTO, HttpSession session);
+
+
+    //! DELETE
+
+
+    /**
+     * 删除用户
+     */
+    void deleteUserB();
+
+
+    //! UPDATE
+
+    /**
+     * 更新用户信息
+     */
+    void putUserB(UserGreatDTO userGreatDTO) throws InstantiationException, IllegalAccessException;
+
+
+    /**
+     * 更新用户密码
+     */
+    void putUserPasswordG(UserLoginDTO userLoginDTO);
+
+
+    //! QUERY
+
+
+    /**
+     * ID查用户
+     */
+    UserVO getUser8EzIdA(Long id);
+
+
+    /**
+     * Account查用户
+     */
+    UserVO getUser8EzA(String account);
+
+
+    /**
+     * 查自己全部信息
+     */
+    UserGreatVO getUser4MeG();
+
+
+    /**
+     * Account模糊搜索用户
+     */
+    Page<UserVO> searchUserB(String account, Integer current);
 }

@@ -63,240 +63,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private StringRedisTemplate stringRedisTemplate;
 
 
-    @Override
-    @Transactional
-    public void register(UserLoginDTO userLoginDTO, HttpSession session) {
-
-        String phone = userLoginDTO.getPhone();
-        if (RegexUtil.isPhoneInvalid(phone)) throw new InvalidInputException(PHONE_INVALID);
-
-        //从redis获取验证码并校验
-        String cacheCode = stringRedisTemplate.opsForValue().get(LOGIN_CODE_KEY_GUEST + phone);
-        String code = userLoginDTO.getCode();
-        if (cacheCode == null || !cacheCode.equals(code)) throw new InvalidInputException(CODE_INVALID);
-
-
-        //校验账户是否已存在
-        User userExist = query().eq("account", userLoginDTO.getAccount()).one();
-        if (userExist != null) throw new AccountAlivedException(ACCOUNT_ALIVED);
-
-
-        //创建账户 + 账户具体信息 + 账户功能信息, 填充必须字段
-        User user = User.builder()
-                .account(userLoginDTO.getAccount())
-                .password(DigestUtils.md5DigestAsHex(PasswordConstant.DEFAULT_PASSWORD.getBytes())) //默认密码
-                .phone(phone)
-                .build();
-        save(user);
-
-        UserDetail userDetail = UserDetail.builder()
-                .school("蚌埠坦克学院")
-                .createTime(LocalDateTime.now())
-                .introduce("这个人很懒，什么都没留下")
-                .build();
-        userDetailService.save(userDetail);
-
-        UserFunc userFunc = UserFunc.builder()
-                .credit(114L)
-                .build();
-        userFuncService.save(userFunc);
-    }
-
+    //! Func
 
     @Override
-    public String login(UserLoginDTO userLoginDTO, HttpSession session) {
-
-        //删除掉之前的所有登陆令牌
-        Set<String> keys = stringRedisTemplate.keys(LOGIN_USER_KEY_GUEST + "*");
-        if (keys != null) {
-            stringRedisTemplate.delete(keys);
-        }
-
-        //校验手机号
-        String phone = userLoginDTO.getPhone();
-        if (RegexUtil.isPhoneInvalid(phone)) throw new InvalidInputException(PHONE_INVALID);
-
-        //从redis获取验证码并校验
-        String cacheCode = stringRedisTemplate.opsForValue().get(LOGIN_CODE_KEY_GUEST + phone);
-        String code = userLoginDTO.getCode();
-        if (cacheCode == null || !cacheCode.equals(code)) throw new InvalidInputException(CODE_INVALID);
-
-        //根据用户名查询用户
-        User user = query().eq("account", userLoginDTO.getAccount()).one();
-        if (user == null) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
-
-        //判断是否被锁定了
-        UserFunc userFunc = userFuncService.getById(user.getId());
-        if (Objects.equals(userFunc.getStatus(), UserFunc.BLOCK)) throw new BlockActionException(ACCOUNT_LOCKED);
-
-
-        // 随机生成token，作为登录令牌
-        String token = UUID.randomUUID().toString(true);
-        UserLocalDTO userDTO = BeanUtil.copyProperties(user, UserLocalDTO.class);
-        Map<String, Object> userMap = BeanUtil.beanToMap(userDTO, new HashMap<>(),
-                CopyOptions.create()
-                        .setIgnoreNullValue(true)
-                        .setFieldValueEditor((fieldName, fieldValue) -> fieldValue.toString()));
-
-        // 存储
-        String tokenKey = LOGIN_USER_KEY_GUEST + token;
-        stringRedisTemplate.opsForHash().putAll(tokenKey, userMap);
-        stringRedisTemplate.expire(tokenKey, LOGIN_USER_TTL_GUEST, TimeUnit.MINUTES);
-
-        return token;
-    }
-
-
-    @Override
-    public void logout() {
-
-        Set<String> keys = stringRedisTemplate.keys(LOGIN_USER_KEY_GUEST + "*");        //删除掉之前本地的所有登陆令牌
-
-        if (keys != null) {
-            stringRedisTemplate.delete(keys);
-        }
-    }
-
-
-    @Override
-    @Transactional
-    public void updateUserGreatDTO(UserGreatDTO userGreatDTO) throws InstantiationException, IllegalAccessException {
-
-        //联表选择性更新
-        userGreatDTO.setPassword(DigestUtils.md5DigestAsHex(userGreatDTO.getPassword().getBytes())); //预先处理密码
-
-        Optional<User> optionalUser = Optional.ofNullable(this.getOne(Wrappers.<User>lambdaQuery().eq(User::getAccount, userGreatDTO.getAccount())));
-        if (optionalUser.isEmpty()) {
-            throw new RuntimeException("用户不存在");
-        }
-
-        // 用Map存储DTO和Service
-        Map<Object, IService> dtoServiceMap = new HashMap<>();
-        dtoServiceMap.put(createDTOFromUserGreatDTO(userGreatDTO, UserAllDTO.class), this);
-        dtoServiceMap.put(createDTOFromUserGreatDTO(userGreatDTO, UserFuncAllDTO.class), userFuncService);
-        dtoServiceMap.put(createDTOFromUserGreatDTO(userGreatDTO, UserDetailAllDTO.class), userDetailService);
-
-        dtoMapService(dtoServiceMap, optionalUser.get().getId(), optionalUser);
-    }
-
-
-    @Override
-    public void updateUserCode(UserLoginDTO userLoginDTO) {
-
-        if (this.getOne(Wrappers.<User>lambdaQuery().eq(User::getAccount, userLoginDTO.getAccount())) == null) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
-
-        User user = User.builder()
-                .account(userLoginDTO.getAccount())
-                .password(DigestUtils.md5DigestAsHex(userLoginDTO.getPassword().getBytes()))
-                .build();
-
-        this.update(user, Wrappers.<User>lambdaUpdate().eq(User::getAccount, userLoginDTO.getAccount()));
-    }
-
-
-    @Override
-    @Transactional
-    public void doCollect(ProdLocateDTO prodLocateDTO) {
-
-        Long userId = UserHolder.getUser().getId();
-
-        Prod prod = prodService.getOne(Wrappers.<Prod>lambdaQuery()
-                .eq(Prod::getUserId, prodLocateDTO.getUserId())
-                .eq(Prod::getName, prodLocateDTO.getName()));
-
-        if (prod == null) throw new SthNotFoundException(OBJECT_NOT_ALIVE);
-
-        //从ZSet判断是否已经收藏
-        String key = PROD_COLLECT_KEY + prodLocateDTO.getUserId() + ":" + prodLocateDTO.getName(); //拼接key = prod:collect:1:天选5PRO
-        Double score = stringRedisTemplate.opsForZSet().score(key, userId.toString());
-
-        //获取collections
-        UserFunc userFunc = userFuncService.getById(userId);
-        String collections = userFunc.getCollections();
-        String prodNameInCollection = prodLocateDTO.getUserId() + ":" + prodLocateDTO.getName() + ","; // 拼接到collections字段中, 以逗号分隔.
-
-        if (score == null) { //未收藏
-
-            // 更新用户收藏collections字段, 将该商品的唯一定位ProdLocateDTO按照prodLocateDTO.getUserId() + ":" + prodLocateDTO.getName()
-            if (collections == null) {
-                collections = prodNameInCollection;
-            } else {
-                collections += prodNameInCollection;
-            }
-
-            userFunc.setCollections(collections);
-
-            boolean isSuccess = userFuncService.updateById(userFunc);
-
-            // 保存用户到set集合  zadd key value score
-            if (isSuccess) {
-                stringRedisTemplate.opsForZSet().add(key, userId.toString(), System.currentTimeMillis());
-            }
-
-        } else { //已收藏
-
-            // 更新用户收藏collections字段, 将该商品的id从collections字段中移除
-
-            if (collections != null) {
-                collections = collections.replace(prodNameInCollection, "");
-            }
-
-            userFunc.setCollections(collections);
-
-            boolean isSuccess = userFuncService.updateById(userFunc);
-
-            // 用户从Redis的set集合移除
-            if (isSuccess) {
-                stringRedisTemplate.opsForZSet().remove(key, userId.toString());
-            }
-        }
-    }
-
-
-    @Override
-    public int collectCount() {
-        Long userId = UserHolder.getUser().getId();
-        UserFunc userFunc = userFuncService.getById(userId);
-        String collections = userFunc.getCollections();
-
-        return collections == null ? 0 : collections.split(",").length;
-    }
-
-
-    @Override
-    public Page<Prod> collectPage(Integer current) {
-
-        Long userId = UserHolder.getUser().getId();
-        UserFunc userFunc = userFuncService.getById(userId);
-        String collections = userFunc.getCollections();
-        if (collections == null) {
-            return new Page<>();
-        }
-
-        String[] prodLocateDTOs = collections.split(",");
-        List<Prod> prods = new ArrayList<>(); //收藏的商品列表
-
-        for (String prodLocateDTO : prodLocateDTOs) {
-            String[] split = prodLocateDTO.split(":"); //分割
-            Long prodUserId = Long.parseLong(split[0]);
-            String prodName = split[1];
-            Prod prod = prodService.getOne(Wrappers.<Prod>lambdaQuery()
-                    .eq(Prod::getUserId, prodUserId)
-                    .eq(Prod::getName, prodName));
-            prods.add(prod);
-        }
-
-        Page<Prod> page = new Page<>(); //手动分页
-        page.setRecords(prods);
-        page.setCurrent(current);
-        page.setSize(MAX_PAGE_SIZE);
-        page.setTotal(prods.size());
-        return page;
-    }
-
-
-    @Override
-    public String sendCode(String phone, HttpSession session) {
+    public String sendCodeG(String phone, HttpSession session) {
 
         // 1. 判断是否在一级限制条件内
         Boolean oneLevelLimit = stringRedisTemplate.opsForSet().isMember(ONE_LEVERLIMIT_KEY + phone, "1");
@@ -354,8 +124,63 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
 
+    public String loginG(UserLoginDTO userLoginDTO, HttpSession session) {
+
+        //删除掉之前的所有登陆令牌
+        Set<String> keys = stringRedisTemplate.keys(LOGIN_USER_KEY_GUEST + "*");
+        if (keys != null) {
+            stringRedisTemplate.delete(keys);
+        }
+
+        //校验手机号
+        String phone = userLoginDTO.getPhone();
+        if (RegexUtil.isPhoneInvalid(phone)) throw new InvalidInputException(PHONE_INVALID);
+
+        //从redis获取验证码并校验
+        String cacheCode = stringRedisTemplate.opsForValue().get(LOGIN_CODE_KEY_GUEST + phone);
+        String code = userLoginDTO.getCode();
+        if (cacheCode == null || !cacheCode.equals(code)) throw new InvalidInputException(CODE_INVALID);
+
+        //根据用户名查询用户
+        User user = query().eq("account", userLoginDTO.getAccount()).one();
+        if (user == null) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
+
+        //判断是否被锁定了
+        UserFunc userFunc = userFuncService.getById(user.getId());
+        if (Objects.equals(userFunc.getStatus(), UserFunc.BLOCK)) throw new BlockActionException(ACCOUNT_LOCKED);
+
+
+        // 随机生成token，作为登录令牌
+        String token = UUID.randomUUID().toString(true);
+        UserLocalDTO userDTO = BeanUtil.copyProperties(user, UserLocalDTO.class);
+        Map<String, Object> userMap = BeanUtil.beanToMap(userDTO, new HashMap<>(),
+                CopyOptions.create()
+                        .setIgnoreNullValue(true)
+                        .setFieldValueEditor((fieldName, fieldValue) -> fieldValue.toString()));
+
+        // 存储
+        String tokenKey = LOGIN_USER_KEY_GUEST + token;
+        stringRedisTemplate.opsForHash().putAll(tokenKey, userMap);
+        stringRedisTemplate.expire(tokenKey, LOGIN_USER_TTL_GUEST, TimeUnit.MINUTES);
+
+        return token;
+    }
+
+
     @Override
-    public void sign() {
+    public void logoutG() {
+
+        Set<String> keys = stringRedisTemplate.keys(LOGIN_USER_KEY_GUEST + "*");        //删除掉之前本地的所有登陆令牌
+
+        if (keys != null) {
+            stringRedisTemplate.delete(keys);
+        }
+    }
+
+
+
+    @Override
+    public void doSignG() {
 
         Long userId = UserHolder.getUser().getId();
 
@@ -369,7 +194,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
 
     @Override
-    public int signCount() {
+    public int signCountG() {
 
         Long userId = UserHolder.getUser().getId();
 
@@ -406,19 +231,209 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
 
-    @Override
-    public UserVO getByAccount(String account) {
-        User user = this.getOne(Wrappers.<User>lambdaQuery().eq(User::getAccount, account));
-        if (user == null) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
 
-        UserVO userVO = new UserVO();
-        BeanUtils.copyProperties(user, userVO);
-        return userVO;
+    @Override
+    @Transactional
+    public void doCollectG(ProdLocateDTO prodLocateDTO) {
+
+        Long userId = UserHolder.getUser().getId();
+
+        Prod prod = prodService.getOne(Wrappers.<Prod>lambdaQuery()
+                .eq(Prod::getUserId, prodLocateDTO.getUserId())
+                .eq(Prod::getName, prodLocateDTO.getName()));
+
+        if (prod == null) throw new SthNotFoundException(OBJECT_NOT_ALIVE);
+
+        //从ZSet判断是否已经收藏
+        String key = PROD_COLLECT_KEY + prodLocateDTO.getUserId() + ":" + prodLocateDTO.getName(); //拼接key = prod:collect:1:天选5PRO
+        Double score = stringRedisTemplate.opsForZSet().score(key, userId.toString());
+
+        //获取collections
+        UserFunc userFunc = userFuncService.getById(userId);
+        String collections = userFunc.getCollections();
+        String prodNameInCollection = prodLocateDTO.getUserId() + ":" + prodLocateDTO.getName() + ","; // 拼接到collections字段中, 以逗号分隔.
+
+        if (score == null) { //未收藏
+
+            // 更新用户收藏collections字段, 将该商品的唯一定位ProdLocateDTO按照prodLocateDTO.getUserId() + ":" + prodLocateDTO.getName()
+            if (collections == null) {
+                collections = prodNameInCollection;
+            } else {
+                collections += prodNameInCollection;
+            }
+
+            userFunc.setCollections(collections);
+
+            boolean isSuccess = userFuncService.updateById(userFunc);
+
+            // 保存用户到set集合  zadd key value score
+            if (isSuccess) {
+                stringRedisTemplate.opsForZSet().add(key, userId.toString(), System.currentTimeMillis());
+            }
+
+        } else { //已收藏
+
+            // 更新用户收藏collections字段, 将该商品的id从collections字段中移除
+
+            if (collections != null) {
+                collections = collections.replace(prodNameInCollection, "");
+            }
+
+            userFunc.setCollections(collections);
+
+            boolean isSuccess = userFuncService.updateById(userFunc);
+
+            // 用户从Redis的set集合移除
+            if (isSuccess) {
+                stringRedisTemplate.opsForZSet().remove(key, userId.toString());
+            }
+        }
     }
 
 
     @Override
-    public UserVO getByUserId(Long id) {
+    public int collectCountG() {
+        Long userId = UserHolder.getUser().getId();
+        UserFunc userFunc = userFuncService.getById(userId);
+        String collections = userFunc.getCollections();
+
+        return collections == null ? 0 : collections.split(",").length;
+    }
+
+
+    @Override
+    public Page<Prod> pageCollectG(Integer current) {
+
+        Long userId = UserHolder.getUser().getId();
+        UserFunc userFunc = userFuncService.getById(userId);
+        String collections = userFunc.getCollections();
+        if (collections == null) {
+            return new Page<>();
+        }
+
+        String[] prodLocateDTOs = collections.split(",");
+        List<Prod> prods = new ArrayList<>(); //收藏的商品列表
+
+        for (String prodLocateDTO : prodLocateDTOs) {
+            String[] split = prodLocateDTO.split(":"); //分割
+            Long prodUserId = Long.parseLong(split[0]);
+            String prodName = split[1];
+            Prod prod = prodService.getOne(Wrappers.<Prod>lambdaQuery()
+                    .eq(Prod::getUserId, prodUserId)
+                    .eq(Prod::getName, prodName));
+            prods.add(prod);
+        }
+
+        Page<Prod> page = new Page<>(); //手动分页
+        page.setRecords(prods);
+        page.setCurrent(current);
+        page.setSize(MAX_PAGE_SIZE);
+        page.setTotal(prods.size());
+        return page;
+    }
+
+
+    //! ADD
+
+
+    @Override
+    @Transactional
+    public void registerG(UserLoginDTO userLoginDTO, HttpSession session) {
+
+        String phone = userLoginDTO.getPhone();
+        if (RegexUtil.isPhoneInvalid(phone)) throw new InvalidInputException(PHONE_INVALID);
+
+        //从redis获取验证码并校验
+        String cacheCode = stringRedisTemplate.opsForValue().get(LOGIN_CODE_KEY_GUEST + phone);
+        String code = userLoginDTO.getCode();
+        if (cacheCode == null || !cacheCode.equals(code)) throw new InvalidInputException(CODE_INVALID);
+
+
+        //校验账户是否已存在
+        User userExist = query().eq("account", userLoginDTO.getAccount()).one();
+        if (userExist != null) throw new AccountAlivedException(ACCOUNT_ALIVED);
+
+
+        //创建账户 + 账户具体信息 + 账户功能信息, 填充必须字段
+        User user = User.builder()
+                .account(userLoginDTO.getAccount())
+                .password(DigestUtils.md5DigestAsHex(PasswordConstant.DEFAULT_PASSWORD.getBytes())) //默认密码
+                .phone(phone)
+                .build();
+        save(user);
+
+        UserDetail userDetail = UserDetail.builder()
+                .school("蚌埠坦克学院")
+                .createTime(LocalDateTime.now())
+                .introduce("这个人很懒，什么都没留下")
+                .build();
+        userDetailService.save(userDetail);
+
+        UserFunc userFunc = UserFunc.builder()
+                .credit(114L)
+                .build();
+        userFuncService.save(userFunc);
+    }
+
+
+    //! DELETE
+
+
+    @Override
+    public void deleteUserB() {
+        UserLocalDTO userLocalDTO = UserHolder.getUser();
+
+        //连续删除
+        this.removeById(userLocalDTO.getId());
+        userDetailService.removeById(userLocalDTO.getId());
+        userFuncService.removeById(userLocalDTO.getId());
+    }
+
+
+    //! UPDATE
+
+
+    @Override
+    @Transactional
+    public void putUserB(UserGreatDTO userGreatDTO) throws InstantiationException, IllegalAccessException {
+
+        //联表选择性更新
+        userGreatDTO.setPassword(DigestUtils.md5DigestAsHex(userGreatDTO.getPassword().getBytes())); //预先处理密码
+
+        Optional<User> optionalUser = Optional.ofNullable(this.getOne(Wrappers.<User>lambdaQuery().eq(User::getAccount, userGreatDTO.getAccount())));
+        if (optionalUser.isEmpty()) {
+            throw new RuntimeException("用户不存在");
+        }
+
+        // 用Map存储DTO和Service
+        Map<Object, IService> dtoServiceMap = new HashMap<>();
+        dtoServiceMap.put(createDTOFromUserGreatDTO(userGreatDTO, UserAllDTO.class), this);
+        dtoServiceMap.put(createDTOFromUserGreatDTO(userGreatDTO, UserFuncAllDTO.class), userFuncService);
+        dtoServiceMap.put(createDTOFromUserGreatDTO(userGreatDTO, UserDetailAllDTO.class), userDetailService);
+
+        dtoMapService(dtoServiceMap, optionalUser.get().getId(), optionalUser);
+    }
+
+
+    @Override
+    public void putUserPasswordG(UserLoginDTO userLoginDTO) {
+
+        if (this.getOne(Wrappers.<User>lambdaQuery().eq(User::getAccount, userLoginDTO.getAccount())) == null) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
+
+        User user = User.builder()
+                .account(userLoginDTO.getAccount())
+                .password(DigestUtils.md5DigestAsHex(userLoginDTO.getPassword().getBytes()))
+                .build();
+
+        this.update(user, Wrappers.<User>lambdaUpdate().eq(User::getAccount, userLoginDTO.getAccount()));
+    }
+
+
+    //! QUERY
+
+
+    @Override
+    public UserVO getUser8EzIdA(Long id) {
         User user = this.getById(id);
         if (user == null) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
 
@@ -429,7 +444,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
 
     @Override
-    public UserGreatVO info() {
+    public UserVO getUser8EzA(String account) {
+        User user = this.getOne(Wrappers.<User>lambdaQuery().eq(User::getAccount, account));
+        if (user == null) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
+
+        UserVO userVO = new UserVO();
+        BeanUtils.copyProperties(user, userVO);
+        return userVO;
+    }
+
+
+    @Override
+    public UserGreatVO getUser4MeG() {
 
         UserLocalDTO userLocalDTO = UserHolder.getUser();
         BeanUtils.copyProperties(this.getById(1L), userLocalDTO);
@@ -449,18 +475,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
 
     @Override
-    public void killMyAccount() {
-        UserLocalDTO userLocalDTO = UserHolder.getUser();
-
-        //连续删除
-        this.removeById(userLocalDTO.getId());
-        userDetailService.removeById(userLocalDTO.getId());
-        userFuncService.removeById(userLocalDTO.getId());
-    }
-
-
-    @Override
-    public Page<UserVO> searchByAccount(String account, Integer current) {
+    public Page<UserVO> searchUserB(String account, Integer current) {
 
         //分页展示模糊匹配的所有可能结果
         Page<User> page = this.page(new Page<>(current, MAX_PAGE_SIZE), Wrappers.<User>lambdaQuery()
@@ -473,6 +488,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             return userVO;
         });
     }
+
 
     /**
      * 从UserGreatDTO创建DTO

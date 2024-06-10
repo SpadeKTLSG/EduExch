@@ -102,7 +102,7 @@ public class ProdController {
     @Operation(summary = "管理员删除一件商品")
     @Parameters(@Parameter(name = "prodLocateDTO", description = "商品定位DTO", required = true))
     public Result deleteByNameUser(@RequestBody ProdLocateDTO prodLocateDTO) {
-        prodService.deleteByNameUser(prodLocateDTO);
+        prodService.deleteProd4Admin(prodLocateDTO);
         return Result.success();
     }
     //http://localhost:8085/admin/prod/delete/one
@@ -145,7 +145,7 @@ public class ProdController {
     @Operation(summary = "查具体商品信息")
     @Parameters(@Parameter(name = "prodLocateDTO", description = "商品定位DTO", required = true))
     public Result getByNameUser(@RequestBody ProdLocateDTO prodLocateDTO) {
-        return Result.success(prodService.getByNameUser(prodLocateDTO));
+        return Result.success(prodService.getProd4Admin(prodLocateDTO));
     }
     //http://localhost:8085/admin/prod/one
 

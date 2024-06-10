@@ -49,7 +49,7 @@ public class ProdController {
     @Operation(summary = "用户添加商品")
     @Parameters(@Parameter(name = "prodGreatDTO", description = "商品添加DTO", required = true))
     public Result publishGood(@RequestBody ProdGreatDTO prodGreatDTO) {
-        prodService.publishGood(prodGreatDTO);
+        prodService.publishProd(prodGreatDTO);
         return Result.success();
     }
     //http://localhost:8086/guest/prod/save
@@ -65,7 +65,7 @@ public class ProdController {
     @Operation(summary = "用户删除商品")
     @Parameters(@Parameter(name = "name", description = "商品名", required = true))
     public Result deleteGood(@PathVariable("name") String name) {
-        prodService.deleteGood(name);
+        prodService.deleteProd(name);
         return Result.success();
     }
     //http://localhost:8086/guest/prod/delete
@@ -166,7 +166,7 @@ public class ProdController {
     @Operation(summary = "查询单个商品详细信息")
     @Parameters(@Parameter(name = "prodLocateDTO", description = "商品定位DTO"))
     public Result getProd(@RequestBody ProdLocateDTO prodLocateDTO) {
-        return Result.success(prodService.GetByNameSingle(prodLocateDTO));
+        return Result.success(prodService.getSingle(prodLocateDTO));
     }
     //http://localhost:8086/guest/prod/get
 
@@ -180,7 +180,7 @@ public class ProdController {
     @Operation(summary = "查询单个商品详细信息 - Cache")
     @Parameters(@Parameter(name = "prodLocateDTO", description = "商品定位DTO"))
     public Result getProd4Cache(@RequestBody ProdLocateDTO prodLocateDTO) {
-        return Result.success(prodService.GetByNameSingleCache(prodLocateDTO));
+        return Result.success(prodService.getSingleCache(prodLocateDTO));
     }
     //http://localhost:8086/guest/prod/get/cache
 
@@ -214,7 +214,7 @@ public class ProdController {
      * <p>用于前端用户浏览</p>
      */
     @GetMapping("/cateall/page/{cate}")
-    @Operation(summary = "分页查询一个分类下的所有商品列表")
+    @Operation(summary = "分页查分类下所有商品列表")
     @Parameters(@Parameter(name = "cate", description = "分类名", required = true))
     public Result pageCateAllProd(@PathVariable("cate") String cate, @RequestParam(value = "current", defaultValue = "1") Integer current) {
         return Result.success(prodService.pageCateAllProd(cate, current));

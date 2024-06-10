@@ -38,6 +38,18 @@ public class EmployeeController {
 
     //! Func
 
+    /**
+     * 发送手机验证码
+     */
+    @PostMapping("code")
+    @Operation(summary = "发送手机验证码")
+    @Parameters(@Parameter(name = "phone", description = "手机号", required = true))
+    public Result sendCodeA(@RequestParam("phone") String phone, HttpSession session) {
+        return Result.success(employeeService.sendCodeA(phone, session));
+    }
+    //http://localhost:8085/admin/employee/code?phone=15985785169
+
+
 
     /**
      * 登录
@@ -45,31 +57,19 @@ public class EmployeeController {
     @PostMapping("/login")
     @Operation(summary = "登录")
     @Parameters(@Parameter(name = "employeeLoginDTO", description = "员工登录DTO", required = true))
-    public Result login(@RequestBody EmployeeLoginDTO employeeLoginDTO, HttpSession session) {
-        return Result.success(employeeService.login(employeeLoginDTO, session));
+    public Result loginA(@RequestBody EmployeeLoginDTO employeeLoginDTO, HttpSession session) {
+        return Result.success(employeeService.loginA(employeeLoginDTO, session));
     }
     //http://localhost:8085/admin/employee/login
 
 
     /**
-     * 发送验证码
-     */
-    @PostMapping("code")
-    @Operation(summary = "发送手机验证码")
-    @Parameters(@Parameter(name = "phone", description = "手机号", required = true))
-    public Result sendCode(@RequestParam("phone") String phone, HttpSession session) {
-        return Result.success(employeeService.sendCode(phone, session));
-    }
-    //http://localhost:8085/admin/employee/code?phone=15985785169
-
-
-    /**
-     * 登出功能
+     * 注销
      */
     @PostMapping("/logout")
     @Operation(summary = "退出")
-    public Result logout() {
-        employeeService.logout();
+    public Result logoutA() {
+        employeeService.logoutA();
         return Result.success();
     }
     //http://localhost:8085/admin/employee/logout
@@ -83,8 +83,8 @@ public class EmployeeController {
     @PostMapping("/save")
     @Operation(summary = "新增员工")
     @Parameters(@Parameter(name = "employeeDTO", description = "员工DTO", required = true))
-    public Result saveOne(@RequestBody EmployeeDTO employeeDTO) {
-        employeeService.saveOne(employeeDTO);
+    public Result postEmployeeA(@RequestBody EmployeeDTO employeeDTO) {
+        employeeService.postEmployeeA(employeeDTO);
         return Result.success();
     }
     //http://localhost:8085/admin/employee/save
@@ -101,8 +101,8 @@ public class EmployeeController {
     @DeleteMapping("/delete/{account}")
     @Operation(summary = "删除员工")
     @Parameters(@Parameter(name = "account", description = "员工账号", required = true))
-    public Result deleteByAccount(@PathVariable("account") String account) {
-        employeeService.deleteByAccount(account);
+    public Result deleteEmployeeA(@PathVariable("account") String account) {
+        employeeService.deleteEmployeeA(account);
         return Result.success();
     }
     //http://localhost:8085/admin/employee/delete
@@ -116,8 +116,8 @@ public class EmployeeController {
     @PutMapping("/update")
     @Operation(summary = "选择性更新员工信息")
     @Parameters(@Parameter(name = "employee", description = "员工", required = true))
-    public Result updateOne(@RequestBody EmployeeAllDTO employeeAllDTO) {
-        employeeService.updateOne(employeeAllDTO);
+    public Result putEmployeeA(@RequestBody EmployeeAllDTO employeeAllDTO) {
+        employeeService.putEmployeeA(employeeAllDTO);
         return Result.success();
     }
     //http://localhost:8085/admin/employee/update
@@ -131,8 +131,8 @@ public class EmployeeController {
     @GetMapping("/{account}")
     @Operation(summary = "Account查员工")
     @Parameters(@Parameter(name = "account", description = "员工账号", required = true))
-    public Result getByAccount(@PathVariable("account") String account) {
-        return Result.success(employeeService.getByAccount(account));
+    public Result getEmployeeA(@PathVariable("account") String account) {
+        return Result.success(employeeService.getEmployeeA(account));
     }
     //http://localhost:8085/admin/employee/Account查员工
 
@@ -143,7 +143,7 @@ public class EmployeeController {
     @GetMapping("/page")
     @Operation(summary = "分页查询")
     @Parameters(@Parameter(name = "current", description = "当前页", required = true))
-    public Result pageQuery(@RequestParam(value = "current", defaultValue = "1") Integer current) {
+    public Result pageEmployeeA(@RequestParam(value = "current", defaultValue = "1") Integer current) {
 
         return Result.success(employeeService.page(new Page<>(current, MAX_PAGE_SIZE)).convert(employee -> {
             EmployeeVO employeeVO = new EmployeeVO();

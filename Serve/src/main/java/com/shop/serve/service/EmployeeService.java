@@ -12,42 +12,66 @@ import jakarta.servlet.http.HttpSession;
 
 public interface EmployeeService extends IService<Employee> {
 
-    /**
-     * 登录
-     *
-     * @return {@link String }  Token
-     */
-    String login(EmployeeLoginDTO employeeLoginDTO, HttpSession session);
+
+    //! Func
+
 
     /**
      * 发送手机验证码
-     * @return {@link String }  验证码
+     *
+     * @return 验证码
      */
-    String sendCode(String phone, HttpSession session);
+    String sendCodeA(String phone, HttpSession session);
+
 
     /**
-     * 注销当前用户
+     * 登录
      *
+     * @return Token
      */
-    void logout();
+    String loginA(EmployeeLoginDTO employeeLoginDTO, HttpSession session);
+
+
+    /**
+     * 注销
+     */
+    void logoutA();
+
+
+    //! ADD
+
 
     /**
      * 新增一个员工
      */
-    void saveOne(EmployeeDTO employeeDTO);
+    void postEmployeeA(EmployeeDTO employeeDTO);
 
-    /**
-     * 更新一个员工
-     */
-    void updateOne(EmployeeAllDTO employeeAllDTO);
+
+    //! DELETE
+
 
     /**
      * 删除一个员工
      */
-    void deleteByAccount(String account);
+    void deleteEmployeeA(String account);
+
+
+    //! UPDATE
+
+
+    /**
+     * 更新一个员工
+     */
+    void putEmployeeA(EmployeeAllDTO employeeAllDTO);
+
+
+    //! QUERY
+
 
     /**
      * 获取一个员工
      */
-    EmployeeVO getByAccount(String account);
+    EmployeeVO getEmployeeA(String account);
+
+
 }

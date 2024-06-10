@@ -47,8 +47,28 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
     private StringRedisTemplate stringRedisTemplate;
 
 
+    //! Func
+
     @Override
-    public String login(EmployeeLoginDTO employeeLoginDTO, HttpSession session) {
+    public String sendCodeA(String phone, HttpSession session) {
+
+        if (RegexUtil.isPhoneInvalid(phone)) throw new InvalidInputException(PHONE_INVALID);
+
+        Set<String> keys = stringRedisTemplate.keys(LOGIN_USER_KEY_ADMIN + phone + "*"); //删除之前的验证码
+        if (keys != null) {
+            stringRedisTemplate.delete(keys);
+        }
+
+        String code = RandomUtil.randomNumbers(6); //简单生成(管理员端)
+
+        stringRedisTemplate.opsForValue().set(LOGIN_CODE_KEY_ADMIN + phone, code, LOGIN_CODE_TTL_ADMIN, TimeUnit.MINUTES);
+
+        return code; //调试环境: 返回验证码; 未来引入邮箱发送验证码
+    }
+
+
+    @Override
+    public String loginA(EmployeeLoginDTO employeeLoginDTO, HttpSession session) {
 
         //删除掉之前本地的所有登陆令牌
         // ? (localhost环境) 仅本地调试时使用
@@ -89,26 +109,8 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
 
 
     @Override
-    public String sendCode(String phone, HttpSession session) {
-
-        if (RegexUtil.isPhoneInvalid(phone)) throw new InvalidInputException(PHONE_INVALID);
-
-        Set<String> keys = stringRedisTemplate.keys(LOGIN_USER_KEY_ADMIN + phone + "*"); //删除之前的验证码
-        if (keys != null) {
-            stringRedisTemplate.delete(keys);
-        }
-
-        String code = RandomUtil.randomNumbers(6); //简单生成(管理员端)
-
-        stringRedisTemplate.opsForValue().set(LOGIN_CODE_KEY_ADMIN + phone, code, LOGIN_CODE_TTL_ADMIN, TimeUnit.MINUTES);
-
-        return code; //调试环境: 返回验证码; 未来引入邮箱发送验证码
-    }
-
-
-    @Override
-    public void logout() {
-        //删除掉之前的所有登陆令牌
+    public void logoutA() {
+        //删除掉之前的所有登陆令牌 (单机调试模式)
         Set<String> keys = stringRedisTemplate.keys(LOGIN_USER_KEY_ADMIN + "*");
         if (keys != null) {
             stringRedisTemplate.delete(keys);
@@ -116,8 +118,11 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
     }
 
 
+    //! ADD
+
+
     @Override
-    public void saveOne(EmployeeDTO employeeDTO) {
+    public void postEmployeeA(EmployeeDTO employeeDTO) {
 
         if (this.query().eq("account", employeeDTO.getAccount()).count() > 0) {
             throw new AccountAlivedException(ACCOUNT_ALIVED);
@@ -130,9 +135,23 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
     }
 
 
+    //! DELETE
+
+
+    @Override
+    public void deleteEmployeeA(String account) {
+        Employee employee = this.getOne(Wrappers.<Employee>lambdaQuery().eq(Employee::getAccount, account));
+        if (employee == null) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
+        this.removeById(employee.getId());
+    }
+
+
+    //! UPDATE
+
+
     @Override
     @Transactional
-    public void updateOne(EmployeeAllDTO employeeAllDTO) {
+    public void putEmployeeA(EmployeeAllDTO employeeAllDTO) {
 
 
         Optional<Employee> optionalEmployee = Optional.ofNullable(this.getOne(Wrappers.<Employee>lambdaQuery().eq(Employee::getAccount, employeeAllDTO.getAccount())));
@@ -150,16 +169,10 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
     }
 
 
-    @Override
-    public void deleteByAccount(String account) {
-        Employee employee = this.getOne(Wrappers.<Employee>lambdaQuery().eq(Employee::getAccount, account));
-        if (employee == null) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
-        this.removeById(employee.getId());
-    }
-
+    //! QUERY
 
     @Override
-    public EmployeeVO getByAccount(String account) {
+    public EmployeeVO getEmployeeA(String account) {
         Employee employee = this.getOne(Wrappers.<Employee>lambdaQuery().eq(Employee::getAccount, account));
         if (employee == null) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
 

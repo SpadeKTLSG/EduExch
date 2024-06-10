@@ -40,25 +40,13 @@ public class UserController {
 
 
     /**
-     * 登录功能
-     */
-    @PostMapping("/login")
-    @Operation(summary = "登录")
-    @Parameters(@Parameter(name = "userLoginDTO", description = "用户登录DTO", required = true))
-    public Result login(@RequestBody UserLoginDTO userLoginDTO, HttpSession session) {
-        return Result.success(userService.login(userLoginDTO, session));
-    }
-    //http://localhost:8086/guest/user/login
-
-
-    /**
      * 发送验证码
      */
     @PostMapping("code")
     @Operation(summary = "发送手机验证码")
     @Parameters(@Parameter(name = "phone", description = "手机号", required = true))
-    public Result sendCode(@RequestParam("phone") String phone, HttpSession session) {
-        String mes = userService.sendCode(phone, session);
+    public Result sendCodeG(@RequestParam("phone") String phone, HttpSession session) {
+        String mes = userService.sendCodeG(phone, session);
         //如果是!开头的字符串，说明发送失败, 去除!后返回
         if (mes.startsWith("!")) return Result.error(mes.substring(1));
         return Result.success(mes);
@@ -67,16 +55,42 @@ public class UserController {
 
 
     /**
+     * 登录功能
+     */
+    @PostMapping("/login")
+    @Operation(summary = "登录")
+    @Parameters(@Parameter(name = "userLoginDTO", description = "用户登录DTO", required = true))
+    public Result loginG(@RequestBody UserLoginDTO userLoginDTO, HttpSession session) {
+        return Result.success(userService.loginG(userLoginDTO, session));
+    }
+    //http://localhost:8086/guest/user/login
+
+
+
+    /**
      * 登出功能
      */
     @PostMapping("/logout")
     @Operation(summary = "退出")
     @Parameters(@Parameter(name = "无", description = "无", required = true))
-    public Result logout() {
-        userService.logout();
+    public Result logoutG() {
+        userService.logoutG();
         return Result.success();
     }
     //http://localhost:8086/guest/user/logout
+
+
+    /**
+     * 获取当前用户
+     */
+    @GetMapping("/me")
+    @Operation(summary = "获取当前用户")
+    public Result whoAmI() {
+        UserLocalDTO userLocalDTO = UserHolder.getUser();
+        return Result.success(userLocalDTO);
+    }
+    //http://localhost:8086/guest/user/me
+
 
 
     //*---- 关注 ----
@@ -88,7 +102,7 @@ public class UserController {
     @PutMapping("follow/{id}/{isFollow}")
     @Operation(summary = " 用户关注")
     @Parameters({@Parameter(name = "id", description = "被关注用户id", required = true), @Parameter(name = "isFollow", description = "是否关注", required = true)})
-    public Result follow(@PathVariable("id") Long followUserId, @PathVariable("isFollow") Boolean isFollow) {
+    public Result followG(@PathVariable("id") Long followUserId, @PathVariable("isFollow") Boolean isFollow) {
         userFollowService.follow(followUserId, isFollow);
         return Result.success();
     }
@@ -101,7 +115,7 @@ public class UserController {
     @GetMapping("follow/ornot/{id}")
     @Operation(summary = "是否关注")
     @Parameters(@Parameter(name = "id", description = "被关注用户id", required = true))
-    public Result isFollow(@PathVariable("id") Long followUserId) {
+    public Result isFollowG(@PathVariable("id") Long followUserId) {
 
         return Result.success(userFollowService.isFollow(followUserId));
     }
@@ -114,10 +128,11 @@ public class UserController {
     @GetMapping("follow/share/{id}")
     @Operation(summary = "关注的人")
     @Parameters(@Parameter(name = "id", description = "用户id", required = true))
-    public Result shareFollow(@PathVariable("id") Long id) {
+    public Result shareFollowG(@PathVariable("id") Long id) {
         return Result.success(userFollowService.shareFollow(id));
     }
     //http://localhost:8086/guest/user/follow/share/2
+
 
 
     //*---- 签到 ----
@@ -128,8 +143,8 @@ public class UserController {
      */
     @PostMapping("/sign/add")
     @Operation(summary = "签到")
-    public Result sign() {
-        userService.sign();
+    public Result doSignG() {
+        userService.doSignG();
         return Result.success();
     }
     //http://localhost:8086/guest/user/sign/add
@@ -140,8 +155,8 @@ public class UserController {
      */
     @GetMapping("/sign/count")
     @Operation(summary = "签到次数")
-    public Result signCount() {
-        return Result.success(userService.signCount());
+    public Result signCountG() {
+        return Result.success(userService.signCountG());
     }
     //http://localhost:8086/guest/user/sign/count
 
@@ -156,8 +171,8 @@ public class UserController {
     @PutMapping("/collect")
     @Operation(summary = "收藏/取消收藏")
     @Parameters(@Parameter(name = "prodLocateDTO", description = "商品定位DTO", required = true))
-    public Result collect(@RequestBody ProdLocateDTO prodLocateDTO) {
-        userService.doCollect(prodLocateDTO);
+    public Result doCollectG(@RequestBody ProdLocateDTO prodLocateDTO) {
+        userService.doCollectG(prodLocateDTO);
         return Result.success();
     }
     //http://localhost:8086/guest/user/collect
@@ -168,8 +183,8 @@ public class UserController {
      */
     @GetMapping("/collect/count")
     @Operation(summary = "收藏次数")
-    public Result collectCount() {
-        return Result.success(userService.collectCount());
+    public Result collectCountG() {
+        return Result.success(userService.collectCountG());
     }
     //http://localhost:8086/guest/user/collect/count
 
@@ -181,8 +196,8 @@ public class UserController {
     @GetMapping("/collect/page")
     @Operation(summary = "收藏列表")
     @Parameters(@Parameter(name = "current", description = "当前页", required = true))
-    public Result collectPage(@RequestParam(value = "current", defaultValue = "1") Integer current) {
-        return Result.success(userService.collectPage(current));
+    public Result pageCollectG(@RequestParam(value = "current", defaultValue = "1") Integer current) {
+        return Result.success(userService.pageCollectG(current));
     }
     //http://localhost:8086/guest/user/collect/page
 
@@ -196,23 +211,13 @@ public class UserController {
     @PostMapping("/register")
     @Operation(summary = "注册")
     @Parameters(@Parameter(name = "userLoginDTO", description = "用户登录DTO", required = true))
-    public Result register(@RequestBody UserLoginDTO userLoginDTO, HttpSession session) {
-        userService.register(userLoginDTO, session);
+    public Result registerG(@RequestBody UserLoginDTO userLoginDTO, HttpSession session) {
+        userService.registerG(userLoginDTO, session);
         return Result.success();
     }
     //http://localhost:8086/guest/user/register
 
 
-    /**
-     * 获取当前用户
-     */
-    @GetMapping("/me")
-    @Operation(summary = "获取当前用户")
-    public Result me() {
-        UserLocalDTO userLocalDTO = UserHolder.getUser();
-        return Result.success(userLocalDTO);
-    }
-    //http://localhost:8086/guest/user/me
 
 
     //! DELETE
@@ -223,8 +228,8 @@ public class UserController {
      */
     @DeleteMapping("/delete")
     @Operation(summary = "销号")
-    public Result killMyAccount() {
-        userService.killMyAccount();
+    public Result deleteUserB() {
+        userService.deleteUserB();
         return Result.success();
     }
     //http://localhost:8086/guest/user/delete
@@ -238,9 +243,9 @@ public class UserController {
     @PutMapping("/update")
     @Operation(summary = "选择性更新用户信息")
     @Parameters(@Parameter(name = "userGreatDTO", description = "User update DTO", required = true))
-    public Result update(@RequestBody UserGreatDTO userGreatDTO) {
+    public Result putUserB(@RequestBody UserGreatDTO userGreatDTO) {
         try {
-            userService.updateUserGreatDTO(userGreatDTO);
+            userService.putUserB(userGreatDTO);
             return Result.success();
         } catch (RuntimeException | InstantiationException | IllegalAccessException e) {
             return Result.error(e.getMessage());
@@ -256,8 +261,8 @@ public class UserController {
     @PutMapping("/update/code")
     @Operation(summary = "修改密码")
     @Parameters(@Parameter(name = "userLoginDTO", description = "User update DTO", required = true))
-    public Result updateUserCode(@RequestBody UserLoginDTO userLoginDTO) {
-        userService.updateUserCode(userLoginDTO);
+    public Result putUserPasswordG(@RequestBody UserLoginDTO userLoginDTO) {
+        userService.putUserPasswordG(userLoginDTO);
         return Result.success();
     }
     //http://localhost:8086/guest/user/update/code
@@ -265,13 +270,14 @@ public class UserController {
 
     //! QUERY
 
+
     /**
      * 查自己全部信息
      */
     @GetMapping("/info")
     @Operation(summary = "查用户自己全部信息")
-    public Result info() {
-        return Result.success(userService.info());
+    public Result getUser4MeG() {
+        return Result.success(userService.getUser4MeG());
     }
     //http://localhost:8086/guest/user/info
 
@@ -286,8 +292,8 @@ public class UserController {
             @Parameter(name = "account", description = "用户账号", required = true),
             @Parameter(name = "current", description = "当前页", required = true)
     })
-    public Result searchByAccount(@RequestParam("account") String account, @RequestParam(value = "current", defaultValue = "1") Integer current) {
-        return Result.success(userService.searchByAccount(account, current));
+    public Result searchUserB(@RequestParam("account") String account, @RequestParam(value = "current", defaultValue = "1") Integer current) {
+        return Result.success(userService.searchUserB(account, current));
     }
     //http://localhost:8086/guest/user/search/account?account=Store&current=1
 

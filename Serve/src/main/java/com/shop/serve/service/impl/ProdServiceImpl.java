@@ -185,7 +185,7 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
 
 
     @Override
-    public void deleteByNameUser(ProdLocateDTO prodLocateDTO) {
+    public void deleteProd4Admin(ProdLocateDTO prodLocateDTO) {
         this.remove(new LambdaQueryWrapper<Prod>()
                 .eq(Prod::getName, prodLocateDTO.getName())
                 .eq(Prod::getUserId, prodLocateDTO.getUserId())
@@ -194,7 +194,7 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
 
 
     @Override
-    public Prod getByNameUser(ProdLocateDTO prodLocateDTO) {
+    public Prod getProd4Admin(ProdLocateDTO prodLocateDTO) {
         return this.getOne(new LambdaQueryWrapper<Prod>()
                 .eq(Prod::getName, prodLocateDTO.getName())
                 .eq(Prod::getUserId, prodLocateDTO.getUserId())
@@ -231,7 +231,7 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
 
     @Override
     @Transactional
-    public void publishGood(ProdGreatDTO prodGreatDTO) {
+    public void publishProd(ProdGreatDTO prodGreatDTO) {
         if (this.query().eq("name", prodGreatDTO.getName()).count() > 0) throw new SthHasCreatedException(OBJECT_HAS_ALIVE);
 
         Prod prod = new Prod();
@@ -252,7 +252,7 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
 
     @Override
     @Transactional
-    public void deleteGood(String name) {
+    public void deleteProd(String name) {
         Prod prod = this.getOne(Wrappers.<Prod>lambdaQuery().eq(Prod::getName, name));
         if (prod == null) throw new SthNotFoundException(OBJECT_NOT_ALIVE);
 
@@ -322,7 +322,7 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
 
     @Override
     @Transactional
-    public ProdGreatVO GetByNameSingle(ProdLocateDTO prodLocateDTO) {
+    public ProdGreatVO getSingle(ProdLocateDTO prodLocateDTO) {
 
         Prod prod = this.getOne(Wrappers.<Prod>lambdaQuery()
                 .eq(Prod::getName, prodLocateDTO.getName())
@@ -362,7 +362,7 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
      * 通过缓存查询商品, 解决缓存穿透, 缓存击穿等问题
      */
     @Override
-    public ProdGreatVO GetByNameSingleCache(ProdLocateDTO prodLocateDTO) {
+    public ProdGreatVO getSingleCache(ProdLocateDTO prodLocateDTO) {
 
         // 这里是双'主键'情况不能用prodLocateDTO直接查, 需要用prodLocateDTO的name和userId拼接改造CacheClient
 

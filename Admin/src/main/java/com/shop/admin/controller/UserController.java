@@ -46,14 +46,15 @@ public class UserController {
     //! UPDATE
 
     /**
-     * 选择性更新用户信息 包治百病!
+     * 选择性更新用户信息
+     * <p>包治百病!</p>
      */
     @PutMapping("/update")
-    @Operation(summary = "选择性更新用户信息")
+    @Operation(summary = "更新用户信息")
     @Parameters(@Parameter(name = "userGreatDTO", description = "User update DTO", required = true))
-    public Result update(@RequestBody UserGreatDTO userGreatDTO) {
+    public Result putUserA(@RequestBody UserGreatDTO userGreatDTO) {
         try {
-            userService.updateUserGreatDTO(userGreatDTO);
+            userService.putUserB(userGreatDTO);
             return Result.success();
         } catch (RuntimeException | InstantiationException | IllegalAccessException e) {
             return Result.error(e.getMessage());
@@ -70,8 +71,8 @@ public class UserController {
     @GetMapping("/{account}")
     @Operation(summary = "Account查用户")
     @Parameters(@Parameter(name = "account", description = "用户账号", required = true))
-    public Result getByAccount(@PathVariable("account") String account) {
-        return Result.success(userService.getByAccount(account));
+    public Result getUserA(@PathVariable("account") String account) {
+        return Result.success(userService.getUser8EzA(account));
     }
     //http://localhost:8085/admin/user/cwxtlsg
 
@@ -82,8 +83,8 @@ public class UserController {
     @GetMapping("/specify/{id}")
     @Operation(summary = "ID查用户")
     @Parameters(@Parameter(name = "id", description = "用户ID", required = true))
-    public Result getByUserId(@PathVariable("id") Long id) {
-        return Result.success(userService.getByUserId(id));
+    public Result getUser8IdA(@PathVariable("id") Long id) {
+        return Result.success(userService.getUser8EzIdA(id));
     }
     //http://localhost:8085/admin/user/specify/1
 
@@ -94,7 +95,7 @@ public class UserController {
     @GetMapping("/page")
     @Operation(summary = "分页查询")
     @Parameters(@Parameter(name = "current", description = "当前页", required = true))
-    public Result pageQuery(@RequestParam(value = "current", defaultValue = "1") Integer current) {
+    public Result pageUser8EzA(@RequestParam(value = "current", defaultValue = "1") Integer current) {
 
         return Result.success(userService.page(new Page<>(current, MAX_PAGE_SIZE)).convert(user -> {
             UserVO userVO = new UserVO();
@@ -115,8 +116,8 @@ public class UserController {
             @Parameter(name = "account", description = "用户账号", required = true),
             @Parameter(name = "current", description = "当前页", required = true)
     })
-    public Result searchByAccount(@RequestParam("account") String account, @RequestParam(value = "current", defaultValue = "1") Integer current) {
-        return Result.success(userService.searchByAccount(account, current));
+    public Result searchUserA(@RequestParam("account") String account, @RequestParam(value = "current", defaultValue = "1") Integer current) {
+        return Result.success(userService.searchUserB(account, current));
     }
     //http://localhost:8085/admin/user/search/account?account=Store&current=1
 
