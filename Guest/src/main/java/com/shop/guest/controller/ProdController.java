@@ -225,6 +225,7 @@ public class ProdController {
     /**
      * 按Name模糊搜索商品
      * <p>前端搜索框, 分页展示结果</p>
+     * <p>加入搜索权重效果</p>
      */
     @GetMapping("/search/name")
     @Operation(summary = "按Name模糊搜索商品")

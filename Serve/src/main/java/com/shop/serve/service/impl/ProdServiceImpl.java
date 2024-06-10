@@ -745,6 +745,24 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
                 .like(Prod::getName, name)
         );
 
+        //根据ProdFunc的权重值排序
+        //ProdFunc需要通过Prod的id找到, 所以需要先找到id
+        List<Long> ids = new ArrayList<>();
+        for (Prod prod : page.getRecords()) {
+            ids.add(prod.getId());
+        }
+
+        List<ProdFunc> prodFuncList = prodFuncService.list(Wrappers.<ProdFunc>lambdaQuery()
+                .in(ProdFunc::getId, ids)
+                .orderByDesc(ProdFunc::getWeight)
+        );
+
+        //按照prodFuncList的顺序重新排序Prod的Records
+        for (int i = 0; i < page.getRecords().size(); i++) {
+            page.getRecords().set(i, this.getById(prodFuncList.get(i).getId()));
+        }
+
+        //转换为ProdAllVO, 并返回
         return (Page<ProdAllVO>) page.convert(prod -> {
             ProdAllVO prodAllVO = new ProdAllVO();
             BeanUtils.copyProperties(prod, prodAllVO);
