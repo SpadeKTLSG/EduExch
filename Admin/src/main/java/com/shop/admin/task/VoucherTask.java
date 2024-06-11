@@ -30,11 +30,11 @@ public class VoucherTask {
 
         LocalDateTime time = LocalDateTime.now().plusMinutes(-60); //错开高峰期
 
-        List<Voucher> voucherList = voucherService.getOutdateOnes(Voucher.USED, time);
+        List<Voucher> voucherList = voucherService.getOutdateOnesA(Voucher.USED, time);
 
         if (voucherList != null && !voucherList.isEmpty()) {
             for (Voucher voucher : voucherList) {
-                voucherService.ruinVoucher(voucher); //失效对应券对象
+                voucherService.ruinVoucherA(voucher); //失效对应券对象
             }
         }
     }

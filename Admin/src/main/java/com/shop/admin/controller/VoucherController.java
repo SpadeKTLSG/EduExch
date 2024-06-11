@@ -41,8 +41,8 @@ public class VoucherController {
     @PostMapping("/add/seckill")
     @Operation(summary = "新增秒杀券")
     @Parameters(@Parameter(name = "voucherAllDTO", description = "优惠券添加DTO", required = true))
-    public Result addSeckillVoucher(@RequestBody VoucherAllDTO voucherAllDTO) {
-        voucherService.addSeckillVoucher(voucherAllDTO);
+    public Result putSeckillVoucherA(@RequestBody VoucherAllDTO voucherAllDTO) {
+        voucherService.putSeckillVoucherA(voucherAllDTO);
         return Result.success();
     }
     //http://localhost:8085/admin/voucher/add/seckill
@@ -54,8 +54,8 @@ public class VoucherController {
     @PostMapping("/add")
     @Operation(summary = "新增普通券")
     @Parameters(@Parameter(name = "voucherAllDTO", description = "优惠券添加DTO", required = true))
-    public Result addVoucher(@RequestBody VoucherAllDTO voucherAllDTO) {
-        voucherService.addVoucher(voucherAllDTO);
+    public Result putVoucherA(@RequestBody VoucherAllDTO voucherAllDTO) {
+        voucherService.putVoucherA(voucherAllDTO);
         return Result.success();
     }
     //http://localhost:8085/admin/voucher/add
@@ -92,8 +92,8 @@ public class VoucherController {
             @Parameter(name = "name", description = "卷名", required = true),
             @Parameter(name = "current", description = "当前页", required = true)
     })
-    public Result searchVoucherByName(@RequestParam("name") String name, @RequestParam(value = "current", defaultValue = "1") Integer current) {
-        return Result.success(voucherService.searchVoucherByName(name, current));
+    public Result searchVoucherB(@RequestParam("name") String name, @RequestParam(value = "current", defaultValue = "1") Integer current) {
+        return Result.success(voucherService.searchVoucherB(name, current));
     }
     //http://localhost:8085/admin/voucher/search/name?name=卷&current=1
 }

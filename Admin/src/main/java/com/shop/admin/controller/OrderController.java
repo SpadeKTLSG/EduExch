@@ -50,7 +50,7 @@ public class OrderController {
     @GetMapping("/listall")
     @Operation(summary = "查看所有订单列表")
     @Parameters(@Parameter(name = "current", description = "当前页", required = true))
-    public Result orderPage(@RequestParam(value = "current", defaultValue = "1") Integer current) {
+    public Result pageOrderA(@RequestParam(value = "current", defaultValue = "1") Integer current) {
         return Result.success(orderService.page(new Page<>(current, SystemConstant.MAX_PAGE_SIZE)));
     }
     //http://localhost:8085/admin/order/listall
@@ -63,7 +63,7 @@ public class OrderController {
     @GetMapping("/detail")
     @Operation(summary = "查看一个订单详情")
     @Parameters(@Parameter(name = "orderAllDTO", description = "订单详情DTO", required = true))
-    public Result orderDetail(@RequestBody OrderAllDTO orderAllDTO) {
+    public Result getOrderA(@RequestBody OrderAllDTO orderAllDTO) {
         return Result.success(orderService.orderDetail(orderAllDTO));
     }
     //http://localhost:8085/admin/order/detail

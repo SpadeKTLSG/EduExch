@@ -41,19 +41,16 @@ public class OrderController {
     //支付模块: 委托外部支付平台进行支付(未实现)
 
 
-    //! ADD
-
-
     /**
      * 用户开启交易
      */
     @PostMapping("/start")
     @Operation(summary = "用户开启交易")
     @Parameters(@Parameter(name = "prodLocateDTO", description = "商品定位DTO", required = true))
-    public Result startOrder(@RequestBody ProdLocateDTO prodLocateDTO) {
+    public Result postOrderG(@RequestBody ProdLocateDTO prodLocateDTO) {
         //? 压测: 插入用户数据, 同时关闭拦截器
 //        UserHolder.saveUser(UserLocalDTO.builder().id(1L).account("StoreMan").build());
-        orderService.startOrder(prodLocateDTO);
+        orderService.postOrderG(prodLocateDTO);
         return Result.success();
     }
     //http://localhost:8086/guest/order/start
@@ -66,13 +63,18 @@ public class OrderController {
     @PostMapping("/start/seckill")
     @Operation(summary = "用户开启交易(秒杀)")
     @Parameters(@Parameter(name = "prodLocateDTO", description = "商品定位DTO", required = true))
-    public Result startSeckillOrder(@RequestBody ProdLocateDTO prodLocateDTO) {
+    public Result putOrderSeckillG(@RequestBody ProdLocateDTO prodLocateDTO) {
         //? 压测: 插入用户数据, 同时关闭拦截器
 //        UserHolder.saveUser(UserLocalDTO.builder().id(1L).account("StoreMan").build());
-        orderService.seckillStartOrder(prodLocateDTO);
+        orderService.putOrderSeckillG(prodLocateDTO);
         return Result.success();
     }
     //http://localhost:8086/guest/order/start/seckill
+
+
+    //! ADD
+
+
 
 
     //! DELETE
@@ -84,8 +86,8 @@ public class OrderController {
     @DeleteMapping("/stop")
     @Operation(summary = "终止当前交易")
     @Parameters(@Parameter(name = "orderAllDTO", description = "订单DTO", required = true))
-    public Result stopOrder(@RequestBody OrderAllDTO orderAllDTO) {
-        orderService.closeOrder(orderAllDTO);
+    public Result deleteOrderG(@RequestBody OrderAllDTO orderAllDTO) {
+        orderService.deleteOrderG(orderAllDTO);
         return Result.success();
     }
     //http://localhost:8086/guest/order/stop
@@ -143,7 +145,7 @@ public class OrderController {
     @GetMapping("/list")
     @Operation(summary = "分页查看自己的订单列表")
     @Parameters(@Parameter(name = "current", description = "当前页", required = true))
-    public Result orderPage(@RequestParam(value = "current", defaultValue = "1") Integer current) {
+    public Result pageOrder4MeG(@RequestParam(value = "current", defaultValue = "1") Integer current) {
 
         Long userId = UserHolder.getUser().getId();
 
@@ -165,8 +167,8 @@ public class OrderController {
     @GetMapping("/detail")
     @Operation(summary = "查看一个订单详情")
     @Parameters(@Parameter(name = "orderAllDTO", description = "订单DTO", required = true))
-    public Result orderDetails(@RequestBody OrderAllDTO orderAllDTO) {
-        return Result.success(orderService.orderDetails(orderAllDTO));
+    public Result getOrderG(@RequestBody OrderAllDTO orderAllDTO) {
+        return Result.success(orderService.getOrderG(orderAllDTO));
     }
     //http://localhost:8086/guest/order/detail
 
@@ -178,7 +180,7 @@ public class OrderController {
     @GetMapping("/status/count/{status}")
     @Operation(summary = "计数自己各种状态的订单")
     @Parameters(@Parameter(name = "status", description = "订单状态", required = true))
-    public Result orderStatusCount(@PathVariable Integer status) {
+    public Result getOrderStatus8Count4FG(@PathVariable Integer status) {
 
         return Result.success(orderService.count(new LambdaQueryWrapper<Order>()
                 .eq(Order::getStatus, status)

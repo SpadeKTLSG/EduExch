@@ -8,25 +8,38 @@ import com.shop.pojo.vo.OrderGreatVO;
 
 public interface OrderService extends IService<Order> {
 
+    //! Func
+
+
     /**
      * 查看一个订单详情
      */
     OrderGreatVO orderDetail(OrderAllDTO orderAllDTO);
 
+
     /**
      * 开启交易
      */
-    void startOrder(ProdLocateDTO prodLocateDTO);
+    void postOrderG(ProdLocateDTO prodLocateDTO);
 
     /**
      * 开启秒杀交易
      */
-    void seckillStartOrder(ProdLocateDTO prodLocateDTO);
+    void putOrderSeckillG(ProdLocateDTO prodLocateDTO);
+
+
+    //! ADD
+
+
+    //! DELETE
+
 
     /**
      * 关闭交易
      */
-    void closeOrder(OrderAllDTO orderAllDTO);
+    void deleteOrderG(OrderAllDTO orderAllDTO);
+
+    //! UPDATE
 
     /**
      * 卖家确认回复[1]
@@ -43,10 +56,13 @@ public interface OrderService extends IService<Order> {
      */
     void sellerKnowClose(OrderAllDTO orderAllDTO);
 
+
+    //! QUERY
+
     /**
      * 完整订单详情
      */
-    OrderGreatVO orderDetails(OrderAllDTO orderAllDTO);
+    OrderGreatVO getOrderG(OrderAllDTO orderAllDTO);
 
 
 }

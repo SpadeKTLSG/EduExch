@@ -42,7 +42,7 @@ public class VoucherServiceImpl extends ServiceImpl<VoucherMapper, Voucher> impl
 
 
     @Override
-    public void addSeckillVoucher(VoucherAllDTO voucherAllDTO) {
+    public void putSeckillVoucherA(VoucherAllDTO voucherAllDTO) {
         Voucher voucher = new Voucher();
         BeanUtils.copyProperties(voucherAllDTO, voucher);
         voucher.setUserId(1L);
@@ -53,7 +53,7 @@ public class VoucherServiceImpl extends ServiceImpl<VoucherMapper, Voucher> impl
 
     @Override
     @Transactional
-    public void addVoucher(VoucherAllDTO voucherAllDTO) {
+    public void putVoucherA(VoucherAllDTO voucherAllDTO) {
         Voucher voucher = new Voucher();
         BeanUtils.copyProperties(voucherAllDTO, voucher);
         voucher.setUserId(STORE_USERID); //存到默认仓库用户
@@ -63,7 +63,7 @@ public class VoucherServiceImpl extends ServiceImpl<VoucherMapper, Voucher> impl
 
     @Override
     @Transactional
-    public void claimVoucher(VoucherLocateDTO voucherLocateDTO) {
+    public void claimVoucherG(VoucherLocateDTO voucherLocateDTO) {
 
         Voucher voucher = this.getOne(new LambdaQueryWrapper<Voucher>()
                 .eq(Voucher::getName, voucherLocateDTO.getName())
@@ -175,7 +175,7 @@ public class VoucherServiceImpl extends ServiceImpl<VoucherMapper, Voucher> impl
 
 
     @Override
-    public List<Voucher> getOutdateOnes(Integer status, LocalDateTime time) {
+    public List<Voucher> getOutdateOnesA(Integer status, LocalDateTime time) {
         List<Voucher> voucherList2Check = this.query()
                 .eq("status", status)
                 .list();
@@ -187,13 +187,13 @@ public class VoucherServiceImpl extends ServiceImpl<VoucherMapper, Voucher> impl
     }
 
     @Override
-    public void ruinVoucher(Voucher voucher) {
+    public void ruinVoucherA(Voucher voucher) {
         voucher.setStatus(2);
         this.updateById(voucher);
     }
 
     @Override
-    public Page<Voucher> searchVoucherByName(String name, Integer current) {
+    public Page<Voucher> searchVoucherB(String name, Integer current) {
 
         //分页展示模糊匹配的所有可能结果
         return this.page(new Page<>(current, 10),

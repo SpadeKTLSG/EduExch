@@ -67,6 +67,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         SECKILL_SCRIPT.setResultType(Long.class); //返回类型
     }
 
+    //! Func
 
     @Override
     public OrderGreatVO orderDetail(OrderAllDTO orderAllDTO) {
@@ -87,7 +88,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     @Override
     @Transactional
-    public void startOrder(ProdLocateDTO prodLocateDTO) {
+    public void postOrderG(ProdLocateDTO prodLocateDTO) {
         String name = prodLocateDTO.getName();
         Long userId = prodLocateDTO.getUserId();
 
@@ -146,7 +147,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      * ! 秒杀下单流程
      */
     @Override
-    public void seckillStartOrder(ProdLocateDTO prodLocateDTO) {
+    public void putOrderSeckillG(ProdLocateDTO prodLocateDTO) {
 
         // 用令牌桶算法进行限流
         /*
@@ -213,10 +214,14 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         mqSender.sendSeckillMessage(JSON.toJSONString(order));
     }
 
+    //! ADD
+
+
+    //! DELETE
 
     @Override
     @Transactional
-    public void closeOrder(OrderAllDTO orderAllDTO) {
+    public void deleteOrderG(OrderAllDTO orderAllDTO) {
         Order order1 = dtoFindEntity(orderAllDTO);
 
         //保留式删除, 将订单状态置为5, 同时将订单详情的checkoutTime置为当前时间
@@ -281,9 +286,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         userFuncService.updateById(sellerFunc);
     }
 
+    //! QUERY
+
 
     @Override
-    public OrderGreatVO orderDetails(OrderAllDTO orderAllDTO) {
+    public OrderGreatVO getOrderG(OrderAllDTO orderAllDTO) {
         Order order = dtoFindEntity(orderAllDTO);
 
         OrderDetail orderDetail = orderDetailService.getOne(new LambdaQueryWrapper<OrderDetail>()

@@ -40,6 +40,19 @@ public class VoucherController {
 
     //! Func
 
+    /**
+     * 宣称(领取)优惠券
+     * <p>不可重复领取</p>
+     */
+    @PutMapping("/claim")
+    @Operation(summary = "宣称(领取)优惠券")
+    @Parameters(@Parameter(name = "voucherLocateDTO", description = "优惠券定位DTO", required = true))
+    public Result claimVoucherG(@RequestBody VoucherLocateDTO voucherLocateDTO) {
+        voucherService.claimVoucherG(voucherLocateDTO);
+        return Result.success();
+    }
+    //http://localhost:8086/guest/voucher/claim
+
 
     //! ADD
     //禁止
@@ -81,18 +94,6 @@ public class VoucherController {
     //! UPDATE
 
 
-    /**
-     * 宣称(领取)优惠券
-     * <p>不可重复领取</p>
-     */
-    @PutMapping("/claim")
-    @Operation(summary = "宣称(领取)优惠券")
-    @Parameters(@Parameter(name = "voucherLocateDTO", description = "优惠券定位DTO", required = true))
-    public Result claimVoucher(@RequestBody VoucherLocateDTO voucherLocateDTO) {
-        voucherService.claimVoucher(voucherLocateDTO);
-        return Result.success();
-    }
-    //http://localhost:8086/guest/voucher/claim
 
 
     //! QUERY
@@ -190,8 +191,8 @@ public class VoucherController {
             @Parameter(name = "name", description = "卷名", required = true),
             @Parameter(name = "current", description = "当前页", required = true)
     })
-    public Result searchVoucherByName(@RequestParam("name") String name, @RequestParam(value = "current", defaultValue = "1") Integer current) {
-        return Result.success(voucherService.searchVoucherByName(name, current));
+    public Result searchVoucherB(@RequestParam("name") String name, @RequestParam(value = "current", defaultValue = "1") Integer current) {
+        return Result.success(voucherService.searchVoucherB(name, current));
     }
     //http://localhost:8086/guest/voucher/search/name
 
