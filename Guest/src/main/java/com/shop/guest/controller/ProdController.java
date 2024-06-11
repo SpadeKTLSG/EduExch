@@ -39,6 +39,23 @@ public class ProdController {
     //! Func
 
 
+    /**
+     * 优惠券触发商品状态修改
+     */
+    @PutMapping("/update/status/{func}")
+    @Operation(summary = "优惠券触发商品状态修改")
+    @Parameters({
+            @Parameter(name = "prodLocateDTO", description = "商品定位DTO", required = true),
+            @Parameter(name = "func", description = "功能", required = true)
+    })
+    public Result putProdStatusG(@RequestBody ProdLocateDTO prodLocateDTO, @PathVariable("func") Integer func) {
+        prodService.putProdStatusG(prodLocateDTO, func);
+        return Result.success();
+    }
+    //http://localhost:8086/guest/prod/update/status/0
+
+
+
     //! ADD
 
     /**
@@ -48,8 +65,8 @@ public class ProdController {
     @PostMapping("/save")
     @Operation(summary = "用户添加商品")
     @Parameters(@Parameter(name = "prodGreatDTO", description = "商品添加DTO", required = true))
-    public Result publishGood(@RequestBody ProdGreatDTO prodGreatDTO) {
-        prodService.publishProd(prodGreatDTO);
+    public Result postProdG(@RequestBody ProdGreatDTO prodGreatDTO) {
+        prodService.postProdG(prodGreatDTO);
         return Result.success();
     }
     //http://localhost:8086/guest/prod/save
@@ -64,8 +81,8 @@ public class ProdController {
     @DeleteMapping("/delete/{name}")
     @Operation(summary = "用户删除商品")
     @Parameters(@Parameter(name = "name", description = "商品名", required = true))
-    public Result deleteGood(@PathVariable("name") String name) {
-        prodService.deleteProd(name);
+    public Result deleteProdG(@PathVariable("name") String name) {
+        prodService.deleteProdG(name);
         return Result.success();
     }
     //http://localhost:8086/guest/prod/delete
@@ -80,9 +97,9 @@ public class ProdController {
     @PutMapping("/update")
     @Operation(summary = "用户更新商品")
     @Parameters(@Parameter(name = "prodGreatDTO", description = "商品更新DTO", required = true))
-    public Result update4User(@RequestBody ProdGreatDTO prodGreatDTO) {
+    public Result putProdG(@RequestBody ProdGreatDTO prodGreatDTO) {
         try {
-            prodService.update4User(prodGreatDTO);
+            prodService.putProdG(prodGreatDTO);
             return Result.success();
         } catch (RuntimeException | InstantiationException | IllegalAccessException e) {
             return Result.error(e.getMessage());
@@ -99,10 +116,10 @@ public class ProdController {
     @PutMapping("/update/cache")
     @Operation(summary = "用户更新商品 - Cache")
     @Parameters(@Parameter(name = "prodGreatDTO", description = "商品更新DTO", required = true))
-    public Result update4UserCache(@RequestBody ProdGreatDTO prodGreatDTO) {
+    public Result putProd8CG(@RequestBody ProdGreatDTO prodGreatDTO) {
 
         try {
-            prodService.update4UserCache(prodGreatDTO);
+            prodService.putProd8CG(prodGreatDTO);
             return Result.success();
         } catch (RuntimeException | InstantiationException | IllegalAccessException e) {
             return Result.error(e.getMessage());
@@ -111,20 +128,6 @@ public class ProdController {
     //http://localhost:8086/guest/prod/update/cache
 
 
-    /**
-     * 优惠券触发商品状态修改
-     */
-    @PutMapping("/update/status/{func}")
-    @Operation(summary = "优惠券触发商品状态修改")
-    @Parameters({
-            @Parameter(name = "prodLocateDTO", description = "商品定位DTO", required = true),
-            @Parameter(name = "func", description = "功能", required = true)
-    })
-    public Result updateStatus(@RequestBody ProdLocateDTO prodLocateDTO, @PathVariable("func") Integer func) {
-        prodService.updateStatus(prodLocateDTO, func);
-        return Result.success();
-    }
-    //http://localhost:8086/guest/prod/update/status/0
 
 
     //! QUERY
@@ -136,7 +139,7 @@ public class ProdController {
     @GetMapping("/category/page")
     @Operation(summary = "分页查询商品分类列表")
     @Parameters(@Parameter(name = "current", description = "当前页", required = true))
-    public Result pageCateQuery(@RequestParam(value = "current", defaultValue = "1") Integer current) {
+    public Result pageCate(@RequestParam(value = "current", defaultValue = "1") Integer current) {
         return Result.success(prodCateService.page(new Page<>(current, SystemConstant.MAX_PAGE_SIZE)));
     }
     //http://localhost:8086/guest/prod/category/page
@@ -149,7 +152,7 @@ public class ProdController {
     @GetMapping("/page")
     @Operation(summary = "分页查询自己的商品列表")
     @Parameters(@Parameter(name = "current", description = "当前页", required = true))
-    public Result pageProdQuery(@RequestParam(value = "current", defaultValue = "1") Integer current) {
+    public Result pageProd4Me(@RequestParam(value = "current", defaultValue = "1") Integer current) {
         return Result.success(prodService.page(new Page<>(current, SystemConstant.MAX_PAGE_SIZE),
                 Wrappers.<Prod>lambdaQuery()
                         .eq(Prod::getUserId, UserHolder.getUser().getId()))
@@ -165,8 +168,8 @@ public class ProdController {
     @GetMapping("/get")
     @Operation(summary = "查询单个商品详细信息")
     @Parameters(@Parameter(name = "prodLocateDTO", description = "商品定位DTO"))
-    public Result getProd(@RequestBody ProdLocateDTO prodLocateDTO) {
-        return Result.success(prodService.getSingle(prodLocateDTO));
+    public Result getProdG(@RequestBody ProdLocateDTO prodLocateDTO) {
+        return Result.success(prodService.getProdG(prodLocateDTO));
     }
     //http://localhost:8086/guest/prod/get
 
@@ -179,8 +182,8 @@ public class ProdController {
     @GetMapping("/get/cache")
     @Operation(summary = "查询单个商品详细信息 - Cache")
     @Parameters(@Parameter(name = "prodLocateDTO", description = "商品定位DTO"))
-    public Result getProd4Cache(@RequestBody ProdLocateDTO prodLocateDTO) {
-        return Result.success(prodService.getSingleCache(prodLocateDTO));
+    public Result getProd8CG(@RequestBody ProdLocateDTO prodLocateDTO) {
+        return Result.success(prodService.getProd8CG(prodLocateDTO));
     }
     //http://localhost:8086/guest/prod/get/cache
 
@@ -191,8 +194,8 @@ public class ProdController {
     @GetMapping("/category/prod/{cate}")
     @Operation(summary = "根据分类获得自己的对应商品列表")
     @Parameters(@Parameter(name = "cate", description = "分类名", required = true))
-    public Result getPageByCate(@PathVariable("cate") String cate, @RequestParam(value = "current", defaultValue = "1") Integer current) {
-        return Result.success(prodService.getPageByCate(cate, current));
+    public Result pageProd8CateG(@PathVariable("cate") String cate, @RequestParam(value = "current", defaultValue = "1") Integer current) {
+        return Result.success(prodService.pageProd8CateG(cate, current));
     }
     //http://localhost:8086/guest/prod/category/prod/0
 
@@ -216,8 +219,8 @@ public class ProdController {
     @GetMapping("/cateall/page/{cate}")
     @Operation(summary = "分页查分类下所有商品列表")
     @Parameters(@Parameter(name = "cate", description = "分类名", required = true))
-    public Result pageCateAllProd(@PathVariable("cate") String cate, @RequestParam(value = "current", defaultValue = "1") Integer current) {
-        return Result.success(prodService.pageCateAllProd(cate, current));
+    public Result pageProdCateG(@PathVariable("cate") String cate, @RequestParam(value = "current", defaultValue = "1") Integer current) {
+        return Result.success(prodService.pageProdCateG(cate, current));
     }
     //http://localhost:8086/guest/prod/cateall/page/人类
 
@@ -233,8 +236,8 @@ public class ProdController {
             @Parameter(name = "name", description = "商品名称", required = true),
             @Parameter(name = "current", description = "当前页", required = true)
     })
-    public Result searchByName(@RequestParam("name") String name, @RequestParam(value = "current", defaultValue = "1") Integer current) {
-        return Result.success(prodService.searchByNameSimple(name, current));
+    public Result searchProd8EzG(@RequestParam("name") String name, @RequestParam(value = "current", defaultValue = "1") Integer current) {
+        return Result.success(prodService.searchProd8EzG(name, current));
     }
     //http://localhost:8086/guest/prod/search/name
 

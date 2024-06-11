@@ -14,95 +14,137 @@ import java.util.List;
 
 public interface ProdService extends IService<Prod> {
 
-    /**
-     * 用户更新单件商品
-     */
-    void update4User(ProdGreatDTO prodGreatDTO) throws InstantiationException, IllegalAccessException;
 
-    /**
-     * 用户更新单件商品[缓存]
-     */
-    void update4UserCache(ProdGreatDTO prodGreatDTO) throws InstantiationException, IllegalAccessException;
+    //! Func
 
     /**
      * 管理员审核单件商品
      */
-    void check(ProdLocateDTO prodLocateDTO);
+    void checkA(ProdLocateDTO prodLocateDTO);
 
     /**
      * 管理员冻结单件商品
      */
-    void freeze(ProdLocateDTO prodLocateDTO);
+    void freezeA(ProdLocateDTO prodLocateDTO);
 
     /**
      * 管理员分页查看需要审核商品
      */
-    Page<ProdGreatVO> page2Check(Integer current);
+    Page<ProdGreatVO> page2CheckA(Integer current);
 
-    /**
-     * 管理员删除一件商品
-     */
-    void deleteProd4Admin(ProdLocateDTO prodLocateDTO);
-
-    /**
-     * 管理员查看单件商品(简易)
-     */
-    Prod getProd4Admin(ProdLocateDTO prodLocateDTO);
-
-    /**
-     * 管理员分页查询所有商品列表
-     */
-    Page<ProdGreatVO> pageProd(Integer current);
-
-    /**
-     * 用户添加商品
-     */
-    void publishProd(ProdGreatDTO prodGreatDTO);
-
-    /**
-     * 用户删除商品
-     */
-    void deleteProd(String name);
 
     /**
      * 优惠券商品状态修改
      */
-    void updateStatus(ProdLocateDTO prodLocateDTO, Integer func);
+    void putProdStatusG(ProdLocateDTO prodLocateDTO, Integer func);
+
+
+    /**
+     * 处理到达失效展示时间的商品对象
+     */
+    List<ProdFunc> getOutdateProdA(LocalDateTime time);
+
+    /**
+     * 提取热搜表
+     */
+    List<ProdFunc> getHotProdA();
+
+
+    /**
+     * 商品从提升表中移除
+     */
+    void cooldownUpshowProdA(ProdFunc prodFunc);
+
+    /**
+     * 商品从轮播表中移除
+     */
+    void cooldownRotationProdA(ProdFunc prodFunc);
+
+
+    /**
+     * 添加商品到热搜表
+     */
+    void add2HotSearchA(ProdFunc prodFunc);
+
+
+    //! ADD
+
+    /**
+     * 用户添加商品
+     */
+    void postProdG(ProdGreatDTO prodGreatDTO);
+
+
+    //! DELETE
+
+
+    /**
+     * 管理员删除一件商品
+     */
+    void deleteProdA(ProdLocateDTO prodLocateDTO);
+
+
+    /**
+     * 用户删除商品
+     */
+    void deleteProdG(String name);
+
+
+    //! UPDATE
+
+
+    /**
+     * 用户更新单件商品
+     */
+    void putProdG(ProdGreatDTO prodGreatDTO) throws InstantiationException, IllegalAccessException;
+
+
+    /**
+     * 用户更新单件商品[缓存]
+     */
+    void putProd8CG(ProdGreatDTO prodGreatDTO) throws InstantiationException, IllegalAccessException;
+
+
+    //! QUERY
+
+    /**
+     * 管理员查看单件商品(简易)
+     */
+    Prod getProd8EzA(ProdLocateDTO prodLocateDTO);
+
+    /**
+     * 管理员分页查询所有商品列表
+     */
+    Page<ProdGreatVO> pageProdA(Integer current);
+
+    /**
+     * 管理员按Name模糊搜索商品
+     */
+    Page<ProdGreatVO> searchProdA(String name, Integer current);
+
 
     /**
      * 用户查看单件商品详细
      */
-    ProdGreatVO getSingle(ProdLocateDTO prodLocateDTO);
+    ProdGreatVO getProdG(ProdLocateDTO prodLocateDTO);
 
     /**
      * 用户查看单件商品详细[缓存]
      */
-    ProdGreatVO getSingleCache(ProdLocateDTO prodLocateDTO);
+    ProdGreatVO getProd8CG(ProdLocateDTO prodLocateDTO);
 
     /**
      * 用户分页分类查商品列表
      */
-    Page<Prod> getPageByCate(String cate, Integer current);
+    Page<Prod> pageProdCateG(String cate, Integer current);
 
     /**
      * 用户分页查分类下所有商品列表
      */
-    Page<Prod> pageCateAllProd(String cate, Integer current);
+    Page<Prod> pageProd8CateG(String cate, Integer current);
 
     /**
-     *
+     * 用户按Name模糊搜索商品
      */
-    List<ProdFunc> getOutdateOnes(LocalDateTime time);
-
-    void cooldownUpshowProd(ProdFunc prodFunc);
-
-    void cooldownRotationProd(ProdFunc prodFunc);
-
-    List<ProdFunc> extractList4HotProd();
-
-    void add2HotSearch(ProdFunc prodFunc);
-
-    Page<ProdGreatVO> searchByName(String name, Integer current);
-
-    Page<ProdAllVO> searchByNameSimple(String name, Integer current);
+    Page<ProdAllVO> searchProd8EzG(String name, Integer current);
 }

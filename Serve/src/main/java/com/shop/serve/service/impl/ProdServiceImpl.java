@@ -46,7 +46,6 @@ import static com.shop.common.utils.NewBeanUtil.dtoMapService;
 @Service
 public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements ProdService {
 
-
     @Autowired
     private ProdFuncService prodFuncService;
     @Autowired
@@ -67,6 +66,8 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
     private StringRedisTemplate stringRedisTemplate;
 
 
+    //! Func
+
     /**
      * 线程池[缓存击穿问题], 完成重构缓存
      */
@@ -74,47 +75,7 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
 
 
     @Override
-    @Transactional
-    public void update4User(ProdGreatDTO prodGreatDTO) throws InstantiationException, IllegalAccessException {
-        // 联表选择性更新
-        Optional<Prod> optionalProd = Optional.ofNullable(this.getOne(Wrappers.<Prod>lambdaQuery().eq(Prod::getName, prodGreatDTO.getName())));
-        if (optionalProd.isEmpty()) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
-
-        optionalProd.get().setUserId(UserHolder.getUser().getId());//这里商品的userId是自己
-
-        Map<Object, IService> dtoServiceMap = new HashMap<>();
-        dtoServiceMap.put(createDTOFromProdGreatDTO(prodGreatDTO, ProdAllDTO.class), this);
-        dtoServiceMap.put(createDTOFromProdGreatDTO(prodGreatDTO, ProdFuncAllDTO.class), prodFuncService);
-
-        dtoMapService(dtoServiceMap, optionalProd.get().getId(), optionalProd);
-    }
-
-
-    @Override
-    public void update4UserCache(ProdGreatDTO prodGreatDTO) throws InstantiationException, IllegalAccessException {
-
-        // 联表选择性更新
-        Optional<Prod> optionalProd = Optional.ofNullable(this.getOne(Wrappers.<Prod>lambdaQuery().eq(Prod::getName, prodGreatDTO.getName())));
-        if (optionalProd.isEmpty()) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
-
-        optionalProd.get().setUserId(UserHolder.getUser().getId());//这里商品的userId是自己
-
-        Map<Object, IService> dtoServiceMap = new HashMap<>();
-        dtoServiceMap.put(createDTOFromProdGreatDTO(prodGreatDTO, ProdAllDTO.class), this);
-        dtoServiceMap.put(createDTOFromProdGreatDTO(prodGreatDTO, ProdFuncAllDTO.class), prodFuncService);
-
-        dtoMapService(dtoServiceMap, optionalProd.get().getId(), optionalProd);
-
-
-        //包含缓存的更新逻辑, 在更新数据库之后更新缓存(正常流程后)
-
-        String key = CACHE_PROD_KEY + prodGreatDTO.getUserId() + ":" + prodGreatDTO.getName();
-        stringRedisTemplate.delete(key);
-    }
-
-
-    @Override
-    public void check(ProdLocateDTO prodLocateDTO) {
+    public void checkA(ProdLocateDTO prodLocateDTO) {
 
         Prod prod = this.getOne(new LambdaQueryWrapper<Prod>()// 找到对应商品id, 通过id找到另一张表UserFunc, 修改状态字段
                 .eq(Prod::getName, prodLocateDTO.getName())
@@ -131,7 +92,7 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
 
 
     @Override
-    public void freeze(ProdLocateDTO prodLocateDTO) {
+    public void freezeA(ProdLocateDTO prodLocateDTO) {
 
         Prod prod = this.getOne(new LambdaQueryWrapper<Prod>()// 找到对应商品id, 通过id找到另一张表UserFunc, 修改状态字段
                 .eq(Prod::getName, prodLocateDTO.getName())
@@ -159,7 +120,7 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
 
 
     @Override
-    public Page<ProdGreatVO> page2Check(Integer current) {
+    public Page<ProdGreatVO> page2CheckA(Integer current) {
 
         Page<ProdFunc> prodFuncPage = prodFuncService.page(new Page<>(current, SystemConstant.MAX_PAGE_SIZE),
                 new LambdaQueryWrapper<ProdFunc>().eq(ProdFunc::getStatus, 0));
@@ -185,7 +146,104 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
 
 
     @Override
-    public void deleteProd4Admin(ProdLocateDTO prodLocateDTO) {
+    public List<ProdFunc> getOutdateProdA(LocalDateTime time) {
+
+        List<ProdFunc> prodList2Check = prodFuncService.query() //需要保证其ShowoffEndtime存在!
+                .isNotNull("showoff_endtime") //这里是为了保证不会出现空指针异常
+                .list();
+
+        prodList2Check.removeIf(prodFunc -> prodFunc.getShowoffEndtime().isAfter(time));   //需要手动取出来判断是否过期
+
+        return prodList2Check;
+    }
+
+
+    @Override
+    public List<ProdFunc> getHotProdA() {
+
+        List<ProdFunc> prodList2Check = prodFuncService
+                .query()
+                .orderByDesc("visit")
+                .last("limit " + SystemConstant.MAX_PAGE_SIZE)
+                .list();
+
+        return prodList2Check;
+    }
+
+
+    @Override
+    public void cooldownUpshowProdA(ProdFunc prodFunc) {
+
+        prodFunc.setShowoffStatus(0);
+        prodFunc.setShowoffEndtime(LocalDateTime.now()); //只能设置为现在而不是null否则报错
+
+        UpshowAllDTO upshowAllDTO = UpshowAllDTO.builder()
+                .prodId(prodFunc.getId())
+                .name(this.query().eq("id", prodFunc.getId()).one().getName())
+                .build();
+
+        prodFuncService.updateById(prodFunc);
+        upshowService.remove4Upshow(upshowAllDTO);
+    }
+
+
+    @Override
+    public void cooldownRotationProdA(ProdFunc prodFunc) {
+
+        prodFunc.setShowoffStatus(0);
+        prodFunc.setShowoffEndtime(LocalDateTime.now()); //只能设置为现在而不是null否则报错
+
+        RotationAllDTO rotationAllDTO = RotationAllDTO.builder()
+                .prodId(prodFunc.getId())
+                .name(this.query().eq("id", prodFunc.getId()).one().getName())
+                .build();
+
+        prodFuncService.updateById(prodFunc);
+        rotationService.remove4Rotation(rotationAllDTO);
+    }
+
+
+    @Override
+    public void add2HotSearchA(ProdFunc prodFunc) {
+
+        HotsearchAllDTO hotsearchAllDTO = HotsearchAllDTO.builder()
+                .visit(prodFunc.getVisit())
+                .prodId(prodFunc.getId())
+                .name(this.query().eq("id", prodFunc.getId()).one().getName())
+                .build();
+
+        hotsearchService.add2Hotsearch(hotsearchAllDTO);
+    }
+
+
+    //! ADD
+
+    @Override
+    @Transactional
+    public void postProdG(ProdGreatDTO prodGreatDTO) {
+        if (this.query().eq("name", prodGreatDTO.getName()).count() > 0) throw new SthHasCreatedException(OBJECT_HAS_ALIVE);
+
+        Prod prod = new Prod();
+        ProdFunc prodFunc = new ProdFunc();
+
+        BeanUtils.copyProperties(prodGreatDTO, prod);
+        BeanUtils.copyProperties(prodGreatDTO, prodFunc);
+
+        prod.setUserId(UserHolder.getUser().getId());
+
+        this.save(prod);
+        prodFuncService.save(prodFunc);
+
+        //还需要添加Redis Key
+        stringRedisTemplate.opsForValue().set(SECKILL_STOCK_KEY + prod.getId(), prod.getStock().toString());
+    }
+
+
+    //! DELETE
+
+
+    @Override
+    public void deleteProdA(ProdLocateDTO prodLocateDTO) {
         this.remove(new LambdaQueryWrapper<Prod>()
                 .eq(Prod::getName, prodLocateDTO.getName())
                 .eq(Prod::getUserId, prodLocateDTO.getUserId())
@@ -194,7 +252,76 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
 
 
     @Override
-    public Prod getProd4Admin(ProdLocateDTO prodLocateDTO) {
+    @Transactional
+    public void deleteProdG(String name) {
+        Prod prod = this.getOne(Wrappers.<Prod>lambdaQuery().eq(Prod::getName, name));
+        if (prod == null) throw new SthNotFoundException(OBJECT_NOT_ALIVE);
+
+        //需要判断是否有已经开启的交易
+        Order order = orderService.getOne(Wrappers.<Order>lambdaQuery()
+                .eq(Order::getProdId, prod.getId())
+                .ne(Order::getStatus, Order.OVER) //已经完成的交易不算
+                .ne(Order::getStatus, Order.STOP) //已经撤销的交易不算
+        );
+
+        if (order != null) throw new SthHasCreatedException(ORDER_STATUS_ERROR);
+
+        prodFuncService.removeById(prod.getId());
+        this.removeById(prod.getId());
+
+        //还需要删除Redis Key
+        stringRedisTemplate.delete(SECKILL_STOCK_KEY + prod.getId());
+    }
+
+
+    //! UPDATE
+
+
+    @Override
+    @Transactional
+    public void putProdG(ProdGreatDTO prodGreatDTO) throws InstantiationException, IllegalAccessException {
+        // 联表选择性更新
+        Optional<Prod> optionalProd = Optional.ofNullable(this.getOne(Wrappers.<Prod>lambdaQuery().eq(Prod::getName, prodGreatDTO.getName())));
+        if (optionalProd.isEmpty()) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
+
+        optionalProd.get().setUserId(UserHolder.getUser().getId());//这里商品的userId是自己
+
+        Map<Object, IService> dtoServiceMap = new HashMap<>();
+        dtoServiceMap.put(createDTOFromProdGreatDTO(prodGreatDTO, ProdAllDTO.class), this);
+        dtoServiceMap.put(createDTOFromProdGreatDTO(prodGreatDTO, ProdFuncAllDTO.class), prodFuncService);
+
+        dtoMapService(dtoServiceMap, optionalProd.get().getId(), optionalProd);
+    }
+
+
+    @Override
+    public void putProd8CG(ProdGreatDTO prodGreatDTO) throws InstantiationException, IllegalAccessException {
+
+        // 联表选择性更新
+        Optional<Prod> optionalProd = Optional.ofNullable(this.getOne(Wrappers.<Prod>lambdaQuery().eq(Prod::getName, prodGreatDTO.getName())));
+        if (optionalProd.isEmpty()) throw new AccountNotFoundException(ACCOUNT_NOT_FOUND);
+
+        optionalProd.get().setUserId(UserHolder.getUser().getId());//这里商品的userId是自己
+
+        Map<Object, IService> dtoServiceMap = new HashMap<>();
+        dtoServiceMap.put(createDTOFromProdGreatDTO(prodGreatDTO, ProdAllDTO.class), this);
+        dtoServiceMap.put(createDTOFromProdGreatDTO(prodGreatDTO, ProdFuncAllDTO.class), prodFuncService);
+
+        dtoMapService(dtoServiceMap, optionalProd.get().getId(), optionalProd);
+
+
+        //包含缓存的更新逻辑, 在更新数据库之后更新缓存(正常流程后)
+
+        String key = CACHE_PROD_KEY + prodGreatDTO.getUserId() + ":" + prodGreatDTO.getName();
+        stringRedisTemplate.delete(key);
+    }
+
+
+    //! QUERY
+
+
+    @Override
+    public Prod getProd8EzA(ProdLocateDTO prodLocateDTO) {
         return this.getOne(new LambdaQueryWrapper<Prod>()
                 .eq(Prod::getName, prodLocateDTO.getName())
                 .eq(Prod::getUserId, prodLocateDTO.getUserId())
@@ -203,7 +330,7 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
 
 
     @Override
-    public Page<ProdGreatVO> pageProd(Integer current) {
+    public Page<ProdGreatVO> pageProdA(Integer current) {
 
         Page<Prod> prodPage = this.page(new Page<>(current, SystemConstant.MAX_PAGE_SIZE));
         Page<ProdFunc> prodFuncPage = prodFuncService.page(new Page<>(current, SystemConstant.MAX_PAGE_SIZE));
@@ -230,52 +357,47 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
 
 
     @Override
-    @Transactional
-    public void publishProd(ProdGreatDTO prodGreatDTO) {
-        if (this.query().eq("name", prodGreatDTO.getName()).count() > 0) throw new SthHasCreatedException(OBJECT_HAS_ALIVE);
+    public Page<ProdGreatVO> searchProdA(String name, Integer current) {
 
-        Prod prod = new Prod();
-        ProdFunc prodFunc = new ProdFunc();
+        Page<Prod> prodPage = this.page(new Page<>(current, SystemConstant.MAX_PAGE_SIZE),
+                Wrappers.<Prod>lambdaQuery()
+                        .like(Prod::getName, name));
 
-        BeanUtils.copyProperties(prodGreatDTO, prod);
-        BeanUtils.copyProperties(prodGreatDTO, prodFunc);
 
-        prod.setUserId(UserHolder.getUser().getId());
+        List<Long> ids = new ArrayList<>();     //通过prodPage中的id找到对应的ProdFunc对象
+        for (Prod prod : prodPage.getRecords()) {
+            ids.add(prod.getId());
+        }
 
-        this.save(prod);
-        prodFuncService.save(prodFunc);
+        Page<ProdFunc> prodFuncPage = prodFuncService.page(new Page<>(current, SystemConstant.MAX_PAGE_SIZE),
+                Wrappers.<ProdFunc>lambdaQuery()
+                        .in(ProdFunc::getId, ids));
 
-        //还需要添加Redis Key
-        stringRedisTemplate.opsForValue().set(SECKILL_STOCK_KEY + prod.getId(), prod.getStock().toString());
+
+        // 存储合并后的结果
+        List<ProdGreatVO> mergedList = new ArrayList<>();
+
+        for (int i = 0; i < prodPage.getRecords().size(); i++) { //合并两个Page的Records
+            Prod prod = prodPage.getRecords().get(i);
+            ProdFunc prodFunc = prodFuncPage.getRecords().get(i);
+
+            ProdGreatVO prodGreatVO = new ProdGreatVO();
+            BeanUtils.copyProperties(prod, prodGreatVO);
+            BeanUtils.copyProperties(prodFunc, prodGreatVO);
+            mergedList.add(prodGreatVO);
+        }
+
+        Page<ProdGreatVO> mergedPage = new Page<>(current, SystemConstant.MAX_PAGE_SIZE);
+        mergedPage.setRecords(mergedList);
+        mergedPage.setTotal(prodPage.getTotal() + prodFuncPage.getTotal());
+
+        return mergedPage;
     }
 
 
     @Override
     @Transactional
-    public void deleteProd(String name) {
-        Prod prod = this.getOne(Wrappers.<Prod>lambdaQuery().eq(Prod::getName, name));
-        if (prod == null) throw new SthNotFoundException(OBJECT_NOT_ALIVE);
-
-        //需要判断是否有已经开启的交易
-        Order order = orderService.getOne(Wrappers.<Order>lambdaQuery()
-                .eq(Order::getProdId, prod.getId())
-                .ne(Order::getStatus, Order.OVER) //已经完成的交易不算
-                .ne(Order::getStatus, Order.STOP) //已经撤销的交易不算
-        );
-
-        if (order != null) throw new SthHasCreatedException(ORDER_STATUS_ERROR);
-
-        prodFuncService.removeById(prod.getId());
-        this.removeById(prod.getId());
-
-        //还需要删除Redis Key
-        stringRedisTemplate.delete(SECKILL_STOCK_KEY + prod.getId());
-    }
-
-
-    @Override
-    @Transactional
-    public void updateStatus(ProdLocateDTO prodLocateDTO, Integer func) {
+    public void putProdStatusG(ProdLocateDTO prodLocateDTO, Integer func) {
 
         String name = prodLocateDTO.getName();
         Long userId = prodLocateDTO.getUserId();
@@ -322,7 +444,7 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
 
     @Override
     @Transactional
-    public ProdGreatVO getSingle(ProdLocateDTO prodLocateDTO) {
+    public ProdGreatVO getProdG(ProdLocateDTO prodLocateDTO) {
 
         Prod prod = this.getOne(Wrappers.<Prod>lambdaQuery()
                 .eq(Prod::getName, prodLocateDTO.getName())
@@ -362,7 +484,7 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
      * 通过缓存查询商品, 解决缓存穿透, 缓存击穿等问题
      */
     @Override
-    public ProdGreatVO getSingleCache(ProdLocateDTO prodLocateDTO) {
+    public ProdGreatVO getProd8CG(ProdLocateDTO prodLocateDTO) {
 
         // 这里是双'主键'情况不能用prodLocateDTO直接查, 需要用prodLocateDTO的name和userId拼接改造CacheClient
 
@@ -598,7 +720,7 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
 
 
     @Override
-    public Page<Prod> getPageByCate(String cate, Integer current) {
+    public Page<Prod> pageProd8CateG(String cate, Integer current) {
 
         ProdCate prodCate = prodCateService.getOne(Wrappers.<ProdCate>lambdaQuery()
                 .eq(ProdCate::getName, cate));
@@ -614,7 +736,7 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
 
 
     @Override
-    public Page<Prod> pageCateAllProd(String cate, Integer current) {
+    public Page<Prod> pageProdCateG(String cate, Integer current) {
 
         ProdCate prodCate = prodCateService.getOne(Wrappers.<ProdCate>lambdaQuery()
                 .eq(ProdCate::getName, cate));
@@ -630,115 +752,7 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
 
 
     @Override
-    public List<ProdFunc> getOutdateOnes(LocalDateTime time) {
-
-        List<ProdFunc> prodList2Check = prodFuncService.query() //需要保证其ShowoffEndtime存在!
-                .isNotNull("showoff_endtime") //这里是为了保证不会出现空指针异常
-                .list();
-
-        prodList2Check.removeIf(prodFunc -> prodFunc.getShowoffEndtime().isAfter(time));   //需要手动取出来判断是否过期
-
-        return prodList2Check;
-    }
-
-
-    @Override
-    public void cooldownUpshowProd(ProdFunc prodFunc) {
-
-        prodFunc.setShowoffStatus(0);
-        prodFunc.setShowoffEndtime(LocalDateTime.now()); //只能设置为现在而不是null否则报错
-
-        UpshowAllDTO upshowAllDTO = UpshowAllDTO.builder()
-                .prodId(prodFunc.getId())
-                .name(this.query().eq("id", prodFunc.getId()).one().getName())
-                .build();
-
-        prodFuncService.updateById(prodFunc);
-        upshowService.remove4Upshow(upshowAllDTO);
-    }
-
-
-    @Override
-    public void cooldownRotationProd(ProdFunc prodFunc) {
-
-        prodFunc.setShowoffStatus(0);
-        prodFunc.setShowoffEndtime(LocalDateTime.now()); //只能设置为现在而不是null否则报错
-
-        RotationAllDTO rotationAllDTO = RotationAllDTO.builder()
-                .prodId(prodFunc.getId())
-                .name(this.query().eq("id", prodFunc.getId()).one().getName())
-                .build();
-
-        prodFuncService.updateById(prodFunc);
-        rotationService.remove4Rotation(rotationAllDTO);
-    }
-
-
-    @Override
-    public List<ProdFunc> extractList4HotProd() {
-
-        List<ProdFunc> prodList2Check = prodFuncService
-                .query()
-                .orderByDesc("visit")
-                .last("limit " + SystemConstant.MAX_PAGE_SIZE)
-                .list();
-
-        return prodList2Check;
-    }
-
-
-    @Override
-    public void add2HotSearch(ProdFunc prodFunc) {
-
-        HotsearchAllDTO hotsearchAllDTO = HotsearchAllDTO.builder()
-                .visit(prodFunc.getVisit())
-                .prodId(prodFunc.getId())
-                .name(this.query().eq("id", prodFunc.getId()).one().getName())
-                .build();
-
-        hotsearchService.add2Hotsearch(hotsearchAllDTO);
-    }
-
-    @Override
-    public Page<ProdGreatVO> searchByName(String name, Integer current) {
-
-        Page<Prod> prodPage = this.page(new Page<>(current, SystemConstant.MAX_PAGE_SIZE),
-                Wrappers.<Prod>lambdaQuery()
-                        .like(Prod::getName, name));
-
-
-        List<Long> ids = new ArrayList<>();     //通过prodPage中的id找到对应的ProdFunc对象
-        for (Prod prod : prodPage.getRecords()) {
-            ids.add(prod.getId());
-        }
-
-        Page<ProdFunc> prodFuncPage = prodFuncService.page(new Page<>(current, SystemConstant.MAX_PAGE_SIZE),
-                Wrappers.<ProdFunc>lambdaQuery()
-                        .in(ProdFunc::getId, ids));
-
-
-        // 存储合并后的结果
-        List<ProdGreatVO> mergedList = new ArrayList<>();
-
-        for (int i = 0; i < prodPage.getRecords().size(); i++) { //合并两个Page的Records
-            Prod prod = prodPage.getRecords().get(i);
-            ProdFunc prodFunc = prodFuncPage.getRecords().get(i);
-
-            ProdGreatVO prodGreatVO = new ProdGreatVO();
-            BeanUtils.copyProperties(prod, prodGreatVO);
-            BeanUtils.copyProperties(prodFunc, prodGreatVO);
-            mergedList.add(prodGreatVO);
-        }
-
-        Page<ProdGreatVO> mergedPage = new Page<>(current, SystemConstant.MAX_PAGE_SIZE);
-        mergedPage.setRecords(mergedList);
-        mergedPage.setTotal(prodPage.getTotal() + prodFuncPage.getTotal());
-
-        return mergedPage;
-    }
-
-    @Override
-    public Page<ProdAllVO> searchByNameSimple(String name, Integer current) {
+    public Page<ProdAllVO> searchProd8EzG(String name, Integer current) {
 
         //只需要返回ProdVO
         Page<Prod> page = this.page(new Page<>(current, SystemConstant.MAX_PAGE_SIZE), Wrappers.<Prod>lambdaQuery()

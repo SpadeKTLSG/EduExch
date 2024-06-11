@@ -44,8 +44,8 @@ public class ProdController {
     @PutMapping("/check")
     @Operation(summary = "管理员审核单件商品")
     @Parameters(@Parameter(name = "prodLocateDTO", description = "商品定位DTO", required = true))
-    public Result check(@RequestBody ProdLocateDTO prodLocateDTO) {
-        prodService.check(prodLocateDTO);
+    public Result checkA(@RequestBody ProdLocateDTO prodLocateDTO) {
+        prodService.checkA(prodLocateDTO);
         return Result.success();
     }
     //http://localhost:8085/admin/prod/check
@@ -57,8 +57,8 @@ public class ProdController {
     @PutMapping("/freeze")
     @Operation(summary = "管理员冻结单件商品")
     @Parameters(@Parameter(name = "prodLocateDTO", description = "商品定位DTO", required = true))
-    public Result freeze(@RequestBody ProdLocateDTO prodLocateDTO) {
-        prodService.freeze(prodLocateDTO);
+    public Result freezeA(@RequestBody ProdLocateDTO prodLocateDTO) {
+        prodService.freezeA(prodLocateDTO);
         return Result.success();
     }
     //http://localhost:8085/admin/prod/freeze
@@ -71,8 +71,8 @@ public class ProdController {
     @GetMapping("/page2Check")
     @Operation(summary = "管理员分页查看需要审核商品")
     @Parameters(@Parameter(name = "current", description = "当前页", required = true))
-    public Result page2Check(@RequestParam(value = "current", defaultValue = "1") Integer current) {
-        return Result.success(prodService.page2Check(current));
+    public Result page2CheckA(@RequestParam(value = "current", defaultValue = "1") Integer current) {
+        return Result.success(prodService.page2CheckA(current));
     }
     //http://localhost:8085/admin/prod/page2Check
 
@@ -85,8 +85,8 @@ public class ProdController {
     @PostMapping("/cate/save")
     @Operation(summary = "添加商品分类")
     @Parameters(@Parameter(name = "prodCateAllDTO", description = "商品分类DTO", required = true))
-    public Result saveCate(@RequestBody ProdCateAllDTO prodCateAllDTO) {
-        prodCateService.saveCate(prodCateAllDTO);
+    public Result postCateA(@RequestBody ProdCateAllDTO prodCateAllDTO) {
+        prodCateService.postCateA(prodCateAllDTO);
         return Result.success();
     }
     //http://localhost:8085/admin/prod/cate/save
@@ -101,8 +101,8 @@ public class ProdController {
     @DeleteMapping("/delete/one")
     @Operation(summary = "管理员删除一件商品")
     @Parameters(@Parameter(name = "prodLocateDTO", description = "商品定位DTO", required = true))
-    public Result deleteByNameUser(@RequestBody ProdLocateDTO prodLocateDTO) {
-        prodService.deleteProd4Admin(prodLocateDTO);
+    public Result deleteProdA(@RequestBody ProdLocateDTO prodLocateDTO) {
+        prodService.deleteProdA(prodLocateDTO);
         return Result.success();
     }
     //http://localhost:8085/admin/prod/delete/one
@@ -114,8 +114,8 @@ public class ProdController {
     @DeleteMapping("/cate/delete")
     @Operation(summary = "删除商品分类")
     @Parameters(@Parameter(name = "prodCateAllDTO", description = "商品分类DTO", required = true))
-    public Result deleteCate(@RequestBody ProdCateAllDTO prodCateAllDTO) {
-        prodCateService.deleteCate(prodCateAllDTO);
+    public Result deleteCateA(@RequestBody ProdCateAllDTO prodCateAllDTO) {
+        prodCateService.deleteCateA(prodCateAllDTO);
         return Result.success();
     }
     //http://localhost:8085/admin/prod/cate/delete
@@ -130,8 +130,8 @@ public class ProdController {
     @PutMapping("/cate/update")
     @Operation(summary = "修改商品分类")
     @Parameters(@Parameter(name = "prodCateAllDTO", description = "商品分类DTO", required = true))
-    public Result updateCate(@RequestBody ProdCateAllDTO prodCateAllDTO) {
-        prodCateService.updateCate(prodCateAllDTO);
+    public Result putCateA(@RequestBody ProdCateAllDTO prodCateAllDTO) {
+        prodCateService.putCateA(prodCateAllDTO);
         return Result.success();
     }
 
@@ -144,8 +144,8 @@ public class ProdController {
     @GetMapping("/one")
     @Operation(summary = "查具体商品信息")
     @Parameters(@Parameter(name = "prodLocateDTO", description = "商品定位DTO", required = true))
-    public Result getByNameUser(@RequestBody ProdLocateDTO prodLocateDTO) {
-        return Result.success(prodService.getProd4Admin(prodLocateDTO));
+    public Result getProd8EzA(@RequestBody ProdLocateDTO prodLocateDTO) {
+        return Result.success(prodService.getProd8EzA(prodLocateDTO));
     }
     //http://localhost:8085/admin/prod/one
 
@@ -156,7 +156,7 @@ public class ProdController {
     @GetMapping("/cate/page")
     @Operation(summary = "分页查询所有商品分类")
     @Parameters(@Parameter(name = "current", description = "当前页", required = true))
-    public Result pageCate(@RequestParam(value = "current", defaultValue = "1") Integer current) {
+    public Result pageCateA(@RequestParam(value = "current", defaultValue = "1") Integer current) {
         return Result.success(prodService.page(new Page<>(current, SystemConstant.MAX_PAGE_SIZE)));
     }
     //http://localhost:8085/admin/prod/cate/page
@@ -169,8 +169,8 @@ public class ProdController {
     @GetMapping("/page")
     @Operation(summary = "分页查询所有商品")
     @Parameters(@Parameter(name = "current", description = "当前页", required = true))
-    public Result pageProd(@RequestParam(value = "current", defaultValue = "1") Integer current) {
-        return Result.success(prodService.pageProd(current));
+    public Result pageProdA(@RequestParam(value = "current", defaultValue = "1") Integer current) {
+        return Result.success(prodService.pageProdA(current));
     }
     //http://localhost:8085/admin/prod/page
 
@@ -185,8 +185,8 @@ public class ProdController {
             @Parameter(name = "name", description = "商品名称", required = true),
             @Parameter(name = "current", description = "当前页", required = true)
     })
-    public Result searchByName(@RequestParam("name") String name, @RequestParam(value = "current", defaultValue = "1") Integer current) {
-        return Result.success(prodService.searchByName(name, current));
+    public Result searchProdA(@RequestParam("name") String name, @RequestParam(value = "current", defaultValue = "1") Integer current) {
+        return Result.success(prodService.searchProdA(name, current));
     }
     //http://localhost:8085/admin/prod/search/name?name=天&current=1
 

@@ -20,7 +20,7 @@ import static com.shop.common.constant.MessageConstant.OBJECT_NOT_ALIVE;
 public class ProdCateServiceImpl extends ServiceImpl<ProdCateMapper, ProdCate> implements ProdCateService {
 
     @Override
-    public void saveCate(ProdCateAllDTO prodCateAllDTO) {
+    public void postCateA(ProdCateAllDTO prodCateAllDTO) {
 
         if (this.getOne(new LambdaQueryWrapper<ProdCate>()
                 .eq(ProdCate::getName, prodCateAllDTO.getName()), false) != null) throw new SthHasCreatedException(OBJECT_HAS_ALIVE);
@@ -32,7 +32,7 @@ public class ProdCateServiceImpl extends ServiceImpl<ProdCateMapper, ProdCate> i
     }
 
     @Override
-    public void deleteCate(ProdCateAllDTO prodCateAllDTO) {
+    public void deleteCateA(ProdCateAllDTO prodCateAllDTO) {
 
         this.remove(new LambdaQueryWrapper<ProdCate>()
                 .eq(ProdCate::getName, prodCateAllDTO.getName()));
@@ -41,7 +41,7 @@ public class ProdCateServiceImpl extends ServiceImpl<ProdCateMapper, ProdCate> i
 
 
     @Override
-    public void updateCate(ProdCateAllDTO prodCateAllDTO) {
+    public void putCateA(ProdCateAllDTO prodCateAllDTO) {
         ProdCate prodCate = this.getOne(new LambdaQueryWrapper<ProdCate>()
                 .eq(ProdCate::getName, prodCateAllDTO.getName()), false);
         if (prodCate == null) throw new SthNotFoundException(OBJECT_NOT_ALIVE);

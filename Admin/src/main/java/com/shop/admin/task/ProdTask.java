@@ -34,12 +34,12 @@ public class ProdTask {
 
         LocalDateTime time = LocalDateTime.now().plusMinutes(-60); //错开高峰期
 
-        List<ProdFunc> prodFuncList = prodService.getOutdateOnes(time);
+        List<ProdFunc> prodFuncList = prodService.getOutdateProdA(time);
 
         if (prodFuncList != null && !prodFuncList.isEmpty()) {
             for (ProdFunc prodFunc : prodFuncList) {
-                prodService.cooldownUpshowProd(prodFunc); //停止提升展示对应券对象
-                prodService.cooldownRotationProd(prodFunc); //停止轮播对应券对象
+                prodService.cooldownUpshowProdA(prodFunc); //停止提升展示对应券对象
+                prodService.cooldownRotationProdA(prodFunc); //停止轮播对应券对象
             }
         }
     }
@@ -54,11 +54,11 @@ public class ProdTask {
 
         log.debug("定时提取热搜表：{}", LocalDateTime.now());
 
-        List<ProdFunc> prodFuncList = prodService.extractList4HotProd();
+        List<ProdFunc> prodFuncList = prodService.getHotProdA();
 
         if (prodFuncList != null && !prodFuncList.isEmpty()) {
             for (ProdFunc prodFunc : prodFuncList) {
-                prodService.add2HotSearch(prodFunc); //添加到热搜表
+                prodService.add2HotSearchA(prodFunc); //添加到热搜表
             }
         }
     }
