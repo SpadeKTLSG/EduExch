@@ -12,7 +12,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.shop.common.constant.SystemConstant;
 import com.shop.common.context.UserHolder;
 import com.shop.common.exception.*;
-import com.shop.pojo.RedisData;
+import com.shop.pojo.res.RedisData;
 import com.shop.pojo.dto.*;
 import com.shop.pojo.entity.Order;
 import com.shop.pojo.entity.Prod;

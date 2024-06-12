@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.shop.common.constant.SystemConstant;
 import com.shop.common.context.UserHolder;
-import com.shop.pojo.Result;
+import com.shop.pojo.res.Result;
 import com.shop.pojo.dto.ProdGreatDTO;
 import com.shop.pojo.dto.ProdLocateDTO;
 import com.shop.pojo.entity.Prod;

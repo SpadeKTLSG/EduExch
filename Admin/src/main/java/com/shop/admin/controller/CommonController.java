@@ -2,7 +2,7 @@ package com.shop.admin.controller;
 
 
 import com.shop.common.utils.AliOssUtil;
-import com.shop.pojo.Result;
+import com.shop.pojo.res.Result;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;

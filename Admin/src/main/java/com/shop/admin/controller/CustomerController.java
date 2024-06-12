@@ -3,7 +3,7 @@ package com.shop.admin.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.shop.serve.websocket.WebSocketServer;
-import com.shop.pojo.Result;
+import com.shop.pojo.res.Result;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.websocket.Session;

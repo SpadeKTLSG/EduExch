@@ -1,7 +1,7 @@
 package com.shop.admin.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.shop.pojo.Result;
+import com.shop.pojo.res.Result;
 import com.shop.pojo.dto.EmployeeAllDTO;
 import com.shop.pojo.dto.EmployeeDTO;
 import com.shop.pojo.dto.EmployeeLoginDTO;

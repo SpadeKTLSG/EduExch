@@ -2,7 +2,7 @@ package com.shop.guest.controller;
 
 
 import com.shop.common.utils.AliOssUtil;
-import com.shop.pojo.Result;
+import com.shop.pojo.res.Result;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;

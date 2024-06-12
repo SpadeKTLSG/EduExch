@@ -2,7 +2,7 @@ package com.shop.admin.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.shop.common.constant.SystemConstant;
-import com.shop.pojo.Result;
+import com.shop.pojo.res.Result;
 import com.shop.pojo.dto.ProdCateAllDTO;
 import com.shop.pojo.dto.ProdLocateDTO;
 import com.shop.serve.service.ProdCateService;

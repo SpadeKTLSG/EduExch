@@ -4,7 +4,7 @@ package com.shop.guest.controller;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.shop.common.context.UserHolder;
-import com.shop.pojo.Result;
+import com.shop.pojo.res.Result;
 import com.shop.pojo.dto.VoucherLocateDTO;
 import com.shop.pojo.entity.Voucher;
 import com.shop.pojo.vo.VoucherStoreVO;

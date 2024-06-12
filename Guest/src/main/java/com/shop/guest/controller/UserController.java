@@ -1,7 +1,7 @@
 package com.shop.guest.controller;
 
 import com.shop.common.context.UserHolder;
-import com.shop.pojo.Result;
+import com.shop.pojo.res.Result;
 import com.shop.pojo.dto.ProdLocateDTO;
 import com.shop.pojo.dto.UserGreatDTO;
 import com.shop.pojo.dto.UserLocalDTO;

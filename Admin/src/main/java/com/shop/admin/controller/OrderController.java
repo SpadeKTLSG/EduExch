@@ -3,7 +3,7 @@ package com.shop.admin.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.shop.common.constant.SystemConstant;
-import com.shop.pojo.Result;
+import com.shop.pojo.res.Result;
 import com.shop.pojo.dto.OrderAllDTO;
 import com.shop.serve.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
