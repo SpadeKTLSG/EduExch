@@ -1,6 +1,7 @@
 package com.shop.serve.mq;
 
 import com.alibaba.fastjson.JSON;
+import com.shop.common.exception.BaseException;
 import com.shop.common.exception.TrashException;
 import com.shop.pojo.entity.Order;
 import com.shop.pojo.entity.OrderDetail;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
+import static com.shop.common.constant.MessageConstant.BLOCK_ACTION;
 import static com.shop.common.constant.RabbitMQConstant.QUEUE;
 
 
@@ -85,6 +87,7 @@ public class MQReceiver {
             }
         } catch (Exception e) {
             log.error("库存不足 {}", e.getMessage());
+            throw new BaseException(BLOCK_ACTION);
         }
 
         log.debug("恭喜, 一个秒杀逻辑订单创建成功!");

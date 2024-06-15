@@ -51,7 +51,8 @@ public class NewBeanUtil {
             String[] nullPN = getNullPropertyNames(dto);
 
             //取出对象, 根据nullPN进行选择性更新
-            Object target = service.getOne(Wrappers.<User>lambdaQuery().eq(User::getId, id));
+            Object target = service.getOne(Wrappers.<User>lambdaQuery()
+                    .eq(User::getId, id));
             BeanUtils.copyProperties(dto, target, nullPN);
             service.updateById(target);
         }
