@@ -47,7 +47,6 @@ public class UserController {
 
     /**
      * 选择性更新用户信息
-     * <p>包治百病!</p>
      */
     @PutMapping("/update")
     @Operation(summary = "更新用户信息")
